@@ -17,19 +17,17 @@ import com.example.ehguardian.ui.screens.authenticationScreens.login.EmailTextFi
 import com.example.ehguardian.ui.screens.authenticationScreens.login.PasswordTextField
 
 @Composable
-fun SignUpScreen(modifier: Modifier = Modifier) {
-    var firstName by rememberSaveable {
-        mutableStateOf("")
-    }
-    var lastname by rememberSaveable {
-        mutableStateOf("")
-    }
+fun SignUpScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit ) {
+    var firstName by rememberSaveable { mutableStateOf("") }
+    var lastName by rememberSaveable { mutableStateOf("") }
+    var weight by rememberSaveable { mutableStateOf("") }
+    var height by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var selectedGender by rememberSaveable { mutableStateOf("Select Gender") } // Store selected gender
+    var selectedGender by rememberSaveable { mutableStateOf("Select Gender") }
 
     Column(
         modifier = modifier
-            .padding(25.dp)
+            .padding(20.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -43,7 +41,7 @@ fun SignUpScreen(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Name Fields
         Row(
@@ -51,36 +49,40 @@ fun SignUpScreen(modifier: Modifier = Modifier) {
         ) {
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = firstName, // Use state to manage input
+                value = firstName,
                 onValueChange = { firstName = it },
                 shape = RoundedCornerShape(12.dp),
+                maxLines = 1,
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 label = { Text("First Name", style = MaterialTheme.typography.titleMedium) }
             )
-            Spacer(modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = lastname, // Use state to manage input
-                onValueChange = { lastname = it },
+                value = lastName,
+                onValueChange = { lastName = it },
                 shape = RoundedCornerShape(12.dp),
+                maxLines = 1,
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 label = { Text("Last Name", style = MaterialTheme.typography.titleMedium) }
             )
         }
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Email and Password Fields
         EmailTextField()
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         PasswordTextField()
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Gender Selection
         Box {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = selectedGender,
-                onValueChange = {}, // Prevent direct input
+                onValueChange = {},
                 readOnly = true,
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
@@ -88,38 +90,84 @@ fun SignUpScreen(modifier: Modifier = Modifier) {
                         Icon(Icons.Outlined.ArrowDropDown, contentDescription = "Select Gender")
                     }
                 },
-                label = { Text("Gender", style = MaterialTheme.typography.titleMedium)
-
-                }
+                label = { Text("Gender", style = MaterialTheme.typography.titleMedium) }
             )
-            DropdownMenu(modifier= Modifier
-                .width(350.dp),expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenu(
+                modifier = Modifier.width(350.dp),
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
                 DropdownMenuItem(
-                    text = { Text("Male", style =
-                        MaterialTheme.typography.titleMedium) },
+                    text = { Text("Male", style = MaterialTheme.typography.titleMedium) },
                     onClick = {
                         selectedGender = "Male"
                         expanded = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Female", style= MaterialTheme.typography.titleMedium) },
+                    text = { Text("Female", style = MaterialTheme.typography.titleMedium) },
                     onClick = {
                         selectedGender = "Female"
                         expanded = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Other", style= MaterialTheme.typography.titleMedium) },
+                    text = { Text("Other", style = MaterialTheme.typography.titleMedium) },
                     onClick = {
                         selectedGender = "Other"
                         expanded = false
                     }
                 )
+                DropdownMenuItem(
+                    text = { Text("Prefer not to say", style = MaterialTheme.typography.titleMedium) },
+                    onClick = {
+                        selectedGender = "Prefer not to say"
+                        expanded = false
+                    }
+                )
             }
         }
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.weight(3f),
+                value = weight,
+                onValueChange = { weight = it },
+                shape = RoundedCornerShape(12.dp),
+                maxLines = 1,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text("Weight in kg", style = MaterialTheme.typography.titleMedium) }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            OutlinedTextField(
+                modifier = Modifier.weight(3f),
+                value = height,
+                onValueChange = { height = it },
+                shape = RoundedCornerShape(12.dp),
+                maxLines = 1,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text("Height in ft", style = MaterialTheme.typography.titleMedium) }
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Sign Up Button
+        Button(
+            onClick = onSignUpClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = "Create Account",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
+            )
+        }
     }
 }
