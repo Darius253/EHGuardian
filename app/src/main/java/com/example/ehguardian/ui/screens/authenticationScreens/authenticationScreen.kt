@@ -2,11 +2,12 @@ package com.example.ehguardian.ui.screens.authenticationScreens
 
 
 
-import android.content.res.Resources.Theme
+
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,59 +17,87 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.ehguardian.R
 import com.example.ehguardian.ui.screens.authenticationScreens.login.LoginScreen
 import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpScreen
 
-
 @Composable
-fun AuthenticationScreen(modifier: Modifier = Modifier) {
+fun AuthenticationScreen(
+    modifier: Modifier = Modifier,
+    onForgotPasswordClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit
+    ) {
     var isLogin by remember { mutableStateOf(true) }
 
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.heart)
+    )
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true,
+        speed = 1f,
+        restartOnPlay = false
+    )
 
     Column(
-        modifier = modifier.padding(top = 25.dp).fillMaxSize(),
-
+        modifier = modifier
+            .padding(top = 25.dp)
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        Text(text = "Welcome to EHGuardian")
-//        Spacer(modifier = Modifier.padding(60.dp))
+        LottieAnimation(
+            composition,
+            progress,
+            modifier = Modifier.size(200.dp)
+        )
 
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp)),
-            colors = CardDefaults.cardColors(
-//                containerColor = MaterialTheme.colorScheme.primary,
-
-
-            )
+                .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp)),
+            colors = CardDefaults.cardColors()
         ) {
             Column {
                 AuthenticationButton(isLogin = isLogin) {
-                    isLogin= !isLogin
-
+                    isLogin = !isLogin
                 }
-                if (isLogin) {
-                    LoginScreen(onForgotPasswordClick = { /*TODO*/ }) {
-                        isLogin = !isLogin
 
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 5.dp)
+            ) {
+
+
+                item {
+                    if (isLogin) {
+                        LoginScreen(onForgotPasswordClick = onForgotPasswordClick, onSignInClick = onSignInClick)
+                    } else {
+                        SignUpScreen(onSignUpClick = onSignUpClick)
                     }
                 }
-                else{
-                    SignUpScreen()
-                }
             }
-            // Row with a background and rounded corners
-           }
+        }
     }
 }
+    }
+
 
 @Composable
-fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit){
-    val boxOffset = animateDpAsState(
-            targetValue = if (isLogin) 0.dp else 180.dp,
-    animationSpec = tween(durationMillis = 900), label = ""
+fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
+    val boxOffset by animateDpAsState(
+        targetValue = if (isLogin) 0.dp else 180.dp,
+        label = "boxOffset",
+        animationSpec = tween(durationMillis = 900)
     )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,21 +108,19 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit){
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth()) {
-            // Animated box that moves under the text buttons
+        Box(
+            modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth()
+        ) {
             Box(
                 modifier = Modifier
-
-                    .offset(x = boxOffset.value)
+                    .offset(x = boxOffset)
                     .size(width = 150.dp, height = 40.dp)
                     .clip(RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.primary)
-
             )
 
-            // Text Buttons on top of the animated box
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -121,5 +148,4 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit){
             }
         }
     }
-
 }
