@@ -1,8 +1,8 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +13,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,12 +35,12 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onForgotPasswordClick: () -> Unit, // Add callback for Forgot Password
-    onSignUpClick: () -> Unit  // Add callback for Sign Up
+    onForgotPasswordClick: () -> Unit,
+    onSignInClick: () -> Unit, // Add callback for Forgot Password
 ) {
     Column(
         modifier = modifier
-            .padding(25.dp)
+            .padding(20.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -54,67 +57,45 @@ fun LoginScreen(
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Email Field
         EmailTextField()
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Password Field
         PasswordTextField()
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Sign In Button
         Button(
-            onClick = { /* Handle login logic */ },
+            onClick = onSignInClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),shape = RoundedCornerShape(12.dp)
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp)
+
         ) {
             Text(
                 text = "Sign In",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
+
             )
         }
 
         // Forgot Password
-        Spacer(modifier = Modifier.padding(3.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(
-                onClick = onForgotPasswordClick, // Use the callback
-                modifier = Modifier.padding(end = 10.dp)
-            ) {
-                Text(
-                    text = "Forgot Password?",
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.W600,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(3.dp))
 
-        // Sign Up
-        Spacer(modifier = Modifier.padding(30.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        TextButton(
+            onClick = onForgotPasswordClick // Use the callback
         ) {
-            Text(text = "Don't have an account yet? ")
-            TextButton(
-                onClick = onSignUpClick
-            ) {
-               Text( text = "Sign Up here!",
-                style = MaterialTheme.typography.titleMedium.copy(
+            Text(
+                text = "Forgot Password? Tap Here!",
+                style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.W600,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-               )
-                // Make "Sign Up here!" clickable
-            }
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     }
 }
@@ -125,16 +106,17 @@ fun EmailTextField() {
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
+        value = email,
+        onValueChange = { email = it },
         maxLines = 1,
+        singleLine = true,
+        label = { Text(text = "Email") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Outlined.Email,
                 contentDescription = "Email Icon"
             )
         },
-        value = email,
-        label = { Text(text = "Email") },
-        onValueChange = { email = it },
         shape = RoundedCornerShape(12.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
     )
@@ -147,6 +129,11 @@ fun PasswordTextField() {
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
+        value = password,
+        onValueChange = { password = it },
+        singleLine = true,
+        maxLines = 1,
+        label = { Text(text = "Password") },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
         leadingIcon = {
             Icon(
@@ -154,26 +141,15 @@ fun PasswordTextField() {
                 contentDescription = "Password Icon"
             )
         },
-
         trailingIcon = {
-            if (isVisible)
-            TextButton(onClick = { isVisible = !isVisible }) {
-               Text( text = "Hide Password")
+            IconButton(onClick = { isVisible = !isVisible }) {
+                Icon(
+                    imageVector = if (isVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                    contentDescription = if (isVisible) "Hide Password" else "Show Password"
+                )
             }
-            else
-                TextButton(onClick = { isVisible = true }) {
-                    Text( text = "Show Password")
-                }
-
         },
-        value = password,
-
-        label = { Text(text = "Password") },
-        maxLines = 1,
-
-        onValueChange = { password = it },
         shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
     )
 }
