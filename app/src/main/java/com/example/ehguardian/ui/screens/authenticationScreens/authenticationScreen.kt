@@ -61,13 +61,19 @@ fun AuthenticationScreen(
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp)),
+                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
             colors = CardDefaults.cardColors()
         ) {
-            Column {
-                AuthenticationButton(isLogin = isLogin) {
-                    isLogin = !isLogin
-                }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ToggleScreenButton(isLogin = isLogin,
+                  onButtonClick =  { isLogin = !isLogin},
+                    firstText = "Login",
+                    secondText = "Sign Up",
+                    color = Color.White)
+
 
 
             LazyColumn(
@@ -91,7 +97,7 @@ fun AuthenticationScreen(
 
 
 @Composable
-fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
+fun ToggleScreenButton(isLogin: Boolean, onButtonClick: () -> Unit, firstText: String, secondText: String, color: Color) {
     val boxOffset by animateDpAsState(
         targetValue = if (isLogin) 0.dp else 180.dp,
         label = "boxOffset",
@@ -101,11 +107,11 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp)
+            .padding(16.dp)
             .height(50.dp)
-            .clip(RoundedCornerShape(50))
-            .background(Color.White),
-        horizontalArrangement = Arrangement.SpaceAround,
+            .clip(RoundedCornerShape(12.dp))
+            .background(color),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -116,8 +122,10 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .offset(x = boxOffset)
-                    .size(width = 150.dp, height = 40.dp)
-                    .clip(RoundedCornerShape(50))
+                    .padding(end = 10.dp)
+                    .fillMaxWidth(0.5f)
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.primary)
             )
 
@@ -128,7 +136,7 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
             ) {
                 TextButton(onClick = onButtonClick) {
                     Text(
-                        text = "Log In",
+                        text = firstText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.W600,
                             color = if (isLogin) MaterialTheme.colorScheme.onPrimary else Color.Black
@@ -138,7 +146,7 @@ fun AuthenticationButton(isLogin: Boolean, onButtonClick: () -> Unit) {
 
                 TextButton(onClick = onButtonClick) {
                     Text(
-                        text = "Sign Up",
+                        text = secondText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.W600,
                             color = if (isLogin) Color.Black else MaterialTheme.colorScheme.onPrimary

@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens
+package com.example.ehguardian.ui.screens.homeScreens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,6 +100,32 @@ fun Home(modifier: Modifier = Modifier) {
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+
+
+        }
+        item{
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Latest Health Trends", style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                IconButton(onClick = { /* Handle settings icon click */ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Newspaper,
+                        contentDescription = "Read More",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(32.dp)
+
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -154,7 +181,7 @@ fun HealthCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .height(200.dp)
     ) {

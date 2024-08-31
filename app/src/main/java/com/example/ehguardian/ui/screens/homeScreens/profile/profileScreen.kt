@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens
+package com.example.ehguardian.ui.screens.homeScreens.profile
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

@@ -59,7 +59,7 @@ sealed class BottomNavItem(
         selectedIcon = Icons.Filled.StackedBarChart
     )
 
-    object Profile : BottomNavItem(
+    data object Profile : BottomNavItem(
         title = "Profile",
         icon = Icons.Outlined.Person,
         selectedIcon = Icons.Filled.Person
