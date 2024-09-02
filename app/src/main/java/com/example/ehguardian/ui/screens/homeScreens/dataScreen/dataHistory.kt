@@ -17,7 +17,7 @@ import com.example.ehguardian.R
 import com.example.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
 
 @Composable
-fun DataHistoryScreen(modifier: Modifier) {
+fun DataScreen(modifier: Modifier) {
     var isHistory by remember { mutableStateOf(true) }
     Column {
         ToggleScreenButton(
@@ -29,10 +29,10 @@ fun DataHistoryScreen(modifier: Modifier) {
         )
         
         if (isHistory) {
-            HistoryScreen(modifier = modifier)
+            History(modifier = modifier)
         }
         else {
-            ChartScreen()
+            Chart(modifier = modifier)
         }
 
     }

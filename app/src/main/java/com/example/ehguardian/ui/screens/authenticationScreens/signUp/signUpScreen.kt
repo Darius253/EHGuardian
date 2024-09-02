@@ -111,20 +111,8 @@ fun SignUpScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit ) {
                         expanded = false
                     }
                 )
-                DropdownMenuItem(
-                    text = { Text("Other", style = MaterialTheme.typography.titleMedium) },
-                    onClick = {
-                        selectedGender = "Other"
-                        expanded = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Prefer not to say", style = MaterialTheme.typography.titleMedium) },
-                    onClick = {
-                        selectedGender = "Prefer not to say"
-                        expanded = false
-                    }
-                )
+
+
             }
         }
         Spacer(modifier = Modifier.height(8.dp))

@@ -21,11 +21,11 @@ import io.jetchart.line.renderer.yaxis.LineYAxisWithValueDrawer
 import kotlin.random.Random
 
 @Composable
-fun ChartScreen() {
+fun Chart(modifier: Modifier) {
     var selectedFilter by rememberSaveable { mutableStateOf("Blood Pressure") }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxHeight(0.8f)
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)

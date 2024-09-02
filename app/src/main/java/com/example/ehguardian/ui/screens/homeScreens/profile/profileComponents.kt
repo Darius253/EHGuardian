@@ -1,0 +1,371 @@
+package com.example.ehguardian.ui.screens.homeScreens.profile
+
+import android.icu.text.SimpleDateFormat
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.example.ehguardian.R
+import java.util.Date
+import java.util.Locale
+
+
+@Composable
+fun ProfileImage() {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .size(120.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(16.dp),
+            painter = painterResource(id = R.drawable.user),
+            contentDescription = "User Profile Image",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+        )
+    }
+}
+
+@Composable
+fun NameInputFields(
+    firstName: String,
+    lastName: String,
+    onNameChange: (Pair<String, String>) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        InputField(
+            label = "First Name",
+            value = firstName,
+            onValueChange = { onNameChange(Pair(it, lastName)) },
+            modifier = Modifier.weight(1f)
+        )
+        InputField(
+            label = "Last Name",
+            value = lastName,
+            onValueChange = { onNameChange(Pair(firstName, it)) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun GenderDropdown(
+    label: String,
+    selectedGender: String,
+    isExpanded: Boolean,
+    onGenderSelected: (String) -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        OutlinedTextField(
+            value = selectedGender,
+            onValueChange = {},
+            singleLine = true,
+            maxLines = 1,
+            readOnly = true,
+            trailingIcon = {
+                IconButton(
+                    onClick = { onExpandedChange(!isExpanded) }
+                ) {
+                    Icon(Icons.Outlined.ArrowDropDown, contentDescription = "Select Gender")
+                }
+            },
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        DropdownMenu(
+            expanded = isExpanded,
+            modifier = Modifier.fillMaxWidth(),
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            listOf("Male", "Female").forEach { gender ->
+                DropdownMenuItem(
+                    text = { Text(gender, style = MaterialTheme.typography.titleMedium) },
+                    onClick = {
+                        onGenderSelected(gender)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DateOfBirthInputField(
+    label: String,
+    dateOfBirth: String,
+    showCalendar: Boolean,
+    onCalendarToggle: (Boolean) -> Unit,
+
+    ) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        OutlinedTextField(
+            value = dateOfBirth,
+            onValueChange = {},
+            singleLine = true,
+            maxLines = 1,
+            readOnly = true,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarMonth,
+                    contentDescription = "Calendar Icon"
+                )
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = { onCalendarToggle(!showCalendar) }
+                ) {
+                    Icon(Icons.Outlined.Edit, contentDescription = "Edit Icon")
+                }
+            },
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun WeightAndHeightInputFields(
+    weight: String,
+    height: String,
+    onWeightChange: (String) -> Unit,
+    onHeightChange: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        InputField(
+            label = "Weight",
+            value = weight,
+            onValueChange = onWeightChange,
+            modifier = Modifier.weight(1f),
+            keyboardType = KeyboardType.Number,
+            suffix = "kg"
+        )
+        InputField(
+            label = "Height",
+            value = height,
+            onValueChange = onHeightChange,
+            modifier = Modifier.weight(1f),
+            keyboardType = KeyboardType.Number,
+            suffix = "ft"
+        )
+    }
+}
+
+@Composable
+fun CholesterolAndBloodSugarInputFields(
+    cholesterolLevel: String,
+    bloodSugarLevel: String,
+    onCholesterolChange: (String) -> Unit,
+    onBloodSugarChange: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        InputField(
+            label = "Cholesterol Level",
+            value = cholesterolLevel,
+            onValueChange = onCholesterolChange,
+            modifier = Modifier.weight(1f),
+            keyboardType = KeyboardType.Number,
+            suffix = "mg/dL",
+
+            )
+        InputField(
+            label = "Blood Sugar Level",
+            value = bloodSugarLevel,
+            onValueChange = onBloodSugarChange,
+            modifier = Modifier.weight(1f),
+            keyboardType = KeyboardType.Number,
+            suffix = "mg/dL"
+        )
+    }
+}
+
+@Composable
+fun UpdateDetailsButton(onClick: () -> Unit) {
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        shape = RoundedCornerShape(12.dp),
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Text(
+            text = "Update Details",
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModal(
+    onDateSelected: () -> Unit,
+    onDismiss: () -> Unit,
+    datePickerState: DatePickerState,
+) {
+    DatePickerDialog(
+        shape = MaterialTheme.shapes.medium,
+        onDismissRequest = onDismiss,
+        colors = DatePickerDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        modifier = Modifier
+            .border(1.dp, MaterialTheme.colorScheme.onSurface, MaterialTheme.shapes.medium),
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected()
+                onDismiss()
+            }) {
+                Text(
+                    "OK",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = MaterialTheme.colorScheme.error)
+            }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            headline = {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Date of Birth",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        )
+    }
+}
+
+@Composable
+fun InputField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    suffix: String = ""
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            maxLines = 1,
+            shape = MaterialTheme.shapes.medium,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            modifier = Modifier.fillMaxWidth(),
+            suffix = {
+                if (suffix.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .width(60.dp)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface,
+                                MaterialTheme.shapes.medium
+                            ).background(MaterialTheme.colorScheme.tertiaryContainer)
+                        ,
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(5.dp),
+                            text = suffix,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
+
+fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
+}

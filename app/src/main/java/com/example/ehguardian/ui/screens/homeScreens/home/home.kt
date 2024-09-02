@@ -1,15 +1,20 @@
 package com.example.ehguardian.ui.screens.homeScreens.home
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,122 +24,133 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.ehguardian.R
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.outlined.Newspaper
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
+import com.example.ehguardian.ui.screens.homeScreens.SettingsPopUp
 import java.time.LocalTime
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Home(modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .fillMaxSize()
-    ) {
-        item { Header() }
-        item { Spacer(modifier = Modifier.height(10.dp)) }
-        item {
-            Text(
-                text = "Here is your last health recorded data",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HealthCard(
-                title = "Blood Pressure",
-                imageRes = R.drawable.arm,
-                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                textColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+    var settingsPopupVisible by remember { mutableStateOf(false) }
+    Box {
+
+        LazyColumn(
+            modifier = modifier
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .fillMaxSize()
+        ) {
+            item{
+                Header(
+                    onClickSettings = { settingsPopupVisible = true }
+                )
+
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item { SectionTitle("Here is your last Measurement") }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            item {
+                HealthCard(
+                    title = "Blood Pressure",
+                    imageRes = R.drawable.arm,
+                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    TextData("Systolic", "120", MaterialTheme.colorScheme.onPrimaryContainer)
-                    TextData("Diastolic", "80", MaterialTheme.colorScheme.onPrimaryContainer)
-                    TextData("Pulse", "80", MaterialTheme.colorScheme.onPrimaryContainer)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextData("Systolic", "120", MaterialTheme.colorScheme.onPrimaryContainer)
+                        TextData("Diastolic", "80", MaterialTheme.colorScheme.onPrimaryContainer)
+                        TextData("Pulse", "80", MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HealthCard(
-                title = "Heart Rate",
-                imageRes = R.drawable.blood_pressure,
-                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                textColor = MaterialTheme.colorScheme.onSecondaryContainer
-            ) {
-                TextData(
-                    text = "bpm",
-                    value = "82",
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(start = 60.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HealthCard(
-                title = "Body Mass Index",
-                imageRes = R.drawable.heart_rate_monitor,
-                backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                textColor = MaterialTheme.colorScheme.onTertiaryContainer
-            ) {
-                TextData(
-                    text = "kg/m²",
-                    value = "24",
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(start = 60.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
 
-
-        }
-        item{
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Latest Health Trends", style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                IconButton(onClick = { /* Handle settings icon click */ }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Newspaper,
-                        contentDescription = "Read More",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(32.dp)
-
+            item {
+                HealthCard(
+                    title = "Heart Rate",
+                    imageRes = R.drawable.blood_pressure,
+                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ) {
+                    TextData(
+                        text = "bpm",
+                        value = "82",
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(start = 60.dp)
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    item {
+                        HealthCard(
+                            title = "Body Mass Index",
+                            imageRes = R.drawable.heart_rate_monitor,
+                            backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            textColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        ) {
+                            TextData(
+                                text = "kg/m²",
+                                value = "24",
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier.padding(start = 60.dp)
+                            )
+                        }
+                    }
+                    item {
+                        HealthCard(
+                            title = "Cholesterol",
+                            imageRes = R.drawable.cholesterol,
+                            backgroundColor = Color(0xFFDDC842),
+                            textColor = Color.White
+                        ) {
+                            TextData(
+                                text = "mg/dL",
+                                value = "200",
+                                color = Color.White,
+                                modifier = Modifier.padding(start = 60.dp)
+                            )
+                        }
+                    }
+                    item {
+                        HealthCard(
+                            title = "Blood Sugar",
+                            imageRes = R.drawable.sugar_blood_level,
+                            backgroundColor = Color(0xFF5CC87C),
+                            textColor = Color.White
+                        ) {
+                            TextData(
+                                text = "mg/dL",
+                                value = "100",
+                                color = Color.White,
+                                modifier = Modifier.padding(start = 60.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item { LatestHealthTrends() }
         }
+        if (settingsPopupVisible) {
+            SettingsPopUp(
+
+                onDismiss = { settingsPopupVisible = false }
+
+            )
+        }
+
     }
 }
 
-
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header(modifier: Modifier = Modifier) {
+fun Header(modifier: Modifier = Modifier,
+           onClickSettings: () -> Unit = {}) {
     val currentHour = remember { LocalTime.now().hour }
     val greeting = when (currentHour) {
         in 5..11 -> "Good Morning,"
@@ -144,8 +160,7 @@ fun Header(modifier: Modifier = Modifier) {
     }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -159,7 +174,7 @@ fun Header(modifier: Modifier = Modifier) {
             )
         }
 
-        IconButton(onClick = { /* Handle settings icon click */ }) {
+        IconButton(onClick = onClickSettings) {
             Icon(
                 imageVector = Icons.Outlined.Settings,
                 contentDescription = "Settings",
@@ -167,8 +182,19 @@ fun Header(modifier: Modifier = Modifier) {
             )
         }
     }
+
 }
 
+@Composable
+fun SectionTitle(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier
+    )
+}
 
 @Composable
 fun HealthCard(
@@ -235,5 +261,28 @@ fun TextData(
             fontWeight = FontWeight.Normal,
             color = color
         )
+    }
+}
+
+@Composable
+fun LatestHealthTrends(modifier: Modifier = Modifier) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        SectionTitle(
+            title = "Latest Health Trends",
+            modifier = Modifier.weight(1f)
+        )
+
+        IconButton(onClick = { /* Handle settings icon click */ }) {
+            Icon(
+                imageVector = Icons.Outlined.Newspaper,
+                contentDescription = "Read More",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(32.dp)
+            )
+        }
     }
 }
