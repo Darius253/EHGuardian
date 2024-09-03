@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.dataScreen
+package com.example.ehguardian.ui.screens.homeScreens.healthDataScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
