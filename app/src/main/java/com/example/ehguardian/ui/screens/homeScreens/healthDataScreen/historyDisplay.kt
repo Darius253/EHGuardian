@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ehguardian.R
 
 @Composable
-fun History(modifier: Modifier) {
+fun HistoryPage(modifier: Modifier) {
 
 Column {
 

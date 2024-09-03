@@ -21,7 +21,7 @@ import io.jetchart.line.renderer.yaxis.LineYAxisWithValueDrawer
 import kotlin.random.Random
 
 @Composable
-fun Chart(modifier: Modifier) {
+fun ChartPage(modifier: Modifier) {
     var selectedFilter by rememberSaveable { mutableStateOf("Blood Pressure") }
 
     Column(
