@@ -6,7 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.example.ehguardian.ui.screens.homeScreens.dataScreen.DataScreen
+import com.example.ehguardian.ui.screens.homeScreens.healthDataScreen.HealthDataScreen
 import com.example.ehguardian.ui.screens.homeScreens.home.Home
 import com.example.ehguardian.ui.screens.homeScreens.measureScreen.MeasureScreen
 import com.example.ehguardian.ui.screens.homeScreens.profile.ProfileScreen
@@ -52,7 +52,7 @@ fun HomeScreenContents(
     when (selectedItem) {
         0 -> Home(modifier = modifier)
         1 -> MeasureScreen(modifier = modifier)
-        2 -> DataScreen(modifier = modifier)
+        2 -> HealthDataScreen(modifier = modifier)
         3 -> ProfileScreen(modifier = modifier)
         else -> Home(modifier = modifier) // Default to Home if no match
     }
