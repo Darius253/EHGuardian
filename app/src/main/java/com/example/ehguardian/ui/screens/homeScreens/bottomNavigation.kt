@@ -23,7 +23,8 @@ fun BottomNavigation(
 ) {
     NavigationBar(
         modifier = Modifier
-            .height(70.dp)
+            .height(75.dp)
+
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
     ) {
         items.forEachIndexed { index, item ->
@@ -73,7 +74,7 @@ fun RowScope.AddItem(
     onClick: () -> Unit
 ) {
     NavigationBarItem(
-        modifier = Modifier.padding(top = 26.dp),
+        modifier = Modifier.padding(top = 26.dp, bottom = 26.dp),
         label = {
             Text(
                 text = item.title,
