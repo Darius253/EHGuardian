@@ -21,8 +21,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Share
@@ -74,8 +74,8 @@ fun SettingsPopUp(
 
                    ) {
                    SettingsItem(
-                       leadingIcon = Icons.Filled.Person,
-                       title = "Profile",
+                       leadingIcon = Icons.Filled.LocalHospital,
+                       title = "View Hospitals Nearby",
                        onClick = { /*TODO*/ }
                    )
                    SettingsDivider()
