@@ -22,6 +22,7 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
+
     NavHost(
         navController = navController,
         startDestination = NavigationClass.AuthenticationDestination.route,
@@ -36,7 +37,8 @@ fun AppNavigation(
                 onSignUpClick = {
                         navController.navigate(NavigationClass.HomeDestination.route)
                 },
-                onForgotPasswordClick = {})
+                onForgotPasswordClick = {}
+            )
         }
         composable(route = NavigationClass.HomeDestination.route) {
             // Home Screen
