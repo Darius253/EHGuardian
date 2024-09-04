@@ -10,39 +10,65 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.ehguardian.ui.screens.MyApp
 import com.example.ehguardian.ui.theme.EHGuardianTheme
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var enableBtLauncher: ActivityResultLauncher<Intent>
+    private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             EHGuardianTheme {
                 MyApp()
             }
         }
 
-        // Initialize the Activity Result Launcher
+        // Initialize the Activity Result Launchers
         enableBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 showToast("Bluetooth enabled")
             } else {
-                showToast("Bluetooth enabling failed")
+                showToast("Bluetooth not enabled")
             }
         }
 
-        checkBluetooth()
+        requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allPermissionsGranted = permissions.values.all { it }
+            if (allPermissionsGranted) {
+                checkBluetooth()
+            } else {
+                showToast("Bluetooth permissions are required to use Bluetooth features")
+            }
+        }
+
+        checkPermissionsAndBluetooth()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun checkPermissionsAndBluetooth() {
+        val permissions = arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        val permissionsNeeded = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            requestPermissionsLauncher.launch(permissionsNeeded.toTypedArray())
+        } else {
+            checkBluetooth()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -52,22 +78,26 @@ class MainActivity : ComponentActivity() {
 
         if (bluetoothAdapter == null) {
             showToast("Bluetooth is not supported on this device")
-        } else if (bluetoothAdapter.isEnabled.not()) {
+        } else if (!bluetoothAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // Request Bluetooth Connect Permission
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                    REQUEST_PERMISSION_BT_CONNECT
-                )
-                return
-            }
             enableBtLauncher.launch(enableBtIntent)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_PERMISSION_BT_CONNECT) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                checkBluetooth()
+            } else {
+                showToast("Bluetooth permission is required to enable Bluetooth")
+            }
         }
     }
 
