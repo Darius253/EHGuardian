@@ -85,7 +85,7 @@ private fun points(count: Int) = (1..count).map {
 private fun getLinesForFilter(filter: String): Pair<List<Line>, List<String>> {
     return when (filter) {
         "Blood Pressure" -> {
-            val labels = listOf("10", "20", "30", "40", "50", "60", "70", "80", "90", "DIA")
+            val labels = listOf( "60", "70", "80", "90", "DIA")
             val lines = listOf(
                 Line(
                     points = listOf(
@@ -146,7 +146,7 @@ fun GraphFilter(
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(10.dp)
     ) {
         FilterCard(
             text = "Blood Pressure",
