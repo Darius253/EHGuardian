@@ -1,6 +1,10 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.login
 
-import androidx.compose.foundation.background
+import LoginViewModel
+import android.app.Activity
+import android.content.Context
+import android.widget.Toast
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,6 +21,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +32,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -36,8 +43,16 @@ import androidx.compose.ui.unit.dp
 fun LoginScreen(
     modifier: Modifier = Modifier,
     onForgotPasswordClick: () -> Unit,
-    onSignInClick: () -> Unit, // Add callback for Forgot Password
+    onSignInClick: () -> Unit,
+     loginViewModel: LoginViewModel = viewModel()
 ) {
+    val email by loginViewModel.email
+    val password by loginViewModel.password
+    val isLoading by loginViewModel.isLoading
+    val errorMessage by loginViewModel.errorMessage
+
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .padding(20.dp)
@@ -60,16 +75,27 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Email Field
-        EmailTextField()
+        EmailTextField(
+            email = email,
+            onEmailChange = loginViewModel::onEmailChange,
+            errorMessage = errorMessage
+
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         // Password Field
-        PasswordTextField()
+        PasswordTextField(
+            password = password,
+            onPasswordChange = loginViewModel::onPasswordChange,
+            errorMessage = errorMessage,
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         // Sign In Button
+
+        if(!isLoading)
         Button(
-            onClick = onSignInClick,
+            onClick = { loginViewModel.login() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -82,6 +108,11 @@ fun LoginScreen(
 
             )
         }
+        else CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = MaterialTheme.colorScheme.onSurface,
+            strokeWidth = 2.dp
+        )
 
         // Forgot Password
         Spacer(modifier = Modifier.height(3.dp))
@@ -101,16 +132,21 @@ fun LoginScreen(
 }
 
 @Composable
-fun EmailTextField() {
-    var email by rememberSaveable { mutableStateOf("") }
+fun EmailTextField(email: String, onEmailChange: (String) -> Unit, errorMessage: String? = null) {
+
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = email,
-        onValueChange = { email = it },
+        onValueChange = onEmailChange,
         maxLines = 1,
         singleLine = true,
         label = { Text(text = "Email") },
+        supportingText = {
+            if (errorMessage != null) {
+                Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()
+        }},
+
         leadingIcon = {
             Icon(
                 imageVector = Icons.Outlined.Email,
@@ -123,16 +159,22 @@ fun EmailTextField() {
 }
 
 @Composable
-fun PasswordTextField() {
-    var password by rememberSaveable { mutableStateOf("") }
+fun PasswordTextField(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    errorMessage: String? = null
+) {
     var isVisible by rememberSaveable { mutableStateOf(false) }
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = password,
-        onValueChange = { password = it },
+        onValueChange = onPasswordChange,
         singleLine = true,
         maxLines = 1,
+        supportingText = {
+            if (errorMessage != null) {
+               Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()}},
         label = { Text(text = "Password") },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
         leadingIcon = {
