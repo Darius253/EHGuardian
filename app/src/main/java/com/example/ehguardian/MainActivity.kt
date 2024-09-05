@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.ehguardian
 
 import android.Manifest
@@ -13,24 +15,35 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.ehguardian.ui.screens.MyApp
 import com.example.ehguardian.ui.theme.EHGuardianTheme
 
+@Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
 
     private lateinit var enableBtLauncher: ActivityResultLauncher<Intent>
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
 
+  private   val requestCode = 1
+   private val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+        putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
+    }
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
+
         setContent {
             EHGuardianTheme {
-                MyApp()
+                MyApp(
+
+                )
             }
         }
+
+
 
         // Initialize the Activity Result Launchers
         enableBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -46,7 +59,8 @@ class MainActivity : ComponentActivity() {
             if (allPermissionsGranted) {
                 checkBluetooth()
             } else {
-                showToast("Bluetooth permissions are required to use Bluetooth features")
+                showToast("Bluetooth is required to use Bluetooth features")
+                startActivityForResult(discoverableIntent, requestCode)
             }
         }
 
@@ -58,7 +72,12 @@ class MainActivity : ComponentActivity() {
         val permissions = arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.INTERNET,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.BLUETOOTH,
         )
         val permissionsNeeded = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
