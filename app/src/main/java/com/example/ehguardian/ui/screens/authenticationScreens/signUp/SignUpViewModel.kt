@@ -1,14 +1,24 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.signUp
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.UserModel
+import com.example.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(
+    private val userRepository: UserRepository
+) : ViewModel() {
+
+    private val _id = UUID.randomUUID().toString()
+    val id: String = _id
+
 
     // Mutable live data for the input fields
     private val _email = MutableLiveData<String>()
@@ -17,14 +27,14 @@ class SignUpViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _name = MutableLiveData<String>()
-    val name: LiveData<String> = _name
+    private val _firstname = MutableLiveData<String>()
+    val firstname: LiveData<String> = _firstname
 
     private val _surname = MutableLiveData<String>()
     val surname: LiveData<String> = _surname
 
     private val _gender = MutableLiveData<String>()
-    var gender: LiveData<String> = _gender
+    val gender: LiveData<String> = _gender
 
     private val _weight = MutableLiveData<String>()
     val weight: LiveData<String> = _weight
@@ -32,144 +42,96 @@ class SignUpViewModel : ViewModel() {
     private val _height = MutableLiveData<String>()
     val height: LiveData<String> = _height
 
+    // Changed dateOfBirth to String to only store day/month/year
     private val _dateOfBirth = MutableLiveData<String>()
     val dateOfBirth: LiveData<String> = _dateOfBirth
-
 
     private val _password = MutableLiveData<String>()
     val password: LiveData<String> = _password
 
-
-
-    private val _signUpSuccess = MutableLiveData<Boolean>()
-    val signUpSuccess: LiveData<Boolean> = _signUpSuccess
-
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+    // Date format for day, month, and year
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    // Method to create a UserModel
-    private fun createUserModel(): UserModel {
-        val emailValue = _email.value ?: ""
-        val passwordValue = _password.value ?: ""
-        val nameValue = _name.value ?: ""
-        val surnameValue = _surname.value ?: ""
-        val genderValue = _gender.value ?: ""
-        val weightValue = _weight.value ?: ""
-        val heightValue = _height.value ?: ""
-        val dateOfBirthValue = _dateOfBirth.value ?: ""
+    // Update email, password, name, etc.
+    fun onEmailChanged(newEmail: String) { _email.value = newEmail }
+    fun onPasswordChanged(newPassword: String) { _password.value = newPassword }
+    fun onNameChanged(newFirstName: String) { _firstname.value = newFirstName }
+    fun onSurnameChanged(newSurname: String) { _surname.value = newSurname }
+    fun onGenderChanged(newGender: String) { _gender.value = newGender }
+    fun onWeightChanged(newWeight: String) { _weight.value = newWeight }
+    fun onHeightChanged(newHeight: String) { _height.value = newHeight }
 
-        return UserModel(
-            id = 0, // You might want to generate or fetch this from the server
-            name = "$nameValue $surnameValue",
-            email = emailValue,
-            gender = genderValue,
-            status = "active", // or any default value
-            createdAt = System.currentTimeMillis().toString(),
-            password = passwordValue,
-            firstName = nameValue,
-            lastName = surnameValue,
-            userWeight = weightValue,
-            userHeight = heightValue,
-            dateOfBirth = dateOfBirthValue,
-            measurementData = MeasurementData(
-                0,
-                "0",
-                "0",
-                "0",
-                "0",
-                0,
-
-
-                ) // Replace with actual data if needed
-        )
+    // Update date of birth with day, month, and year only
+    fun onDateOfBirthChanged(newDateOfBirth: Date) {
+        _dateOfBirth.value = dateFormatter.format(newDateOfBirth)
     }
-
-    // Update email value
-    fun onEmailChanged(newEmail: String) {
-        _email.value = newEmail
-    }
-
-    // Update password value
-    fun onPasswordChanged(newPassword: String) {
-        _password.value = newPassword
-    }
-
-
-
-    fun onNameChanged(newName: String) {
-        _name.value = newName
-    }
-
-    fun onSurnameChanged(newSurname: String) {
-        _surname.value = newSurname
-
-    }
-
-    fun onGenderChanged(newGender: String) {
-        _gender.value = newGender
-    }
-
-    fun onWeightChanged(newWeight: String) {
-        _weight.value = newWeight
-    }
-
-    fun onHeightChanged(newHeight: String) {
-        _height.value = newHeight
-    }
-
-    fun onDateOfBirthChanged(newDateOfBirth: String) {
-        _dateOfBirth.value = newDateOfBirth
-    }
-
-
-
-
-
 
     // Sign-up function
-    fun signUp() {
-        val userModel = createUserModel()
+    fun signUp(user: UserModel, context: Context, onSignUpSuccess: () -> Unit) {
+        if (!validateInputs()) return
+        _isLoading.value = true
+        clearErrorMessage()
 
-
-
-        // Check if email or passwords are empty
-        if (userModel.email.isEmpty()
-            || userModel.password.isEmpty()
-            || userModel.firstName.isEmpty()
-            || userModel.lastName.isEmpty()
-            || userModel.gender.isEmpty()
-            || userModel.userWeight.isEmpty()
-            || userModel.userHeight.isEmpty()
-            ) {
-            _errorMessage.value = "All fields are required"
-            return
-        }
-
-
-        // If all validations pass, attempt to sign up (mocked here)
         viewModelScope.launch {
-            // Mocking sign-up process; replace with actual authentication logic
-            if (mockSignUp(userModel) ){
-                _signUpSuccess.value = true
-            } else {
-                _errorMessage.value = "Sign up failed. Please try again."
+            try {
+                userRepository.userSignUp(user, onComplete = {
+                    success, errorMessage ->
+                    if (success) {
+                        Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
+                        onSignUpSuccess()
+                    } else {
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                    }
+                })
+                clearErrorMessage()
+
+                _isLoading.value = false
+                clearInputFields() // Optional: clear fields after successful sign-up
+            } catch (e: Exception) {
+                _errorMessage.value = e.message
+                _isLoading.value = false
             }
         }
     }
 
-    // Reset error message
-    fun clearErrorMessage() {
-        _errorMessage.value = null
+    // Input validation function
+    private fun validateInputs(): Boolean {
+        if (_email.value.isNullOrEmpty() || _password.value.isNullOrEmpty() ||
+            _firstname.value.isNullOrEmpty() ||
+            _surname.value.isNullOrEmpty() ||
+            _gender.value.isNullOrEmpty() ||
+            _dateOfBirth.value.isNullOrEmpty() ) {
+            _errorMessage.value = "This field cannot be empty"
+            return false
+        }
+        return true
     }
 
-    // Mock sign-up function; replace with real logic
-    private suspend fun mockSignUp(
-        userModel: UserModel,
+    // Clear error message
+    private fun clearErrorMessage() { _errorMessage.value = null }
 
-    ): Boolean {
-        // Simulating a network call with a delay
-        kotlinx.coroutines.delay(2000)
-        return userModel.email == "test@example.com" && userModel.password == "password"
+    // Clear input fields after sign-up
+    private fun clearInputFields() {
+        _email.value = ""
+        _password.value = ""
+        _firstname.value = ""
+        _surname.value = ""
+        _gender.value = ""
+        _weight.value = ""
+        _height.value = ""
+        _dateOfBirth.value = ""
+    }
+
+    fun signOut(
+        onSignOutSuccess: () -> Unit
+    ){
+        viewModelScope.launch {
+            userRepository.signOut()
+        }
+        onSignOutSuccess()
+
     }
 }
