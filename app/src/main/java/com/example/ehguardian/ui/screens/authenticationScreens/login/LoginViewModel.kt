@@ -1,12 +1,16 @@
-import android.util.Log
+package com.example.ehguardian.ui.screens.authenticationScreens.login
+
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.example.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val userRepository: UserRepository // Inject the repository
+) : ViewModel() {
 
     // State for email and password
     var email = mutableStateOf("")
@@ -30,31 +34,53 @@ class LoginViewModel : ViewModel() {
         password.value = newPassword
     }
 
-    // Simulate login process
-    fun login() {
+
+    fun signIn(
+        context: Context,
+        onSignInSuccess: () -> Unit) {
+        isLoading.value = true
         if (email.value.isEmpty() || password.value.isEmpty()) {
             errorMessage.value = "Email and Password cannot be empty"
+            Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
+
+            isLoading.value = false
             return
         }
 
-        isLoading.value = true
+        else {
+
         errorMessage.value = null
 
-        // Simulating a network call
         viewModelScope.launch {
             try {
-                // Simulate network delay
-                delay(2000)
+                userRepository.userSignIn(email.value, password.value,
+                    onComplete = {
+                        success, userId ->
+                        if (success) {
+                            isLoading.value = false
+                            errorMessage.value = null
+                            Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                            onSignInSuccess()
 
-                Log.d("Login", "${email.value} ${password.value}")
+                        }
+                        else {
+                            isLoading.value = false
+                            errorMessage.value = "Login failed"
+                            Toast.makeText(context, userId, Toast.LENGTH_SHORT).show()
 
-                // For now, just simulate a successful login
-                isLoading.value = false
-                errorMessage.value = null // Clear error
+                        }
+
+                })
+
+
             } catch (e: Exception) {
+                errorMessage.value = "Login failed: ${e.message}"
+                Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
                 isLoading.value = false
-                errorMessage.value = "Login failed. Try again."
+            } finally {
+                isLoading.value = false
             }
         }
     }
+        }
 }
