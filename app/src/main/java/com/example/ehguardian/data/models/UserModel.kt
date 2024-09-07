@@ -1,18 +1,17 @@
 package com.example.ehguardian.data.models
+import java.io.Serializable
 
 
 data class UserModel(
-    var id: Int,
-    var name: String,
+    var id: String,
     var email: String,
     var gender: String,
-    var status: String,
-    var createdAt: String,
     var password: String,
-    var firstName: String,
-    var lastName: String,
+    var firstname: String,
+    var lastname: String,
     var userWeight: String,
     var userHeight: String,
-    var dateOfBirth: String,
+    var dateOfBirth: Serializable,
+    var createdDate: Int,
     var measurementData: MeasurementData,
     )
