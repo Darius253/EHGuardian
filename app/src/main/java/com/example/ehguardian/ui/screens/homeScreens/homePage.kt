@@ -16,7 +16,9 @@ import com.example.ehguardian.ui.screens.homeScreens.profile.ProfileScreen
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onSignOutSuccess : () -> Unit = {},
+) {
     // State to keep track of the selected item in the bottom navigation
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
 
@@ -41,6 +43,7 @@ fun HomeScreen() {
         HomeScreenContents(
             selectedItem = selectedItem,
             modifier = Modifier.padding(innerPadding),
+            onSignOutSuccess = onSignOutSuccess
         )
     }
 }
@@ -51,13 +54,14 @@ fun HomeScreen() {
 fun HomeScreenContents(
     selectedItem: Int,
     modifier: Modifier,
+    onSignOutSuccess : () -> Unit = {}
 ) {
     // Display content based on the selected item
     when (selectedItem) {
-        0 -> Home(modifier = modifier)
+        0 -> Home(modifier = modifier, onSignOutSuccess)
         1 -> MeasureScreen(modifier = modifier)
         2 -> HealthDataScreen(modifier = modifier)
         3 -> ProfileScreen(modifier = modifier)
-        else -> Home(modifier = modifier) // Default to Home if no match
+        else -> Home(modifier = modifier, onSignOutSuccess) // Default to Home if no match
     }
 }
