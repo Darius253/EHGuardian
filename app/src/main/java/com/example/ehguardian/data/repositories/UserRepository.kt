@@ -1,15 +1,14 @@
 package com.example.ehguardian.data.repositories
 
-import android.content.Context
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.UserModel
 import kotlinx.coroutines.flow.Flow
 
 interface  UserRepository{
 
-    fun userSignIn(email:String, password:String)
+    fun userSignIn(email:String, password:String, onComplete: (Boolean, String?) -> Unit)
 
-    fun userSignUp(user:UserModel)
+    fun userSignUp(user:UserModel, onComplete: (Boolean, String?) -> Unit)
 
     fun getUser(): Flow<UserModel>
 
