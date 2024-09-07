@@ -17,13 +17,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.example.ehguardian.ui.screens.MyApp
+import com.example.ehguardian.ui.screens.homeScreens.HomeScreen
 import com.example.ehguardian.ui.theme.EHGuardianTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
 
     private lateinit var enableBtLauncher: ActivityResultLauncher<Intent>
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var auth: FirebaseAuth
 
   private   val requestCode = 1
    private val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
@@ -31,6 +35,8 @@ class MainActivity : ComponentActivity() {
     }
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+        FirebaseApp.initializeApp(this)
+        auth = FirebaseAuth.getInstance()
 
         super.onCreate(savedInstanceState)
 
@@ -67,6 +73,22 @@ class MainActivity : ComponentActivity() {
         checkPermissionsAndBluetooth()
     }
 
+    public override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+           setContent {
+               HomeScreen()
+           }
+
+        }
+        else{
+            setContent {
+                MyApp()
+            }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.S)
     private fun checkPermissionsAndBluetooth() {
         val permissions = arrayOf(
