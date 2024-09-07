@@ -1,6 +1,5 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.signUp
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,28 +16,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ehguardian.data.models.MeasurementData
+import com.example.ehguardian.data.models.UserModel
+import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.authenticationScreens.login.EmailTextField
 import com.example.ehguardian.ui.screens.authenticationScreens.login.PasswordTextField
+import com.example.ehguardian.ui.screens.homeScreens.profile.DateOfBirthInputField
+import com.example.ehguardian.ui.screens.homeScreens.profile.DatePickerModal
+import java.time.LocalDateTime
+import java.util.Date
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
     onSignUpClick: () -> Unit,
-    signUpViewModel: SignUpViewModel = viewModel(),
+    signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
     ) {
 
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-
+    val id = signUpViewModel.id
     val email by signUpViewModel.email.observeAsState("")
     val password by signUpViewModel.password.observeAsState("")
-    val signUpSuccess by signUpViewModel.signUpSuccess.observeAsState(false)
     val errorMessage by signUpViewModel.errorMessage.observeAsState(null)
-    val firstName by signUpViewModel.name.observeAsState("")
+    val firstName by signUpViewModel.firstname.observeAsState("")
     val lastName by signUpViewModel.surname.observeAsState("")
     val selectedGender by signUpViewModel.gender.observeAsState("")
-    val weight by signUpViewModel.weight.observeAsState("")
-    val height by signUpViewModel.height.observeAsState("")
+    val userWeight by signUpViewModel.weight.observeAsState("")
+    val userHeight by signUpViewModel.height.observeAsState("")
+    val dateOfBirth by signUpViewModel.dateOfBirth.observeAsState("")
+    val isLoading by signUpViewModel.isLoading.observeAsState(false)
+    var showCalendar by rememberSaveable { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
+
 
 
     val context = LocalContext.current
@@ -72,9 +84,7 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
                 supportingText = {
-                    if (errorMessage != null) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    }
+                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -88,16 +98,13 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
                 supportingText = {
-                    if (errorMessage != null) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    }
+                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 label = { Text("Last Name", style = MaterialTheme.typography.titleMedium) }
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
 
         // Email and Password Fields
         EmailTextField(
@@ -120,9 +127,7 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = selectedGender,
                 supportingText = {
-                    if (errorMessage != null) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    }
+                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
                 onValueChange = {
                     signUpViewModel.onGenderChanged(it)
@@ -165,17 +170,12 @@ fun SignUpScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = weight,
+                value = userWeight,
                 onValueChange = {
-                    signUpViewModel.onWeightChanged(weight)
+                    signUpViewModel.onWeightChanged(it)
                 },
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
-                supportingText = {
-                    if (errorMessage != null) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    }
-                },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Weight in kg", style = MaterialTheme.typography.titleMedium) }
@@ -183,31 +183,69 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.width(8.dp))
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = height,
+                value = userHeight,
                 onValueChange = {
-                    signUpViewModel.onHeightChanged(height)
+                    signUpViewModel.onHeightChanged(it)
                 },
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
-                supportingText = {
-                    if (errorMessage != null) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    }
-                },
+
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Height in ft", style = MaterialTheme.typography.titleMedium) }
             )
         }
-        errorMessage?.let {
-            Spacer(modifier = Modifier.height(16.dp))
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        Spacer(modifier = Modifier.height(8.dp))
+
+        DateOfBirthInputField(
+            label = "Date of Birth",
+            dateOfBirth = dateOfBirth.toString(),
+            showCalendar = showCalendar,
+            onCalendarToggle = { showCalendar = it },
+            onValueChange = {
+                signUpViewModel.onDateOfBirthChanged(Date(it))
+            }
+
+
+
+            )
+        if (showCalendar) {
+            DatePickerModal(
+                onDateSelected = {
+                    showCalendar = false
+                    datePickerState.selectedDateMillis?.let {
+                        signUpViewModel.onDateOfBirthChanged(Date(it))
+                    }
+
+
+                },
+                onDismiss = { showCalendar = false },
+                datePickerState = datePickerState,
+            )
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Sign Up Button
+        if (!isLoading)
         Button(
-            onClick = signUpViewModel::signUp,
+            onClick = {signUpViewModel.signUp(user = UserModel(
+                id = id,
+                email = email,
+                password = password,
+                firstname = firstName,
+                lastname = lastName,
+                gender = selectedGender,
+                userWeight = userWeight,
+                userHeight = userHeight,
+                dateOfBirth = dateOfBirth,
+                createdDate = LocalDateTime.now().year,
+                measurementData = MeasurementData()
+
+            ),
+                context = context,
+                      onSignUpSuccess = onSignUpClick
+            )},
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -218,5 +256,10 @@ fun SignUpScreen(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
             )
         }
+        else CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = MaterialTheme.colorScheme.onSurface,
+            strokeWidth = 2.dp
+        )
     }
 }
