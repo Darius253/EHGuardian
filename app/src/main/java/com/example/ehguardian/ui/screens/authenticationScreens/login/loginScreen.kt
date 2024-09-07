@@ -1,8 +1,6 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.login
 
-import LoginViewModel
-import android.app.Activity
-import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Arrangement
@@ -38,13 +36,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.ehguardian.ui.AppViewModelProvider
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onForgotPasswordClick: () -> Unit,
     onSignInClick: () -> Unit,
-     loginViewModel: LoginViewModel = viewModel()
+    onForgotPasswordClick: () -> Unit,
+     loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val email by loginViewModel.email
     val password by loginViewModel.password
@@ -95,7 +94,17 @@ fun LoginScreen(
 
         if(!isLoading)
         Button(
-            onClick = { loginViewModel.login() },
+            onClick = { loginViewModel.signIn(
+                context = context,
+                onSignInSuccess = {
+                    onSignInClick()
+
+                }
+
+            )
+
+
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -143,9 +152,8 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit, errorMessage:
         singleLine = true,
         label = { Text(text = "Email") },
         supportingText = {
-            if (errorMessage != null) {
-                Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()
-        }},
+            errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        },
 
         leadingIcon = {
             Icon(
@@ -173,8 +181,8 @@ fun PasswordTextField(
         singleLine = true,
         maxLines = 1,
         supportingText = {
-            if (errorMessage != null) {
-               Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()}},
+            errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        },
         label = { Text(text = "Password") },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
         leadingIcon = {
