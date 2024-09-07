@@ -151,6 +151,7 @@ fun DateOfBirthInputField(
     dateOfBirth: String,
     showCalendar: Boolean,
     onCalendarToggle: (Boolean) -> Unit,
+    onValueChange: (String) -> Unit,
 
     ) {
     Column {
@@ -162,7 +163,7 @@ fun DateOfBirthInputField(
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = dateOfBirth,
-            onValueChange = {},
+            onValueChange = onValueChange,
             singleLine = true,
             maxLines = 1,
             readOnly = true,
