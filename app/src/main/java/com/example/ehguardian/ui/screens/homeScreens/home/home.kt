@@ -28,7 +28,7 @@ import com.example.ehguardian.ui.screens.homeScreens.SettingsPopUp
 import java.time.LocalTime
 
 @Composable
-fun Home(modifier: Modifier = Modifier) {
+fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     Box {
 
@@ -140,7 +140,8 @@ fun Home(modifier: Modifier = Modifier) {
         if (settingsPopupVisible) {
             SettingsPopUp(
 
-                onDismiss = { settingsPopupVisible = false }
+                onDismiss = { settingsPopupVisible = false } ,
+                        onSignOutSuccess = onSignOut
 
             )
         }
