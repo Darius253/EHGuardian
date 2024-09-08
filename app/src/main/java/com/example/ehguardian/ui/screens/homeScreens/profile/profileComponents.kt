@@ -1,9 +1,10 @@
 package com.example.ehguardian.ui.screens.homeScreens.profile
 
-import android.icu.text.SimpleDateFormat
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
@@ -46,8 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.ehguardian.R
-import java.util.Date
-import java.util.Locale
 
 
 @Composable
@@ -75,6 +75,7 @@ fun NameInputFields(
     firstName: String,
     lastName: String,
     onNameChange: (Pair<String, String>) -> Unit,
+    onDone: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -84,13 +85,15 @@ fun NameInputFields(
             label = "First Name",
             value = firstName,
             onValueChange = { onNameChange(Pair(it, lastName)) },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onDone = onDone
         )
         InputField(
             label = "Last Name",
             value = lastName,
             onValueChange = { onNameChange(Pair(firstName, it)) },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onDone = onDone
         )
     }
 }
@@ -154,7 +157,7 @@ fun DateOfBirthInputField(
     onValueChange: (String) -> Unit,
 
     ) {
-    Column {
+    Column{
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
@@ -181,7 +184,10 @@ fun DateOfBirthInputField(
                 }
             },
             shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.clickable(
+                onClick = { onCalendarToggle(!showCalendar)
+                }
+            ).fillMaxWidth()
         )
     }
 }
@@ -192,6 +198,7 @@ fun WeightAndHeightInputFields(
     height: String,
     onWeightChange: (String) -> Unit,
     onHeightChange: (String) -> Unit,
+    onDone: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -203,7 +210,8 @@ fun WeightAndHeightInputFields(
             onValueChange = onWeightChange,
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Number,
-            suffix = "kg"
+            suffix = "kg",
+            onDone = onDone
         )
         InputField(
             label = "Height",
@@ -211,7 +219,8 @@ fun WeightAndHeightInputFields(
             onValueChange = onHeightChange,
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Number,
-            suffix = "ft"
+            suffix = "metre",
+            onDone = onDone
         )
     }
 }
@@ -222,6 +231,7 @@ fun CholesterolAndBloodSugarInputFields(
     bloodSugarLevel: String,
     onCholesterolChange: (String) -> Unit,
     onBloodSugarChange: (String) -> Unit,
+    onDone: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -234,6 +244,7 @@ fun CholesterolAndBloodSugarInputFields(
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Number,
             suffix = "mg/dL",
+            onDone = onDone
 
             )
         InputField(
@@ -242,7 +253,8 @@ fun CholesterolAndBloodSugarInputFields(
             onValueChange = onBloodSugarChange,
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Number,
-            suffix = "mg/dL"
+            suffix = "mg/dL",
+            onDone = onDone
         )
     }
 }
@@ -270,7 +282,7 @@ fun UpdateDetailsButton(onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(
-    onDateSelected: () -> Unit,
+    onDateSelected: (Any?) -> Unit,
     onDismiss: () -> Unit,
     datePickerState: DatePickerState,
 ) {
@@ -284,7 +296,9 @@ fun DatePickerModal(
             .border(1.dp, MaterialTheme.colorScheme.onSurface, MaterialTheme.shapes.medium),
         confirmButton = {
             TextButton(onClick = {
-                onDateSelected()
+                onDateSelected(
+                    datePickerState.selectedDateMillis
+                )
                 onDismiss()
             }) {
                 Text(
@@ -321,7 +335,8 @@ fun InputField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
-    suffix: String = ""
+    suffix: String = "",
+    onDone: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -335,6 +350,7 @@ fun InputField(
             onValueChange = onValueChange,
             singleLine = true,
             maxLines = 1,
+            keyboardActions = KeyboardActions(onDone = { onDone() }),
             shape = MaterialTheme.shapes.medium,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             modifier = Modifier.fillMaxWidth(),
@@ -366,7 +382,4 @@ fun InputField(
     }
 }
 
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
-}
+
