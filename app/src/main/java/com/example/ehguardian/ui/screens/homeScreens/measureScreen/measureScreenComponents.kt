@@ -1,6 +1,6 @@
 package com.example.ehguardian.ui.screens.homeScreens.measureScreen
 
-import android.widget.Toast
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -77,7 +76,9 @@ fun ManuallyAddDetails(
     heartRate: String,
     onSystolicChange: (String) -> Unit,
     onDiastolicChange: (String) -> Unit,
-    onHeartRateChange: (String) -> Unit
+    onHeartRateChange: (String) -> Unit,
+    onDone: () -> Unit,
+    onUpload: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -103,7 +104,8 @@ fun ManuallyAddDetails(
                     systolic = systolic,
                     diastolic = diastolic,
                     onSystolicChange = onSystolicChange,
-                    onDiastolicChange = onDiastolicChange
+                    onDiastolicChange = onDiastolicChange,
+                    onDone = onDone
                 )
             }
             Spacer(modifier = Modifier.height(25.dp))
@@ -114,15 +116,13 @@ fun ManuallyAddDetails(
                 Spacer(modifier = Modifier.height(16.dp))
                 HeartRateInput(
                     heartRate = heartRate,
-                    onHeartRateChange = onHeartRateChange
+                    onHeartRateChange = onHeartRateChange,
+                    onDone = onDone
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
             UploadButton(
-                onUpload = { onDismiss() },
-                systolic = systolic,
-                diastolic = diastolic,
-                heartRate = heartRate
+                onUpload = onUpload,
             )
         }
     }
@@ -182,7 +182,8 @@ fun BloodPressureInputs(
     systolic: String,
     diastolic: String,
     onSystolicChange: (String) -> Unit,
-    onDiastolicChange: (String) -> Unit
+    onDiastolicChange: (String) -> Unit,
+    onDone: () -> Unit,
 ) {
     Row {
         InputField(
@@ -191,7 +192,8 @@ fun BloodPressureInputs(
             onValueChange = onSystolicChange,
             suffix = "mmHg",
             modifier = Modifier.weight(1f),
-            keyboardType = KeyboardType.Number
+            keyboardType = KeyboardType.Number,
+            onDone = onDone
         )
         Spacer(modifier = Modifier.width(10.dp))
         InputField(
@@ -200,15 +202,16 @@ fun BloodPressureInputs(
             onValueChange = onDiastolicChange,
             suffix = "mmHg",
             modifier = Modifier.weight(1f),
-            keyboardType = KeyboardType.Number
-        )
+            keyboardType = KeyboardType.Number,
+            onDone = onDone)
     }
 }
 
 @Composable
 fun HeartRateInput(
     heartRate: String,
-    onHeartRateChange: (String) -> Unit
+    onHeartRateChange: (String) -> Unit,
+    onDone: ()-> Unit,
 ) {
     InputField(
         label = "Pulse",
@@ -216,24 +219,20 @@ fun HeartRateInput(
         onValueChange = onHeartRateChange,
         suffix = "bpm",
         modifier = Modifier.fillMaxWidth(),
-        keyboardType = KeyboardType.Number
+        keyboardType = KeyboardType.Number,
+        onDone = onDone
     )
 }
 
 @Composable
 fun UploadButton(
     onUpload: () -> Unit,
-    systolic: String,
-    diastolic: String,
-    heartRate: String
 ) {
-    val context = LocalContext.current
 
     TextButton(
         modifier = Modifier.padding(start = 200.dp),
         onClick = {
             onUpload()
-            Toast.makeText(context, "$systolic $diastolic $heartRate", Toast.LENGTH_SHORT).show()
         }
     ) {
         Text(
