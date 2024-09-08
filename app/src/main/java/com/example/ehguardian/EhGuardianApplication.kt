@@ -3,7 +3,7 @@ package com.example.ehguardian
 import android.app.Application
 import com.example.ehguardian.data.repositories.FirebaseUserRepository
 import com.example.ehguardian.data.repositories.UserRepository
-import com.example.ehguardian.data.services.Authentication
+import com.example.ehguardian.data.services.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -20,6 +20,7 @@ class EhGuardianApplication : Application() {
 
 interface AppContainer {
     val userRepository: UserRepository
+
 }
 
 class AppDataContainer : AppContainer {
@@ -30,7 +31,7 @@ class AppDataContainer : AppContainer {
     // Providing the concrete implementation of UserRepository
     override val userRepository: UserRepository by lazy {
         FirebaseUserRepository(
-            authService = Authentication(
+            userService = User(
                 auth = firebaseAuth,
                 firestore = firestore
             ),
