@@ -1,9 +1,7 @@
 package com.example.ehguardian.ui.screens.homeScreens
 
 
-import android.os.Build
-import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
