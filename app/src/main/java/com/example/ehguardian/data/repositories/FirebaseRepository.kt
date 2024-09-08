@@ -1,23 +1,30 @@
 package com.example.ehguardian.data.repositories
 
 
+
+import android.util.Log
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.UserModel
-import com.example.ehguardian.data.services.Authentication
+import com.example.ehguardian.data.services.User
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class FirebaseUserRepository(
-    private val authService: Authentication,
+    private val userService: User,
 
-) : UserRepository {
+    ) : UserRepository {
 
-    override fun userSignIn(email: String, password: String, onComplete: (Boolean, String?) -> Unit) {
-        authService.signIn(email, password) { success, userId ->
+    override fun userSignIn(
+        email: String,
+        password: String,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        userService.signIn(email, password) { success, userId ->
             if (success) {
-        onComplete(true, userId)
+                onComplete(true, userId)
 
             } else {
-             onComplete(false, userId)
+                onComplete(false, userId)
 
             }
         }
@@ -25,7 +32,7 @@ class FirebaseUserRepository(
 
 
     override fun userSignUp(user: UserModel, onComplete: (Boolean, String?) -> Unit) {
-        authService.signUp(
+        userService.signUp(
             user,
         ) { success, userId ->
             if (success && userId != null) {
@@ -36,23 +43,83 @@ class FirebaseUserRepository(
         }
     }
 
-    override suspend fun signOut(){
-        authService.signOut()
+    override suspend fun signOut() {
+        userService.signOut()
 
     }
 
     // Implement other methods of UserRepository
-    override fun getUser(): Flow<UserModel> {
-        TODO("Not yet implemented")
+
+    override suspend fun getUser(): Flow<UserModel> {
+        return flow {
+            try {
+                // Fetch user details from the service
+                val userDetails = userService.getUser() ?: throw Exception("User not found")
+
+                // Emit the user details as a UserModel
+                emit(userDetails)
+            } catch (e: Exception) {
+                // Handle any errors that occur during fetching
+                throw Exception("Failed to fetch user: ${e.message}")
+            }
+        }
     }
 
 
+    override suspend fun updateUserDetails(user: UserModel): Boolean {
+        return try {
+            // Call the updateUserDetails function from your service
+            val success = userService.updateUserDetails(user)
+            success
+
+        } catch (e: Exception) {
+
+            // Handle the exception and log it
+            throw e
+            // Optionally rethrow the exception if necessary
+        }
+    }
 
 
-    override suspend fun updateUserDetails(user: UserModel) = TODO()
+    override suspend fun uploadUserMeasurement(measurementData: MeasurementData): Boolean {
+        return try {
+            // Call the actual upload service
+            val success = userService.uploadUserMeasurement(measurementData)
+
+            // Return success result
+            success
+        } catch (e: Exception) {
+            // Log and handle failure
+            e.printStackTrace()
+            false
+        }
+    }
+
 
     override suspend fun deleteAccount(user: UserModel) = TODO()
-    override suspend fun uploadUserMeasurement(measurement: MeasurementData) = TODO()
-    override fun getUserMeasurements(): Flow<List<MeasurementData>> = TODO()
-    override suspend fun getUserLatestMeasurementByUserId(userId: Int): List<MeasurementData> = TODO()
+
+
+
+
+    override suspend fun getUserMeasurements(): Flow<List<MeasurementData>> {
+        return flow {
+            try {
+                 userService.getUserMeasurements().collect{
+                    emit(it)
+
+                }
+
+
+            } catch (e: Exception) {
+                Log.e("MeasurementFlow", "Failed to fetch user measurements: ${e.message}", e)
+                emit(emptyList())
+            }
+        }
+    }
+
+
+    override suspend fun getUserLatestMeasurementByUserId(userId: Int): Flow<List<MeasurementData>> {
+        TODO("Not yet implemented")
+
+    }
 }
