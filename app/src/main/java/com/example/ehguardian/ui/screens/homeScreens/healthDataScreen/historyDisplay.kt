@@ -1,5 +1,6 @@
 package com.example.ehguardian.ui.screens.homeScreens.healthDataScreen
 
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -26,42 +27,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ehguardian.R
-
+import com.example.ehguardian.data.models.MeasurementData
 @Composable
-fun HistoryPage(modifier: Modifier) {
-
-Column {
+fun HistoryPage(
+    modifier: Modifier,
+    userMeasurements: List<MeasurementData> = emptyList(),
+) {
 
 
     LazyColumn(
         modifier = modifier.padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            HistoryCard(systolic = 120, diastolic = 80, pulse = 72, bmi = 24.5)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HistoryCard(systolic = 135, diastolic = 85, pulse = 75, bmi = 25.0)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HistoryCard(systolic = 145, diastolic = 95, pulse = 78, bmi = 26.2)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HistoryCard(systolic = 115, diastolic = 75, pulse = 70, bmi = 23.8)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            HistoryCard(systolic = 130, diastolic = 82, pulse = 74, bmi = 24.0)
-            Spacer(modifier = Modifier.height(16.dp))
+        items(userMeasurements.size) { measurement ->
+            HistoryCard(
+                userMeasurements[measurement]
+            )
         }
     }
 }
-}
+
 
 @Composable
-fun HistoryCard(systolic: Int, diastolic: Int, pulse: Int, bmi: Double) {
+fun HistoryCard(measurementData: MeasurementData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -77,7 +66,7 @@ fun HistoryCard(systolic: Int, diastolic: Int, pulse: Int, bmi: Double) {
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
+            defaultElevation = 5.dp,
         )
     ) {
         Row(
@@ -86,20 +75,21 @@ fun HistoryCard(systolic: Int, diastolic: Int, pulse: Int, bmi: Double) {
                 .padding(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            BloodPressureCard(systolic = systolic, diastolic = diastolic)
+            BloodPressureCard(systolic = measurementData.systolic, diastolic = measurementData.diastolic)
             Spacer(modifier = Modifier.width(15.dp))
-            HistoryDetails(systolic = systolic, diastolic = diastolic, pulse = pulse, bmi = bmi)
+            HistoryDetails(systolic = measurementData.systolic, diastolic = measurementData.diastolic,
+                pulse = measurementData.pulse, bmi = measurementData.bmi, timestamp = measurementData.timestamp)
         }
 
     }
 }
 
 @Composable
-fun BloodPressureCard(systolic: Int, diastolic: Int) {
+fun BloodPressureCard(systolic: String, diastolic: String) {
     // Determine the background color based on blood pressure levels
     val backgroundColor = when {
-        systolic >= 140 || diastolic >= 90 -> Color(0xFFFF6F6F) //
-        systolic in 120..139 || diastolic in 80..89 -> Color(0xFFFFD966) //
+        systolic.toInt() >= 140 || diastolic.toInt() >= 90 -> Color(0xFFFF6F6F) //
+        systolic.toInt() in 120..139 || diastolic.toInt() in 80..89 -> Color(0xFFFFD966) //
         else -> Color(0xFF5CC87C) // Normal BP - Green
     }
 
@@ -111,17 +101,17 @@ fun BloodPressureCard(systolic: Int, diastolic: Int) {
         )
     ) {
         Column(
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp),
+            modifier = Modifier.padding(start = 10.dp, top = 16.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "$systolic",
+                text = systolic,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "$diastolic",
+                text = diastolic,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -131,11 +121,11 @@ fun BloodPressureCard(systolic: Int, diastolic: Int) {
 }
 
 @Composable
-fun HistoryDetails(systolic: Int, diastolic: Int, pulse: Int, bmi: Double) {
+fun HistoryDetails(systolic: String, diastolic: String, pulse: String, bmi: String, timestamp: String) {
     // Determine the status based on blood pressure levels
     val status = when {
-        systolic >= 140 || diastolic >= 90 -> "Hypertension"
-        systolic in 120..139 || diastolic in 80..89 -> "Elevated"
+        systolic.toInt() >= 140 || diastolic.toInt() >= 90 -> "Hypertension"
+        systolic.toInt() in 120..139 || diastolic.toInt() in 80..89 -> "Elevated"
         else -> "Normal"
     }
 
@@ -144,7 +134,7 @@ fun HistoryDetails(systolic: Int, diastolic: Int, pulse: Int, bmi: Double) {
     Column(
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "23-08-00, 12:00")
+        Text(text = timestamp)
         Spacer(modifier = Modifier.height(10.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically
