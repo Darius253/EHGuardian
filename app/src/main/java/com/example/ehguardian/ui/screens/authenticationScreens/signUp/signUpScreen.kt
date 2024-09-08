@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.authenticationScreens.login.EmailTextField
@@ -24,6 +23,7 @@ import com.example.ehguardian.ui.screens.authenticationScreens.login.PasswordTex
 import com.example.ehguardian.ui.screens.homeScreens.profile.DateOfBirthInputField
 import com.example.ehguardian.ui.screens.homeScreens.profile.DatePickerModal
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +49,14 @@ fun SignUpScreen(
     val isLoading by signUpViewModel.isLoading.observeAsState(false)
     var showCalendar by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    val createdDate = LocalDateTime.now()
+
+// Create a formatter to extract Year, Day of Year, and Time
+    val formatter = DateTimeFormatter.ofPattern("yyyy-DDD HH:mm:ss")
+
+// Format the createdDate to the required format
+    val formattedDate = createdDate.format(formatter)
 
 
 
@@ -130,7 +138,6 @@ fun SignUpScreen(
                     errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
                 onValueChange = {
-                    signUpViewModel.onGenderChanged(it)
                 },
                 readOnly = true,
                 shape = RoundedCornerShape(12.dp),
@@ -170,9 +177,9 @@ fun SignUpScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = userWeight,
+                value = userWeight.toString(),
                 onValueChange = {
-                    signUpViewModel.onWeightChanged(it)
+                    signUpViewModel.onWeightChanged(it.toDouble())
                 },
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
@@ -183,23 +190,23 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.width(8.dp))
             OutlinedTextField(
                 modifier = Modifier.weight(3f),
-                value = userHeight,
+                value = userHeight.toString(),
                 onValueChange = {
-                    signUpViewModel.onHeightChanged(it)
+                    signUpViewModel.onHeightChanged(it.toDouble())
                 },
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
 
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Height in ft", style = MaterialTheme.typography.titleMedium) }
+                label = { Text("Height in metres", style = MaterialTheme.typography.titleMedium) }
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         DateOfBirthInputField(
             label = "Date of Birth",
-            dateOfBirth = dateOfBirth.toString(),
+            dateOfBirth = dateOfBirth,
             showCalendar = showCalendar,
             onCalendarToggle = { showCalendar = it },
             onValueChange = {
@@ -236,12 +243,12 @@ fun SignUpScreen(
                 firstname = firstName,
                 lastname = lastName,
                 gender = selectedGender,
-                userWeight = userWeight,
-                userHeight = userHeight,
+                userWeight = userWeight.toString(),
+                userHeight = userHeight.toString(),
                 dateOfBirth = dateOfBirth,
-                createdDate = LocalDateTime.now().year,
-                measurementData = MeasurementData()
-
+                createdDate = formattedDate,
+                bloodSugarLevel = "",
+                cholesterolLevel = "",
             ),
                 context = context,
                       onSignUpSuccess = onSignUpClick
