@@ -1,5 +1,6 @@
 package com.example.ehguardian.ui.screens.homeScreens.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,13 +25,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.R
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.example.ehguardian.ui.screens.homeScreens.SettingsPopUp
 import java.time.LocalTime
 
+@SuppressLint("DefaultLocale")
 @Composable
-fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
+fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
+         homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
+    val userDetails by homeViewModel.userDetails.collectAsState()
     Box {
 
         LazyColumn(
@@ -39,6 +48,8 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
         ) {
             item{
                 Header(
+                    firstName = userDetails?.firstname ?: "",
+                    lastName = userDetails?.lastname ?: "",
                     onClickSettings = { settingsPopupVisible = true }
                 )
 
@@ -95,10 +106,28 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
                         ) {
                             TextData(
                                 text = "kg/m²",
-                                value = "24",
+                                value = (
+                                        if (userDetails != null) {
+                                            val weight = userDetails!!.userWeight.toDouble()
+                                            val height = userDetails!!.userHeight.toDouble()
+
+                                            if (weight > 0 && height > 0) {
+                                                // Perform the BMI calculation with floating-point division
+                                                val bmi = weight / (height * height)
+
+                                                // Format the result to a string with two decimal places
+                                                String.format("%.2f", bmi)
+                                            } else {
+                                                "N/A" // Handle invalid weight or height (e.g. 0 or negative values)
+                                            }
+                                        } else {
+                                            "N/A"
+                                        }
+                                        ).toString(),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                                 modifier = Modifier.padding(start = 60.dp)
                             )
+
                         }
                     }
                     item {
@@ -110,7 +139,16 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
                         ) {
                             TextData(
                                 text = "mg/dL",
-                                value = "200",
+                                value = (
+                                        if(userDetails!=null){
+                                            userDetails!!.cholesterolLevel.ifEmpty {
+                                                "N/A"
+                                            }
+
+                                        }else{
+                                            "N/A"
+                                        }
+                                        ),
                                 color = Color.White,
                                 modifier = Modifier.padding(start = 60.dp)
                             )
@@ -125,7 +163,14 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
                         ) {
                             TextData(
                                 text = "mg/dL",
-                                value = "100",
+                                value = if(userDetails!=null){
+                                    userDetails!!.bloodSugarLevel.ifEmpty {
+                                        "N/A"
+                                    }
+
+                                }else{
+                                    "N/A"
+                                },
                                 color = Color.White,
                                 modifier = Modifier.padding(start = 60.dp)
                             )
@@ -150,7 +195,10 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit) {
 }
 
 @Composable
-fun Header(modifier: Modifier = Modifier,
+fun Header(
+    firstName: String,
+    lastName: String,
+    modifier: Modifier = Modifier,
            onClickSettings: () -> Unit = {}) {
     val currentHour = remember { LocalTime.now().hour }
     val greeting = when (currentHour) {
@@ -168,7 +216,7 @@ fun Header(modifier: Modifier = Modifier,
         Column {
             Text(greeting, style = MaterialTheme.typography.headlineSmall)
             Text(
-                text = "Darius Twumasi-Ankrah",
+                text = "$firstName $lastName",
                 style = MaterialTheme.typography.headlineSmall,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
