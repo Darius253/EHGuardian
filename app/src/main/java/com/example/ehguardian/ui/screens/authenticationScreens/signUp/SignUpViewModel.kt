@@ -36,11 +36,17 @@ class SignUpViewModel(
     private val _gender = MutableLiveData<String>()
     val gender: LiveData<String> = _gender
 
-    private val _weight = MutableLiveData<String>()
-    val weight: LiveData<String> = _weight
+    private val _weight = MutableLiveData<Double>()
+    val weight: LiveData<Double> = _weight
 
-    private val _height = MutableLiveData<String>()
-    val height: LiveData<String> = _height
+    private val _height = MutableLiveData<Double>()
+    val height: LiveData<Double> = _height
+
+    private val _bloodSugarLevel = MutableLiveData<Double>()
+    val bloodSugarLevel: LiveData<Double> = _bloodSugarLevel
+
+    private val _cholesterolLevel = MutableLiveData<Double>()
+    val cholesterolLevel: LiveData<Double> = _cholesterolLevel
 
     // Changed dateOfBirth to String to only store day/month/year
     private val _dateOfBirth = MutableLiveData<String>()
@@ -52,6 +58,7 @@ class SignUpViewModel(
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+
     // Date format for day, month, and year
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
@@ -61,8 +68,10 @@ class SignUpViewModel(
     fun onNameChanged(newFirstName: String) { _firstname.value = newFirstName }
     fun onSurnameChanged(newSurname: String) { _surname.value = newSurname }
     fun onGenderChanged(newGender: String) { _gender.value = newGender }
-    fun onWeightChanged(newWeight: String) { _weight.value = newWeight }
-    fun onHeightChanged(newHeight: String) { _height.value = newHeight }
+    fun onWeightChanged(newWeight: Double) { _weight.value = newWeight }
+    fun onHeightChanged(newHeight: Double) { _height.value = newHeight }
+    fun onBloodSugarLevelChanged(newBloodSugarLevel: Double) { _bloodSugarLevel.value = newBloodSugarLevel }
+    fun onCholesterolLevelChanged(newCholesterolLevel: Double) { _cholesterolLevel.value = newCholesterolLevel }
 
     // Update date of birth with day, month, and year only
     fun onDateOfBirthChanged(newDateOfBirth: Date) {
@@ -120,8 +129,10 @@ class SignUpViewModel(
         _firstname.value = ""
         _surname.value = ""
         _gender.value = ""
-        _weight.value = ""
-        _height.value = ""
+        _weight.value = 0.0
+        _height.value = 0.0
+        _bloodSugarLevel.value = 0.0
+        _cholesterolLevel.value = 0.0
         _dateOfBirth.value = ""
     }
 
