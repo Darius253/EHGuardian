@@ -4,14 +4,17 @@ import java.io.Serializable
 
 data class UserModel(
     var id: String,
-    var email: String,
+    var email: String = "",
     var gender: String,
-    var password: String,
+    var password: String = "",
     var firstname: String,
-    var lastname: String,
+    var lastname: String ,
     var userWeight: String,
     var userHeight: String,
     var dateOfBirth: Serializable,
-    var createdDate: Int,
-    var measurementData: MeasurementData,
+    var createdDate: Serializable = System.currentTimeMillis(),
+    var cholesterolLevel:String,
+    var bloodSugarLevel: String,
+
+
     )
