@@ -79,13 +79,19 @@ class MainActivity : ComponentActivity() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
            setContent {
-               HomeScreen()
+               EHGuardianTheme {
+                   HomeScreen()
+               }
            }
 
         }
         else{
             setContent {
-                MyApp()
+                EHGuardianTheme {
+                    MyApp(
+
+                    )
+                }
             }
         }
     }
