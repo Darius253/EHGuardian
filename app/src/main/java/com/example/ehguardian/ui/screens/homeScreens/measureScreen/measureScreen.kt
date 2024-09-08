@@ -2,6 +2,7 @@
 
 package com.example.ehguardian.ui.screens.homeScreens.measureScreen
 
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -19,18 +20,30 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.*
 import com.example.ehguardian.R
+import com.example.ehguardian.data.models.MeasurementData
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MeasureScreen(modifier: Modifier = Modifier) {
+fun MeasureScreen(
+    modifier: Modifier = Modifier,
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    ) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
     val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
     val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
@@ -38,13 +51,29 @@ fun MeasureScreen(modifier: Modifier = Modifier) {
     val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }
 
 
+    val focusManager: FocusManager = LocalFocusManager.current
+    val context = LocalContext.current
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.bluetooth))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever
     )
 
+    val weight = (homeViewModel.userDetails.collectAsState().value?.userWeight ?: "").toDoubleOrNull() ?: 0.0
+    val height = (homeViewModel.userDetails.collectAsState().value?.userHeight ?: "").toDoubleOrNull() ?: 0.0
+
+    val bmi = if (height > 0) weight / (height * height) else 0.0
+
     val sheetState = rememberModalBottomSheetState()
+
+    val createdDate = LocalDateTime.now()
+
+// Create a formatter to extract Year, Day of Year, and Time
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+
+// Format the createdDate to the required format
+    val formattedDate = createdDate.format(formatter)
+
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (!bluetoothEnabled) {
@@ -67,7 +96,21 @@ fun MeasureScreen(modifier: Modifier = Modifier) {
                 heartRate = heartRate,
                 onSystolicChange = setSystolic,
                 onDiastolicChange = setDiastolic,
-                onHeartRateChange = setHeartRate
+                onHeartRateChange = setHeartRate,
+                onDone = { focusManager.clearFocus() },
+                onUpload = {
+                    setShowDialog(false)
+                    homeViewModel.uploadUserMeasurement(
+                        context = context, // Pass the current context
+                        measurementData = MeasurementData(
+                            systolic = systolic,
+                            diastolic = diastolic,
+                            pulse = heartRate,
+                            timestamp = formattedDate,
+                            bmi =   String.format("%.2f", bmi),
+                        )
+                    )
+                }
             )
         }
     }
