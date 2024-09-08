@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.ehguardian.data.models.MeasurementData
 import io.jetchart.common.animation.fadeInAnimation
 import io.jetchart.line.Line
 import io.jetchart.line.LineChart
@@ -18,10 +19,16 @@ import io.jetchart.line.renderer.line.SolidLineDrawer
 import io.jetchart.line.renderer.point.FilledPointDrawer
 import io.jetchart.line.renderer.xaxis.LineXAxisDrawer
 import io.jetchart.line.renderer.yaxis.LineYAxisWithValueDrawer
-import kotlin.random.Random
+
+
+
+
 
 @Composable
-fun ChartPage(modifier: Modifier) {
+fun ChartPage(
+    modifier: Modifier,
+    userMeasurements: List<MeasurementData> = emptyList()
+) {
     var selectedFilter by rememberSaveable { mutableStateOf("Blood Pressure") }
 
     Column(
@@ -36,17 +43,16 @@ fun ChartPage(modifier: Modifier) {
                 selectedFilter = if (selectedFilter == filter) {
                     filter // Deselect if the same filter is clicked
                 } else {
-                    filter  // Select the new filter
+                    filter // Select the new filter
                 }
             }
         )
 
-        val (lines, labels) = getLinesForFilter(selectedFilter)
+        val (lines, labels) = getLinesForFilter(selectedFilter, userMeasurements)
 
         LineChart(
             lines = lines,
             labels = labels,
-
             modifier = Modifier
                 .fillMaxSize() // This ensures the LineChart fills the entire available space
                 .padding(16.dp), // Optional padding
@@ -54,8 +60,7 @@ fun ChartPage(modifier: Modifier) {
             pointDrawer = FilledPointDrawer(
                 color = MaterialTheme.colorScheme.primary,
                 diameter = 10.dp,
-
-                ),
+            ),
             xAxisDrawer = LineXAxisDrawer(
                 axisLineColor = MaterialTheme.colorScheme.onSurface,
                 labelTextColor = MaterialTheme.colorScheme.onSurface,
@@ -65,70 +70,62 @@ fun ChartPage(modifier: Modifier) {
                 axisLineColor = MaterialTheme.colorScheme.onSurface,
                 labelTextColor = MaterialTheme.colorScheme.onSurface,
                 labelTextSize = MaterialTheme.typography.titleMedium.fontSize,
-
             ),
-
             horizontalOffsetPercentage = 1f
         )
     }
 }
 
 @Composable
-private fun points(count: Int) = (1..count).map {
-    io.jetchart.line.Point(
-        Random.nextFloat(),
-        "$it"
-    )
-}
-
-@Composable
-private fun getLinesForFilter(filter: String): Pair<List<Line>, List<String>> {
+private fun getLinesForFilter(
+    filter: String,
+    userMeasurements: List<MeasurementData>
+): Pair<List<Line>, List<String>> {
     return when (filter) {
         "Blood Pressure" -> {
-            val labels = listOf( "60", "70", "80", "90", "DIA")
+            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
+            val points = userMeasurements.map { measurement ->
+                io.jetchart.line.Point(
+                    value = measurement.systolic.toFloat(), // Systolic as X-axis value
+                    label =  measurement.timestamp , // Diastolic as Y-axis value
+
+                )
+            }
             val lines = listOf(
                 Line(
-                    points = listOf(
-                        io.jetchart.line.Point(120f, "90"),
-                        io.jetchart.line.Point(135f, "85"),
-                        io.jetchart.line.Point(110f, "80"),
-                        io.jetchart.line.Point(105f, "75"),
-                        io.jetchart.line.Point(140f, "70"),
-                        io.jetchart.line.Point(120f, "90"),
-                        io.jetchart.line.Point(135f, "85"),
-                        io.jetchart.line.Point(110f, "80"),
-                        io.jetchart.line.Point(105f, "75"),
-                        io.jetchart.line.Point(140f, "70")
-                    ),
+                    points = points,
                     lineDrawer = SolidLineDrawer(thickness = 5.dp, color = Color(0xFF5CC87C))
                 )
             )
             Pair(lines, labels)
         }
         "Heart Rate" -> {
-            val labels = listOf("1", "2", "3", "4", "5", "6", "7", "8")
+            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
+            val points = userMeasurements.map { measurement ->
+                io.jetchart.line.Point(
+                    value = measurement.pulse.toFloat(),
+                    label = measurement.timestamp
+                )
+            }
             val lines = listOf(
                 Line(
-                    points = listOf(
-                        io.jetchart.line.Point(72f, "1"),
-                        io.jetchart.line.Point(70f, "2"),
-                        io.jetchart.line.Point(68f, "3"),
-                        io.jetchart.line.Point(65f, "4"),
-                        io.jetchart.line.Point(67f, "5"),
-                        io.jetchart.line.Point(69f, "6"),
-                        io.jetchart.line.Point(71f, "7"),
-                        io.jetchart.line.Point(73f, "8")
-                    ),
+                    points = points,
                     lineDrawer = SolidLineDrawer(thickness = 5.dp, color = Color(0xFFEA6447))
                 )
             )
             Pair(lines, labels)
         }
         "Body Mass Index" -> {
-            val labels = (1..12).map { it.toString() }
+            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
+            val points = userMeasurements.map { measurement ->
+                io.jetchart.line.Point(
+                    value = measurement.bmi.toFloatOrNull() ?: 0f,
+                    label = measurement.timestamp
+                )
+            }
             val lines = listOf(
                 Line(
-                    points = points(12),
+                    points = points,
                     lineDrawer = SolidLineDrawer(thickness = 5.dp, color = Color(0xFF5B9AFD))
                 )
             )
@@ -137,6 +134,7 @@ private fun getLinesForFilter(filter: String): Pair<List<Line>, List<String>> {
         else -> Pair(emptyList(), emptyList())
     }
 }
+
 
 @Composable
 fun GraphFilter(
@@ -193,3 +191,6 @@ fun FilterCard(
         )
     }
 }
+
+
+
