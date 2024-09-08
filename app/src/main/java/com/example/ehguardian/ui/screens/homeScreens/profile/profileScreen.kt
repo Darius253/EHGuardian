@@ -1,6 +1,7 @@
 package com.example.ehguardian.ui.screens.homeScreens.profile
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -8,91 +9,167 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
-    var firstName by rememberSaveable { mutableStateOf("Darius") }
-    var lastName by rememberSaveable { mutableStateOf("Twumasi-Ankrah") }
-    var weight by rememberSaveable { mutableStateOf("") }
-    var height by rememberSaveable { mutableStateOf("") }
-    var selectedGender by rememberSaveable { mutableStateOf("Select Gender") }
-    var cholesterolLevel by rememberSaveable { mutableStateOf("") }
-    var bloodSugarLevel by rememberSaveable { mutableStateOf("") }
-    var isGenderMenuExpanded by rememberSaveable { mutableStateOf(false) }
-    var showCalendar by rememberSaveable { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val userDetails by homeViewModel.userDetails.collectAsState()
+    val context = LocalContext.current
 
-    val dateOfBirth = datePickerState.selectedDateMillis?.let {
-        convertMillisToDate(it)
-    } ?: ""
+    // Get a reference to the FocusManager
+    val focusManager: FocusManager = LocalFocusManager.current
 
-    LazyColumn(
-        modifier = modifier
-            .padding(16.dp)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item { ProfileImage() }
-        item { Spacer(modifier = Modifier.height(50.dp)) }
-        item { NameInputFields(firstName, lastName) { firstName = it.first; lastName = it.second } }
-        item { Spacer(modifier = Modifier.height(10.dp)) }
-        item {
-            GenderDropdown(
-                label = "Gender",
-                selectedGender = selectedGender,
-                isExpanded = isGenderMenuExpanded,
-                onGenderSelected = { selectedGender = it },
-                onExpandedChange = { isGenderMenuExpanded = it }
-            )
-        }
-        item { Spacer(modifier = Modifier.height(10.dp)) }
-        item {
-            DateOfBirthInputField(
-                label = "Date of Birth",
-                dateOfBirth = dateOfBirth,
-                showCalendar = showCalendar,
-                onCalendarToggle = { showCalendar = it },
-                onValueChange = {}
+    // Ensure we have user details
+    if (userDetails != null) {
+        // Initial values (from the userDetails)
+        val initialFirstName = userDetails!!.firstname
+        val initialLastName = userDetails!!.lastname
+        val initialWeight = userDetails!!.userWeight
+        val initialHeight = userDetails!!.userHeight
+        val initialGender = userDetails!!.gender
+        val initialCholesterolLevel = userDetails!!.cholesterolLevel
+        val initialBloodSugarLevel = userDetails!!.bloodSugarLevel
+        val initialDateOfBirth = userDetails!!.dateOfBirth
 
-            )
-        }
-        item { Spacer(modifier = Modifier.height(10.dp)) }
-        item {
-            WeightAndHeightInputFields(
-                weight = weight,
-                height = height,
-                onWeightChange = { weight = it },
-                onHeightChange = { height = it }
-            )
-        }
-        item { Spacer(modifier = Modifier.height(10.dp)) }
-        item {
-            CholesterolAndBloodSugarInputFields(
-                cholesterolLevel = cholesterolLevel,
-                bloodSugarLevel = bloodSugarLevel,
-                onCholesterolChange = { cholesterolLevel = it },
-                onBloodSugarChange = { bloodSugarLevel = it }
-            )
-        }
-        item { Spacer(modifier = Modifier.height(50.dp)) }
-        item {
-            UpdateDetailsButton(onClick = { /*TODO*/ })
-        }
-    }
+        // Current editable values
+        var firstName by rememberSaveable { mutableStateOf(initialFirstName) }
+        var lastName by rememberSaveable { mutableStateOf(initialLastName) }
+        var weight by rememberSaveable { mutableStateOf(initialWeight) }
+        var height by rememberSaveable { mutableStateOf(initialHeight) }
+        var selectedGender by rememberSaveable { mutableStateOf(initialGender) }
+        var cholesterolLevel by rememberSaveable { mutableStateOf(initialCholesterolLevel) }
+        var bloodSugarLevel by rememberSaveable { mutableStateOf(initialBloodSugarLevel) }
+        var isGenderMenuExpanded by rememberSaveable { mutableStateOf(false) }
+        var showCalendar by rememberSaveable { mutableStateOf(false) }
+        val datePickerState = rememberDatePickerState()
+        var dateOfBirth by rememberSaveable { mutableStateOf(initialDateOfBirth) }
 
-    if (showCalendar) {
-        DatePickerModal(
-            onDateSelected = {
-                showCalendar = false
-                datePickerState.selectedDateMillis?.let {
-                    datePickerState.selectedDateMillis = it
+        // Compare current values with initial values
+        val isChanged = firstName != initialFirstName ||
+                lastName != initialLastName ||
+                weight != initialWeight ||
+                height != initialHeight ||
+                selectedGender != initialGender ||
+                cholesterolLevel != initialCholesterolLevel ||
+                bloodSugarLevel != initialBloodSugarLevel ||
+                dateOfBirth != initialDateOfBirth
+
+        LazyColumn(
+            modifier = modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            item { ProfileImage() }
+            item { Spacer(modifier = Modifier.height(50.dp)) }
+            item {
+                NameInputFields(
+                    firstName = firstName,
+                    lastName = lastName,
+                    onNameChange = { (newFirstName, newLastName) ->
+                        firstName = newFirstName
+                        lastName = newLastName
+                    },
+                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                GenderDropdown(
+                    label = "Gender",
+                    selectedGender = selectedGender,
+                    isExpanded = isGenderMenuExpanded,
+                    onGenderSelected = { selectedGender = it },
+                    onExpandedChange = { isGenderMenuExpanded = it }
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                DateOfBirthInputField(
+                    label = "Date of Birth",
+                    dateOfBirth = dateOfBirth.toString(),
+                    showCalendar = showCalendar,
+                    onCalendarToggle = { showCalendar = it },
+                    onValueChange = { newDateOfBirth ->
+                        dateOfBirth = newDateOfBirth
+                    },
+                    // Clear focus after selecting date
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                WeightAndHeightInputFields(
+                    weight = weight,
+                    height = height,
+                    onWeightChange = { weight = it },
+                    onHeightChange = { height = it },
+                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                CholesterolAndBloodSugarInputFields(
+                    cholesterolLevel = cholesterolLevel,
+                    bloodSugarLevel = bloodSugarLevel,
+                    onCholesterolChange = { cholesterolLevel = it },
+                    onBloodSugarChange = { bloodSugarLevel = it },
+                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                )
+            }
+            item { Spacer(modifier = Modifier.height(50.dp)) }
+
+            // Conditionally show the "Update" button only if any field is changed
+            if (isChanged) {
+                item {
+                    UpdateDetailsButton(onClick = {
+                        userDetails?.let {
+                            homeViewModel.updateUserDetails(
+                                it.copy(
+                                    firstname = firstName,
+                                    lastname = lastName,
+                                    gender = selectedGender,
+                                    userWeight = weight,
+                                    userHeight = height,
+                                    cholesterolLevel = cholesterolLevel,
+                                    bloodSugarLevel = bloodSugarLevel,
+                                    dateOfBirth = dateOfBirth
+                                ),
+                                context,
+                            )
+                        }
+                    })
                 }
-            },
-            onDismiss = { showCalendar = false },
-            datePickerState = datePickerState,
-        )
+            }
+        }
+
+        if (showCalendar) {
+
+                    DatePickerModal(
+                        onDateSelected = { selectedDateMillis ->
+                            showCalendar = false
+                            selectedDateMillis?.let {
+                                // Convert the selected date in milliseconds to a formatted date string
+                                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                val formattedDate = formatter.format(it) // Convert milliseconds to a Date, then format
+                                dateOfBirth = formattedDate // Set the formatted date to dateOfBirth
+                            }
+                        },
+                        onDismiss = { showCalendar = false },
+                        datePickerState = datePickerState,
+                    )
+
+        }
     }
 }
