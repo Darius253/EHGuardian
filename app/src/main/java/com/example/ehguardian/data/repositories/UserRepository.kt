@@ -24,6 +24,6 @@ interface  UserRepository{
 
     suspend fun getUserMeasurements(): Flow<List<MeasurementData>>
 
-    suspend fun getUserLatestMeasurementByUserId(userId: Int): Flow<List<MeasurementData>>
+    suspend fun getUserLatestMeasurement(): Flow<MeasurementData?>
 
 }
