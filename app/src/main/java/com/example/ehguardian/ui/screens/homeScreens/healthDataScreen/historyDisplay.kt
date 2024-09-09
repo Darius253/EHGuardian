@@ -88,21 +88,24 @@ fun HistoryCard(measurementData: MeasurementData) {
 fun BloodPressureCard(systolic: String, diastolic: String) {
     // Determine the background color based on blood pressure levels
     val backgroundColor = when {
-        systolic.toInt() >= 140 || diastolic.toInt() >= 90 -> Color(0xFFFF6F6F) //
-        systolic.toInt() in 120..139 || diastolic.toInt() in 80..89 -> Color(0xFFFFD966) //
+        systolic.isBlank() || diastolic.isBlank() -> Color.Gray // Handle empty or null values
+        (systolic.toIntOrNull() ?: 0) >= 140 || (diastolic.toIntOrNull() ?: 0) >= 90 -> Color(0xFFFF6F6F) // High BP - Red
+        systolic.toIntOrNull() in 120..139 || diastolic.toIntOrNull() in 80..89 -> Color(0xFFFFD966) // Prehypertension - Yellow
         else -> Color(0xFF5CC87C) // Normal BP - Green
     }
 
+
     Card(
         modifier = Modifier
-            .size(width = 80.dp, height = 100.dp),
+            .height(100.dp) ,
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
         )
     ) {
         Column(
-            modifier = Modifier.padding(start = 10.dp, top = 16.dp),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.padding(start = 10.dp, top = 16.dp, end = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = systolic,
@@ -124,8 +127,9 @@ fun BloodPressureCard(systolic: String, diastolic: String) {
 fun HistoryDetails(systolic: String, diastolic: String, pulse: String, bmi: String, timestamp: String) {
     // Determine the status based on blood pressure levels
     val status = when {
-        systolic.toInt() >= 140 || diastolic.toInt() >= 90 -> "Hypertension"
-        systolic.toInt() in 120..139 || diastolic.toInt() in 80..89 -> "Elevated"
+        systolic.isBlank() || diastolic.isBlank() -> "Invalid Data" // Handle empty or null values
+        (systolic.toIntOrNull() ?: 0) >= 140 || (diastolic.toIntOrNull() ?: 0) >= 90 -> "Hypertension"
+        systolic.toIntOrNull() in 120..139 || diastolic.toIntOrNull() in 80..89 -> "Elevated"
         else -> "Normal"
     }
 
