@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +38,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,9 +56,11 @@ import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpView
 fun SettingsPopUp(
     onDismiss: () -> Unit,
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onSignOutSuccess: () -> Unit
+    onSignOutSuccess: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState()
+    var showPopUp by rememberSaveable { mutableStateOf(false) }
+
 
 
 
@@ -152,12 +159,10 @@ fun SettingsPopUp(
                     title = "Logout",
                     onClick = {
 
-                            signUpViewModel.signOut(
-                                onSignOutSuccess = onSignOutSuccess
 
-                            )
+                        showPopUp = true
 
-                        onDismiss()
+
                     },
                     color = Color.Red
                 )
@@ -173,6 +178,21 @@ fun SettingsPopUp(
             item{Text(text = "Version 1.0.0",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,)}
+
+            item {
+                if (showPopUp) {
+                    LogOutPopUp(onDismiss = {
+                        showPopUp = false
+                    },
+                        onSignOutSuccess = {
+                            signUpViewModel.signOut(
+                                onSignOutSuccess = onSignOutSuccess
+                            )
+                            onDismiss()
+
+                        })
+                }
+            }
         }
     }
 }
@@ -249,4 +269,36 @@ fun SettingsDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = 16.dp)
     )
+}
+
+
+
+@Composable
+fun LogOutPopUp(onDismiss: () -> Unit,
+                onSignOutSuccess: () -> Unit = {}) {
+
+    AlertDialog(
+        title = { Text(text = "Log Out",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error) },
+        text = { Text(text = "Are you sure you want to log out?") },
+        onDismissRequest =  onDismiss , confirmButton = {
+            Text(text = "Log Out",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.clickable {
+                    onDismiss()
+                    onSignOutSuccess()
+                })
+        },
+        dismissButton = {
+            Text(text = "Cancel",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onDismiss() })
+        },
+
+
+        )
+
 }
