@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -29,6 +30,8 @@ fun HealthDataScreen(
 ) {
     var isHistory by remember { mutableStateOf(true) }
     val userMeasurements by homeViewModel.userMeasurements.collectAsState()
+    var showPopUp by remember { mutableStateOf(false) }
+    var requestHealthCheck by remember { mutableStateOf(false) }
 
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.heart)
@@ -46,9 +49,7 @@ fun HealthDataScreen(
         Box(
             modifier= Modifier.fillMaxSize(),
         ) {
-            Column(
-                modifier = modifier.fillMaxSize(),
-            ) {
+            Column {
                 ToggleScreenButton(
                     isLogin = isHistory,
                     onButtonClick = { isHistory = !isHistory },
@@ -64,10 +65,8 @@ fun HealthDataScreen(
                         userMeasurements = userMeasurements
                     )
                 } else {
-                    BloodPressureGraph(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp),  // Set the height of the graph
+                    ChartPage(
+                        modifier = modifier,
                         userMeasurements = userMeasurements
                     )
                 }
@@ -76,11 +75,11 @@ fun HealthDataScreen(
         }
         FloatingActionButton(
             onClick = {
-
+                showPopUp = true
             },
             modifier = Modifier
-                .padding(start = 325.dp, bottom = 10.dp, top = 650.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
+                .padding(start = 325.dp, top = 570.dp),
+
         ) {
 
             LottieAnimation(
@@ -89,6 +88,16 @@ fun HealthDataScreen(
                 modifier = Modifier.size(40.dp)
             )
 
+        }
+        if (showPopUp) {
+            HealthCheckPopUp(onDismiss = {
+                showPopUp = false
+                requestHealthCheck = false },
+                onButtonClick = {
+                    requestHealthCheck = true
+                },
+                requestHealthCheck = requestHealthCheck
+            )
         }
     }
     else{
@@ -109,3 +118,68 @@ fun HealthDataScreen(
     }
 
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HealthCheckPopUp(
+    onDismiss: () -> Unit,
+    onButtonClick: () -> Unit,
+    requestHealthCheck: Boolean,
+) {
+    val sheetState = rememberModalBottomSheetState()
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.heartbeat)
+    )
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true,
+        speed = 1f,
+        restartOnPlay = false
+    )
+    ModalBottomSheet(
+        sheetState = sheetState,
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredHeightIn(min = 0.5f * 600.dp, max = 0.5f * 600.dp,),
+    ) {
+        if (!requestHealthCheck) {
+            // Show this when the button to take health check is not pressed
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "Health Check",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onButtonClick, // This will update the requestHealthCheck state
+                ) {
+                    Text(text = "Take Health Check")
+                }
+            }
+        } else {
+            // Show this when requestHealthCheck is true (after button click)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                LottieAnimation(
+                    composition,
+                    progress,
+                    modifier = Modifier.size(200.dp),
+                )
+            }
+        }
+    }
+}
+
+
