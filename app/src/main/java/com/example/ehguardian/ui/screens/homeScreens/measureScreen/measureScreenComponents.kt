@@ -121,9 +121,11 @@ fun ManuallyAddDetails(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            UploadButton(
-                onUpload = onUpload,
-            )
+            if (systolic.isNotEmpty() && diastolic.isNotEmpty() && heartRate.isNotEmpty()) {
+                UploadButton(
+                    onUpload = onUpload,
+                )
+            }
         }
     }
 }
