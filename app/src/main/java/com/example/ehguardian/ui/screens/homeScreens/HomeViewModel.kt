@@ -23,6 +23,9 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val _userMeasurements = MutableStateFlow<List<MeasurementData>>(emptyList())
     val userMeasurements: StateFlow<List<MeasurementData>> = _userMeasurements
 
+    private val _latestMeasurement = MutableStateFlow<MeasurementData?>(null)
+    val latestMeasurement: StateFlow<MeasurementData?> = _latestMeasurement
+
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
@@ -87,6 +90,19 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                 _errorMessage.value = e.message
                 Log.e("HomeViewModel", "Error uploading measurement: ${e.message}")
                 Toast.makeText(context, "Failed to upload measurement", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun getUserLatestMeasurement(){
+        viewModelScope.launch {
+            try {
+                userRepository.getUserLatestMeasurement().collect { latestMeasurement ->
+                    _latestMeasurement.value = latestMeasurement
+                }
+
+                } catch (e: Exception) {
+                _errorMessage.value = e.message
             }
         }
     }
