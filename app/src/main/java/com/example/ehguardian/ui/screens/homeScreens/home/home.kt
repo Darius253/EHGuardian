@@ -39,159 +39,211 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
 ) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     val userDetails by homeViewModel.userDetails.collectAsState()
-    Box {
 
-        LazyColumn(
-            modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-                .fillMaxSize()
-        ) {
-            item{
+    val latestMeasurement by homeViewModel.userMeasurements.collectAsState()
+
+
+    Box {
+        if (latestMeasurement.isNotEmpty()) {
+            LazyColumn(
+                modifier = modifier
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .fillMaxSize()
+            ) {
+                item {
+                    Header(
+                        firstName = userDetails?.firstname ?: "",
+                        lastName = userDetails?.lastname ?: "",
+                        onClickSettings = { settingsPopupVisible = true }
+                    )
+
+                }
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item { SectionTitle("Here is your last Measurement") }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                item {
+                    HealthCard(
+                        title = "Blood Pressure",
+                        imageRes = R.drawable.arm,
+                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        textColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextData(
+                                text = "Systolic",
+                                value = latestMeasurement.first().systolic,
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            TextData(
+                              text=  "Diastolic",
+                                value= latestMeasurement.first().diastolic,
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            TextData("Pulse", "80", MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                item {
+                    HealthCard(
+                        title = "Heart Rate",
+                        imageRes = R.drawable.blood_pressure,
+                        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                        textColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ) {
+                        TextData(
+                            text = "bpm",
+                            value = latestMeasurement.first().pulse,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(start = 60.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                item {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        item {
+                            HealthCard(
+                                title = "Body Mass Index",
+                                imageRes = R.drawable.heart_rate_monitor,
+                                backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                textColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            ) {
+                                TextData(
+                                    text = "kg/m²",
+                                    value = (
+                                            if (userDetails != null) {
+                                                val weight = userDetails!!.userWeight.toDouble()
+                                                val height = userDetails!!.userHeight.toDouble()
+
+                                                if (weight > 0 && height > 0) {
+                                                    // Perform the BMI calculation with floating-point division
+                                                    val bmi = weight / (height * height)
+
+                                                    // Format the result to a string with two decimal places
+                                                    String.format("%.2f", bmi)
+                                                } else {
+                                                    "N/A" // Handle invalid weight or height (e.g. 0 or negative values)
+                                                }
+                                            } else {
+                                                "N/A"
+                                            }
+                                            ).toString(),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(start = 60.dp)
+                                )
+
+                            }
+                        }
+                        item {
+                            HealthCard(
+                                title = "Cholesterol",
+                                imageRes = R.drawable.cholesterol,
+                                backgroundColor = Color(0xFFDDC842),
+                                textColor = Color.White
+                            ) {
+                                TextData(
+                                    text = "mg/dL",
+                                    value = (
+                                            if (userDetails != null) {
+                                                userDetails!!.cholesterolLevel.ifEmpty {
+                                                    "N/A"
+                                                }
+
+                                            } else {
+                                                "N/A"
+                                            }
+                                            ),
+                                    color = Color.White,
+                                    modifier = Modifier.padding(start = 60.dp)
+                                )
+                            }
+                        }
+                        item {
+                            HealthCard(
+                                title = "Blood Sugar",
+                                imageRes = R.drawable.sugar_blood_level,
+                                backgroundColor = Color(0xFF5CC87C),
+                                textColor = Color.White
+                            ) {
+                                TextData(
+                                    text = "mg/dL",
+                                    value = if (userDetails != null) {
+                                        userDetails!!.bloodSugarLevel.ifEmpty {
+                                            "N/A"
+                                        }
+
+                                    } else {
+                                        "N/A"
+                                    },
+                                    color = Color.White,
+                                    modifier = Modifier.padding(start = 60.dp)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                item { LatestHealthTrends() }
+            }
+            if (settingsPopupVisible) {
+                SettingsPopUp(
+
+                    onDismiss = { settingsPopupVisible = false },
+                    onSignOutSuccess = onSignOut
+
+                )
+            }
+
+        }
+        else {
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .fillMaxSize()
+            ) {
                 Header(
                     firstName = userDetails?.firstname ?: "",
                     lastName = userDetails?.lastname ?: "",
                     onClickSettings = { settingsPopupVisible = true }
                 )
+                Column (
+                        modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                        ){
 
-            }
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-            item { SectionTitle("Here is your last Measurement") }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            item {
-                HealthCard(
-                    title = "Blood Pressure",
-                    imageRes = R.drawable.arm,
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextData("Systolic", "120", MaterialTheme.colorScheme.onPrimaryContainer)
-                        TextData("Diastolic", "80", MaterialTheme.colorScheme.onPrimaryContainer)
-                        TextData("Pulse", "80", MaterialTheme.colorScheme.onPrimaryContainer)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                HealthCard(
-                    title = "Heart Rate",
-                    imageRes = R.drawable.blood_pressure,
-                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ) {
-                    TextData(
-                        text = "bpm",
-                        value = "82",
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(start = 60.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.clipboard),
+                        contentDescription = "No data Image"
+                    )
+                    Text(
+                        text = "No data available",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                if (settingsPopupVisible) {
+                    SettingsPopUp(
 
-            item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    item {
-                        HealthCard(
-                            title = "Body Mass Index",
-                            imageRes = R.drawable.heart_rate_monitor,
-                            backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            textColor = MaterialTheme.colorScheme.onTertiaryContainer
-                        ) {
-                            TextData(
-                                text = "kg/m²",
-                                value = (
-                                        if (userDetails != null) {
-                                            val weight = userDetails!!.userWeight.toDouble()
-                                            val height = userDetails!!.userHeight.toDouble()
-
-                                            if (weight > 0 && height > 0) {
-                                                // Perform the BMI calculation with floating-point division
-                                                val bmi = weight / (height * height)
-
-                                                // Format the result to a string with two decimal places
-                                                String.format("%.2f", bmi)
-                                            } else {
-                                                "N/A" // Handle invalid weight or height (e.g. 0 or negative values)
-                                            }
-                                        } else {
-                                            "N/A"
-                                        }
-                                        ).toString(),
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier.padding(start = 60.dp)
-                            )
-
-                        }
-                    }
-                    item {
-                        HealthCard(
-                            title = "Cholesterol",
-                            imageRes = R.drawable.cholesterol,
-                            backgroundColor = Color(0xFFDDC842),
-                            textColor = Color.White
-                        ) {
-                            TextData(
-                                text = "mg/dL",
-                                value = (
-                                        if(userDetails!=null){
-                                            userDetails!!.cholesterolLevel.ifEmpty {
-                                                "N/A"
-                                            }
-
-                                        }else{
-                                            "N/A"
-                                        }
-                                        ),
-                                color = Color.White,
-                                modifier = Modifier.padding(start = 60.dp)
-                            )
-                        }
-                    }
-                    item {
-                        HealthCard(
-                            title = "Blood Sugar",
-                            imageRes = R.drawable.sugar_blood_level,
-                            backgroundColor = Color(0xFF5CC87C),
-                            textColor = Color.White
-                        ) {
-                            TextData(
-                                text = "mg/dL",
-                                value = if(userDetails!=null){
-                                    userDetails!!.bloodSugarLevel.ifEmpty {
-                                        "N/A"
-                                    }
-
-                                }else{
-                                    "N/A"
-                                },
-                                color = Color.White,
-                                modifier = Modifier.padding(start = 60.dp)
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item { LatestHealthTrends() }
-        }
-        if (settingsPopupVisible) {
-            SettingsPopUp(
-
-                onDismiss = { settingsPopupVisible = false } ,
+                        onDismiss = { settingsPopupVisible = false },
                         onSignOutSuccess = onSignOut
 
-            )
+                    )
+                }
+            }
         }
-
     }
+
 }
 
 @Composable
