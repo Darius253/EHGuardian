@@ -6,6 +6,7 @@ import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -17,7 +18,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         onComplete: (Boolean, String?) -> Unit,
 
 
-    ) {
+        ) {
         auth.createUserWithEmailAndPassword(userModel.email, userModel.password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -51,7 +52,6 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-
     suspend fun getUser(): UserModel? {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -71,7 +71,8 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                         userWeight = data?.get("userWeight") as? String ?: "",
                         userHeight = data?.get("userHeight") as? String ?: "",
                         dateOfBirth = data?.get("dateOfBirth") as? String ?: "",
-                        bloodSugarLevel = data?.get("bloodSugarLevel") as? String ?: "",  // Fixed here
+                        bloodSugarLevel = data?.get("bloodSugarLevel") as? String
+                            ?: "",  // Fixed here
                         cholesterolLevel = data?.get("cholesterolLevel") as? String ?: "",
                         id = data?.get("id") as? String ?: ""
                     )
@@ -114,7 +115,6 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-
     suspend fun uploadUserMeasurement(measurementData: MeasurementData): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
         return if (user != null) {
@@ -153,11 +153,9 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                         document.toObject(MeasurementData::class.java)
                     }
 
-                    Log.d("UserService", "Fetched measurements: $measurements")
                     emit(measurements)
 
                 } catch (e: Exception) {
-                    Log.e("UserService", "Error fetching measurements: ${e.message}", e)
                     emit(emptyList())
 
 
@@ -167,6 +165,42 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
             }
         }
     }
+
+     suspend fun getUserLatestMeasurement(): Flow<MeasurementData?> {
+        return flow {
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                try {
+                    // Access the user's document in Firestore
+                    val userDocRef = firestore.collection("users").document(user.uid)
+
+                    // Query to get the latest measurement ordered by timestamp
+                    val measurementsQuery = userDocRef.collection("measurements")
+                        .orderBy("timestamp", Query.Direction.ASCENDING) // Ensure the latest comes first
+                        .limit(1)
+
+                    // Await the result of the query
+                    val querySnapshot = measurementsQuery.get().await()
+
+                    // Check if any document exists
+                    if (querySnapshot.documents.isNotEmpty()) {
+                        // Convert the document to MeasurementData
+                        val latestMeasurement = querySnapshot.documents[0].toObject(MeasurementData::class.java)
+                        emit(latestMeasurement)
+                    } else {
+                        emit(null) // No measurement found
+                    }
+                } catch (e: Exception) {
+                    Log.e("FirestoreError", "Error fetching latest measurement: ${e.message}")
+                    emit(null) // Emit null in case of an error
+                }
+            } else {
+                Log.e("AuthError", "User is not authenticated")
+                emit(null) // Emit null if the user is not authenticated
+            }
+        }
+    }
+
 }
 
 
