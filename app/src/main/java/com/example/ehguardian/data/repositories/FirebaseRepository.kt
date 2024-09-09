@@ -118,8 +118,18 @@ class FirebaseUserRepository(
     }
 
 
-    override suspend fun getUserLatestMeasurementByUserId(userId: Int): Flow<List<MeasurementData>> {
-        TODO("Not yet implemented")
-
-    }
-}
+    override suspend fun getUserLatestMeasurement(): Flow<MeasurementData?> {
+        return flow {
+            try {
+                userService.getUserLatestMeasurement().collect { measurement ->
+                    if (measurement != null) {
+                        emit(measurement) // Emit if not null
+                    } else {
+                        Log.w("MeasurementFlow", "Received null measurement")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MeasurementFlow", "Failed to fetch user measurements: ${e.message}", e)
+            }
+        }
+    }}
