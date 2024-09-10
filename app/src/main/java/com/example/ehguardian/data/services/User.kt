@@ -2,14 +2,18 @@ package com.example.ehguardian.data.services
 
 
 import android.util.Log
+import com.example.ehguardian.data.models.HealthNewsModel
 import com.example.ehguardian.data.models.MeasurementData
+import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
+import com.example.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import retrofit2.Call
 
 class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
 
@@ -146,6 +150,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                 try {
                     val userDocRef = firestore.collection("users").document(user.uid)
                     val measurementsQuery = userDocRef.collection("measurements")
+                        .orderBy("timestamp", Query.Direction.DESCENDING)
                         .get()
                         .await() // Make sure you use the 'await' function if you're using Kotlin Coroutines
 
@@ -166,38 +171,25 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         }
     }
 
-     suspend fun getUserLatestMeasurement(): Flow<MeasurementData?> {
-        return flow {
-            val user = FirebaseAuth.getInstance().currentUser
-            if (user != null) {
-                try {
-                    // Access the user's document in Firestore
-                    val userDocRef = firestore.collection("users").document(user.uid)
 
-                    // Query to get the latest measurement ordered by timestamp
-                    val measurementsQuery = userDocRef.collection("measurements")
-                        .orderBy("timestamp", Query.Direction.ASCENDING) // Ensure the latest comes first
-                        .limit(1)
 
-                    // Await the result of the query
-                    val querySnapshot = measurementsQuery.get().await()
+    suspend fun fetchHealthNews(): List<NewsItem> {
+        val requestBody = """
+        {
+            "category": "HEALTH",
+            "location": "",
+            "language": "en",
+            "page": 1
+        }
+    """.trimIndent()
 
-                    // Check if any document exists
-                    if (querySnapshot.documents.isNotEmpty()) {
-                        // Convert the document to MeasurementData
-                        val latestMeasurement = querySnapshot.documents[0].toObject(MeasurementData::class.java)
-                        emit(latestMeasurement)
-                    } else {
-                        emit(null) // No measurement found
-                    }
-                } catch (e: Exception) {
-                    Log.e("FirestoreError", "Error fetching latest measurement: ${e.message}")
-                    emit(null) // Emit null in case of an error
-                }
-            } else {
-                Log.e("AuthError", "User is not authenticated")
-                emit(null) // Emit null if the user is not authenticated
-            }
+        return try {
+            // Use the Retrofit service to fetch data
+            val healthNews = NewsApi.retrofitService.getNews(requestBody)
+            healthNews.news as List<NewsItem>? ?: emptyList() // Return the list of news items, or an empty list if null
+        } catch (e: Exception) {
+            Log.e("NewsFlow", "Failed to fetch health news: ${e.message}", e)
+            emptyList() // Return an empty list in case of an error
         }
     }
 
