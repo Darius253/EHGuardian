@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -64,13 +65,19 @@ fun SettingsPopUp(
 
 
 
+
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(
+            topStart = 12.dp,
+            topEnd = 12.dp
+        ),
         sheetState = sheetState,
         dragHandle = {
-            SettingsHeader(onDismiss = onDismiss)
+            ModalBottomHeader(
+                headerText = "Settings",
+                onDismiss = onDismiss)
         }
     ) {
         LazyColumn(
@@ -181,7 +188,11 @@ fun SettingsPopUp(
 
             item {
                 if (showPopUp) {
-                    LogOutPopUp(onDismiss = {
+                    AlertPopUp(
+                        title = "Sign Out",
+                        message = "Are you sure you want to sign out?",
+                        confirmText = "Yes",
+                        onDismiss = {
                         showPopUp = false
                     },
                         onSignOutSuccess = {
@@ -198,7 +209,9 @@ fun SettingsPopUp(
 }
 
 @Composable
-fun SettingsHeader(onDismiss: () -> Unit) {
+fun ModalBottomHeader(
+    headerText: String="",
+    onDismiss: () -> Unit) {
     Column {
         Row(
             modifier = Modifier
@@ -218,7 +231,7 @@ fun SettingsHeader(onDismiss: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "SETTINGS",
+                    text = headerText,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
@@ -274,16 +287,20 @@ fun SettingsDivider() {
 
 
 @Composable
-fun LogOutPopUp(onDismiss: () -> Unit,
+fun AlertPopUp(
+    title: String,
+    message: String,
+    confirmText: String,
+    onDismiss: () -> Unit,
                 onSignOutSuccess: () -> Unit = {}) {
 
     AlertDialog(
-        title = { Text(text = "Log Out",
+        title = { Text(text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.error) },
-        text = { Text(text = "Are you sure you want to log out?") },
+        text = { Text(text = message) },
         onDismissRequest =  onDismiss , confirmButton = {
-            Text(text = "Log Out",
+            Text(text = confirmText,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.clickable {
@@ -295,10 +312,13 @@ fun LogOutPopUp(onDismiss: () -> Unit,
             Text(text = "Cancel",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onDismiss() })
+                modifier = Modifier.clickable { onDismiss() }
+                    .padding(end = 20.dp)
+            )
         },
 
 
         )
 
 }
+
