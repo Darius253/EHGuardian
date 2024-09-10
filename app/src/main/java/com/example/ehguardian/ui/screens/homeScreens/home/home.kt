@@ -14,8 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +43,8 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
     val userDetails by homeViewModel.userDetails.collectAsState()
 
     val latestMeasurement by homeViewModel.userMeasurements.collectAsState()
+   val newsList by homeViewModel.newsLiveData.observeAsState(emptyList())
+    var showHealthTrends by rememberSaveable { mutableStateOf(false) }
 
 
     Box {
@@ -192,7 +196,18 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                item { LatestHealthTrends() }
+                item { LatestHealthTrends(
+                    onReadMoreClick = {
+                            showHealthTrends = true
+
+                    }
+                ) }
+            }
+            if (showHealthTrends) {
+                HealthTrends(
+                    onDismiss = { showHealthTrends = false },
+                            newsList
+                )
             }
             if (settingsPopupVisible) {
                 SettingsPopUp(
@@ -216,7 +231,7 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
                     onClickSettings = { settingsPopupVisible = true }
                 )
                 Column (
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                         ){
@@ -230,6 +245,19 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+              LatestHealthTrends(
+                  onReadMoreClick = {
+                      showHealthTrends = true
+                  }
+
+              )
+                if (showHealthTrends) {
+                    HealthTrends(
+                        onDismiss = { showHealthTrends = false },
+                                newsList
                     )
                 }
                 if (settingsPopupVisible) {
@@ -366,7 +394,10 @@ fun TextData(
 }
 
 @Composable
-fun LatestHealthTrends(modifier: Modifier = Modifier) {
+fun LatestHealthTrends(
+    modifier: Modifier = Modifier,
+    onReadMoreClick: () -> Unit,
+    ) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -377,7 +408,7 @@ fun LatestHealthTrends(modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f)
         )
 
-        IconButton(onClick = { /* Handle settings icon click */ }) {
+        IconButton(onClick = onReadMoreClick) {
             Icon(
                 imageVector = Icons.Outlined.Newspaper,
                 contentDescription = "Read More",
