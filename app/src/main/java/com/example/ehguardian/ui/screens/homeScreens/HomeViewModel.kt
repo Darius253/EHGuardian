@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ehguardian.data.models.MeasurementData
+import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,9 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
+
+    private val _newsLiveData = MutableLiveData<List<NewsItem>>()
+    val newsLiveData: LiveData<List<NewsItem>> = _newsLiveData
 
     init {
         fetchUserDetails()
@@ -94,18 +98,26 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
         }
     }
 
-    fun getUserLatestMeasurement(){
+
+
+    fun fetchHealthNews(context: Context) {
         viewModelScope.launch {
             try {
-                userRepository.getUserLatestMeasurement().collect { latestMeasurement ->
-                    _latestMeasurement.value = latestMeasurement
-                }
+                // Fetch the news from the repository
+                val newsList = userRepository.fetchHealthNews()
 
-                } catch (e: Exception) {
+                // Update UI or LiveData with the fetched news
+                _newsLiveData.value = newsList // Assuming _newsLiveData is a MutableLiveData<List<NewsItem>>
+
+            } catch (e: Exception) {
+                // Log and show error message
+                Log.e("NewsViewModel", "Failed to fetch health news: ${e.message}", e)
                 _errorMessage.value = e.message
+                Toast.makeText(context, "Failed to fetch health news", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 }
 
 
