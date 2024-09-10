@@ -3,7 +3,9 @@ package com.example.ehguardian.data.repositories
 
 
 import android.util.Log
+import com.example.ehguardian.data.models.HealthNewsModel
 import com.example.ehguardian.data.models.MeasurementData
+import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.services.User
 import kotlinx.coroutines.flow.Flow
@@ -118,18 +120,17 @@ class FirebaseUserRepository(
     }
 
 
-    override suspend fun getUserLatestMeasurement(): Flow<MeasurementData?> {
-        return flow {
-            try {
-                userService.getUserLatestMeasurement().collect { measurement ->
-                    if (measurement != null) {
-                        emit(measurement) // Emit if not null
-                    } else {
-                        Log.w("MeasurementFlow", "Received null measurement")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("MeasurementFlow", "Failed to fetch user measurements: ${e.message}", e)
-            }
+
+    override suspend fun fetchHealthNews(): List<NewsItem> {
+        return try {
+            val news = userService.fetchHealthNews()
+            news
+        } catch (e: Exception) {
+            Log.e("NewsFlow", "Failed to fetch health news: ${e.message}", e)
+            emptyList()
         }
-    }}
+    }
+
+
+
+}
