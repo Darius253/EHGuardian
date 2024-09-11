@@ -4,31 +4,31 @@ import com.google.gson.annotations.SerializedName
 
 
 
-data class HealthNewsModel(
-
-	@field:SerializedName("news")
-	val news: List<NewsItem?>? = null,
-
+data class NewsRequest(
+	val category: String,
+	val location: String,
+	val language: String,
+	val page: Int
 )
 
-
+data class HealthNewsModel(
+	@SerializedName("news")
+	val news: List<NewsItem>? = null
+)
 
 data class NewsItem(
+	@SerializedName("date")
+	val date: String? = null,
 
-	@field:SerializedName("date")
-	val date: String,
+	@SerializedName("short_description")
+	val shortDescription: String? = null,
 
-	@field:SerializedName("short_description")
-	val shortDescription: String,
+	@SerializedName("top_image")
+	val topImage: String? = null,
 
+	@SerializedName("title")
+	val title: String? = null,
 
-	@field:SerializedName("top_image")
-	val topImage: String,
-
-
-	@field:SerializedName("title")
-	val title: String,
-
-	@field:SerializedName("url")
-	val url: String
+	@SerializedName("url")
+	val url: String? = null
 )
