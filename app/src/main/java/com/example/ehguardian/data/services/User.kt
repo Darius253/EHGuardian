@@ -2,9 +2,9 @@ package com.example.ehguardian.data.services
 
 
 import android.util.Log
-import com.example.ehguardian.data.models.HealthNewsModel
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
+import com.example.ehguardian.data.models.NewsRequest
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
@@ -13,7 +13,6 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import retrofit2.Call
 
 class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
 
@@ -174,24 +173,30 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
 
     suspend fun fetchHealthNews(): List<NewsItem> {
-        val requestBody = """
-        {
-            "category": "HEALTH",
-            "location": "",
-            "language": "en",
-            "page": 1
-        }
-    """.trimIndent()
+        val requestBody = NewsRequest(
+            category = "HEALTH",
+            location = "",
+            language = "en",
+            page = 1
+        )
 
         return try {
-            // Use the Retrofit service to fetch data
-            val healthNews = NewsApi.retrofitService.getNews(requestBody)
-            healthNews.news as List<NewsItem>? ?: emptyList() // Return the list of news items, or an empty list if null
+            val response = NewsApi.retrofitService.getNews(requestBody)
+            if (response.isSuccessful) {
+                Log.d("NewsFlow", "Response: ${response.body()}")
+                val body = response.body()
+                body?.news ?: emptyList()
+            } else {
+                Log.e("NewsFlow", "Response Error: ${response.errorBody()?.string()}")
+                emptyList()
+            }
         } catch (e: Exception) {
             Log.e("NewsFlow", "Failed to fetch health news: ${e.message}", e)
-            emptyList() // Return an empty list in case of an error
+            emptyList()
         }
     }
+
+
 
 }
 
