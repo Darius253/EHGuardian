@@ -3,7 +3,6 @@ package com.example.ehguardian.data.repositories
 
 
 import android.util.Log
-import com.example.ehguardian.data.models.HealthNewsModel
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
