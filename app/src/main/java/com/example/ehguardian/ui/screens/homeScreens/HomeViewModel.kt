@@ -24,8 +24,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val _userMeasurements = MutableStateFlow<List<MeasurementData>>(emptyList())
     val userMeasurements: StateFlow<List<MeasurementData>> = _userMeasurements
 
-    private val _latestMeasurement = MutableStateFlow<MeasurementData?>(null)
-    val latestMeasurement: StateFlow<MeasurementData?> = _latestMeasurement
+
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
