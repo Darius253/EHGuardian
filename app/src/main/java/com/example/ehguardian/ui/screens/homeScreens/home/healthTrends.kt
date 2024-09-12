@@ -25,6 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
@@ -33,18 +36,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.ehguardian.R
-import com.example.ehguardian.data.models.NewsItem
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.example.ehguardian.ui.screens.homeScreens.ModalBottomHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthTrends(
     onDismiss: () -> Unit,
-    newsList: List<NewsItem> // Changed from NewsItem to List<NewsItem>
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val context = LocalContext.current
+        val context = LocalContext.current
+    val newsList by homeViewModel.newsLiveData.observeAsState(emptyList())
+    LaunchedEffect(Unit) {
+        homeViewModel.fetchHealthNews(context = context)
+    }
+
         ModalBottomSheet(
             modifier = Modifier.heightIn(max = 700.dp, min = 700.dp),
             containerColor = MaterialTheme.colorScheme.background,
@@ -165,7 +175,7 @@ fun NewsCard(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
-            // Load image using Coil or other image loading library
+
             image?.let {
                 AsyncImage(
                     contentScale = ContentScale.FillBounds,
