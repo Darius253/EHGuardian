@@ -71,7 +71,7 @@ fun WebViewPage() {
 
     // WebView Composable
     if(!isOffline || !loading)
-    AndroidView(
+        AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
             WebView(ctx).apply {
