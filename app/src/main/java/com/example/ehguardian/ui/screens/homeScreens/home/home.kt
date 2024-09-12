@@ -12,10 +12,8 @@ import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,17 +40,15 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
 ) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     val userDetails by homeViewModel.userDetails.collectAsState()
-    val context = LocalContext.current
+
 
     val latestMeasurement by homeViewModel.userMeasurements.collectAsState()
-   val newsList by homeViewModel.newsLiveData.observeAsState(emptyList())
+
     var showHealthTrends by rememberSaveable { mutableStateOf(false) }
 
 
 
-    LaunchedEffect(Unit) {
-        homeViewModel.fetchHealthNews(context = context)
-    }
+
 
 
     Box {
@@ -216,7 +211,7 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
             if (showHealthTrends) {
                 HealthTrends(
                     onDismiss = { showHealthTrends = false },
-                            newsList
+
                 )
             }
             if (settingsPopupVisible) {
@@ -267,7 +262,7 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
                 if (showHealthTrends) {
                     HealthTrends(
                         onDismiss = { showHealthTrends = false },
-                                newsList
+
                     )
                 }
                 if (settingsPopupVisible) {
