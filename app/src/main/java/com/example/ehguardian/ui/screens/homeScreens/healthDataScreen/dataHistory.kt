@@ -4,13 +4,14 @@ package com.example.ehguardian.ui.screens.homeScreens.healthDataScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -21,6 +22,7 @@ import com.example.ehguardian.R
 import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.example.ehguardian.ui.screens.homeScreens.ModalBottomHeader
 
 
 @Composable
@@ -127,22 +129,22 @@ fun HealthCheckPopUp(
     requestHealthCheck: Boolean,
 ) {
     val sheetState = rememberModalBottomSheetState()
-    val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.heartbeat)
-    )
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true,
-        speed = 1f,
-        restartOnPlay = false
-    )
+
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(12.dp),
+        dragHandle = {
+            ModalBottomHeader(
+                headerText = "Health Check",
+                onDismiss = onDismiss
+            )
+        },
         modifier = Modifier
             .fillMaxWidth()
-            .requiredHeightIn(min = 0.5f * 600.dp, max = 0.5f * 600.dp,),
+            .fillMaxHeight(
+                0.95f
+            ),
     ) {
         if (!requestHealthCheck) {
             // Show this when the button to take health check is not pressed
@@ -167,17 +169,12 @@ fun HealthCheckPopUp(
             }
         } else {
             // Show this when requestHealthCheck is true (after button click)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                LottieAnimation(
-                    composition,
-                    progress,
-                    modifier = Modifier.size(200.dp),
-                )
-            }
+           LazyColumn {
+               item {
+                   WebViewPage()
+               }
+
+           }
         }
     }
 }
