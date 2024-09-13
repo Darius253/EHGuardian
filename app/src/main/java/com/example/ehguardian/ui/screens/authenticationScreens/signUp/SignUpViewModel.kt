@@ -137,12 +137,26 @@ class SignUpViewModel(
     }
 
     fun signOut(
-        onSignOutSuccess: () -> Unit
+        onSignOutSuccess: () -> Unit,
+        context: Context
+
     ){
         viewModelScope.launch {
-            userRepository.signOut()
+            userRepository.signOut(
+                onSignOutSuccess = { success ->
+                    if (success) {
+                        onSignOutSuccess()
+                        Toast.makeText(context, "Sign out successful", Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        Toast.makeText(context, "Sign out failed", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+
+            )
         }
-        onSignOutSuccess()
+
 
     }
 }
