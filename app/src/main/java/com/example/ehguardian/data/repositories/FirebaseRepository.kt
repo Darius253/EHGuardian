@@ -7,6 +7,8 @@ import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.services.User
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -44,8 +46,19 @@ class FirebaseUserRepository(
         }
     }
 
-    override suspend fun signOut() {
-        userService.signOut()
+    override suspend fun signOut(
+       onSignOutSuccess: (Boolean) -> Unit
+    ) {
+        try {
+
+            userService.signOut()
+            onSignOutSuccess(true)
+
+        }
+        catch (e: Exception) {
+
+            onSignOutSuccess(false)
+        }
 
     }
 
