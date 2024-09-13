@@ -1,7 +1,6 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.login
 
-import android.util.Log
-import android.widget.Toast
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
