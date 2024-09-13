@@ -1,6 +1,8 @@
 package com.example.ehguardian.ui
 
 
+
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -13,7 +15,7 @@ import com.example.ehguardian.ui.screens.homeScreens.HomeScreen
 enum class NavigationClass(val route: String) {
     AuthenticationDestination(route = "authentication"),
     HomeDestination(route = "home"),
-    ProfileDestination(route = "profile"),
+    SettingsDestination(route = "settings")
 }
 
 
@@ -42,10 +44,15 @@ fun AppNavigation(
         }
         composable(route = NavigationClass.HomeDestination.route) {
             // Home Screen
-            HomeScreen()
+            HomeScreen(
+                onSignOutSuccess = {
+
+                    navController.navigate(NavigationClass.AuthenticationDestination.route)
+                }
+            )
         }
-        composable(route = NavigationClass.ProfileDestination.route) {
-            // Profile Screen
+
         }
+
     }
-}
+
