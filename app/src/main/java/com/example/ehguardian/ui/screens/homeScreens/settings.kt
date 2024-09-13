@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.ui.AppViewModelProvider
@@ -61,7 +62,7 @@ fun SettingsPopUp(
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showPopUp by rememberSaveable { mutableStateOf(false) }
-
+    val context = LocalContext.current
 
 
 
@@ -166,9 +167,7 @@ fun SettingsPopUp(
                     title = "Logout",
                     onClick = {
 
-
                         showPopUp = true
-
 
                     },
                     color = Color.Red
@@ -196,10 +195,13 @@ fun SettingsPopUp(
                         showPopUp = false
                     },
                         onSignOutSuccess = {
-                            signUpViewModel.signOut(
-                                onSignOutSuccess = onSignOutSuccess
-                            )
+                         signUpViewModel.signOut(
+                             onSignOutSuccess = onSignOutSuccess,
+                             context = context
+                         )
+
                             onDismiss()
+
 
                         })
                 }
@@ -292,7 +294,7 @@ fun AlertPopUp(
     message: String,
     confirmText: String,
     onDismiss: () -> Unit,
-                onSignOutSuccess: () -> Unit = {}) {
+    onSignOutSuccess: () -> Unit,) {
 
     AlertDialog(
         title = { Text(text = title,
