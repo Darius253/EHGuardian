@@ -22,21 +22,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.ehguardian.R
 import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.NavigationClass
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.example.ehguardian.ui.screens.homeScreens.SettingsPopUp
 import java.time.LocalTime
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
-         homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+fun Home(modifier: Modifier = Modifier,
+         homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+         onSignOutSuccess: () -> Unit = {},
 ) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     val userDetails by homeViewModel.userDetails.collectAsState()
@@ -217,8 +221,14 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
             if (settingsPopupVisible) {
                 SettingsPopUp(
 
-                    onDismiss = { settingsPopupVisible = false },
-                    onSignOutSuccess = onSignOut
+                    onDismiss = {
+                        settingsPopupVisible = false
+                                },
+
+                    onSignOutSuccess = onSignOutSuccess
+
+
+
 
                 )
             }
@@ -269,7 +279,8 @@ fun Home(modifier: Modifier = Modifier, onSignOut: () -> Unit,
                     SettingsPopUp(
 
                         onDismiss = { settingsPopupVisible = false },
-                        onSignOutSuccess = onSignOut
+
+                       onSignOutSuccess = onSignOutSuccess
 
                     )
                 }
