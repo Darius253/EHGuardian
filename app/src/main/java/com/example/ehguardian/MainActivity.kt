@@ -29,27 +29,22 @@ class MainActivity : ComponentActivity() {
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var auth: FirebaseAuth
 
-  private   val requestCode = 1
-   private val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+    private val requestCode = 1
+    private val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
         putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
     }
-    @RequiresApi(Build.VERSION_CODES.S)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         auth = FirebaseAuth.getInstance()
 
         super.onCreate(savedInstanceState)
 
-
         setContent {
             EHGuardianTheme {
-                MyApp(
-
-                )
+                MyApp()
             }
         }
-
-
 
         // Initialize the Activity Result Launchers
         enableBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -75,38 +70,42 @@ class MainActivity : ComponentActivity() {
 
     public override fun onStart() {
         super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         if (currentUser != null) {
-           setContent {
-               EHGuardianTheme {
-                   HomeScreen()
-               }
-           }
-
-        }
-        else{
             setContent {
                 EHGuardianTheme {
-                    MyApp(
-
-                    )
+                    HomeScreen()
+                }
+            }
+        } else {
+            setContent {
+                EHGuardianTheme {
+                    MyApp()
                 }
             }
         }
     }
-    @RequiresApi(Build.VERSION_CODES.S)
+
     private fun checkPermissionsAndBluetooth() {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.INTERNET,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH,
-        )
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.INTERNET
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.INTERNET,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.BLUETOOTH
+            )
+        }
+
         val permissionsNeeded = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
@@ -118,7 +117,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun checkBluetooth() {
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -140,7 +138,6 @@ class MainActivity : ComponentActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_BT_CONNECT) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                 checkBluetooth()
             } else {
                 showToast("Bluetooth permission is required to enable Bluetooth")
