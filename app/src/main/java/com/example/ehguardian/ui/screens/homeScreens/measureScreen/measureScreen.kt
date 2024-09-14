@@ -2,14 +2,13 @@
 
 package com.example.ehguardian.ui.screens.homeScreens.measureScreen
 
-
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
+import android.app.Activity
+import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -43,13 +43,12 @@ import java.time.format.DateTimeFormatter
 fun MeasureScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    ) {
+) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
     val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
     val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
     val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("") }
     val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }
-
 
     val focusManager: FocusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -65,21 +64,13 @@ fun MeasureScreen(
     val bmi = if (height > 0) weight / (height * height) else 0.0
 
     val sheetState = rememberModalBottomSheetState()
-
     val createdDate = LocalDateTime.now()
-
-// Create a formatter to extract Year, Day of Year, and Time
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-
-// Format the createdDate to the required format
     val formattedDate = createdDate.format(formatter)
-
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (!bluetoothEnabled) {
-            ViewBluetoothDevicesButton(
-                onClick = { setBluetoothEnabled(true) }
-            )
+            ViewBluetoothDevicesButton(onClick = { setBluetoothEnabled(true) })
         } else {
             BluetoothAnimation(composition = composition, progress = progress)
             ViewBluetoothDevicesSheet(onDismiss = { setBluetoothEnabled(false) }, sheetState = sheetState)
@@ -101,13 +92,13 @@ fun MeasureScreen(
                 onUpload = {
                     setShowDialog(false)
                     homeViewModel.uploadUserMeasurement(
-                        context = context, // Pass the current context
+                        context = context,
                         measurementData = MeasurementData(
                             systolic = systolic,
                             diastolic = diastolic,
                             pulse = heartRate,
                             timestamp = formattedDate,
-                            bmi =   String.format("%.2f", bmi),
+                            bmi = String.format("%.2f", bmi)
                         )
                     )
                 }
@@ -125,25 +116,31 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
     val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
     val foundDevices = remember { mutableStateListOf<BluetoothDevice>() }
 
-
+    // Check and request Bluetooth permissions
     LaunchedEffect(Unit) {
-        val hasPermissionScan = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.BLUETOOTH_SCAN
-        ) == PackageManager.PERMISSION_GRANTED
-
-        val hasPermissionBluetooth = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.BLUETOOTH
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (hasPermissionScan || hasPermissionBluetooth) {
-            bluetoothAdapter?.startDiscovery()
-            Toast.makeText(context, "Searching for devices", Toast.LENGTH_SHORT).show()
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
         } else {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
 
-            Toast.makeText(context, "Bluetooth permission not granted", Toast.LENGTH_SHORT).show()
+        // Check and request permissions
+        val hasPermissions = permissions.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+
+        if (!hasPermissions) {
+            ActivityCompat.requestPermissions(context as Activity, permissions, 1)
+        } else {
+            startBluetoothDiscovery(bluetoothAdapter, foundDevices, context)
         }
     }
 
+    // Unregister the receiver when done
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -151,22 +148,25 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
                     BluetoothDevice.ACTION_FOUND -> {
                         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         if (device != null && !foundDevices.contains(device)) {
-                            foundDevices.add(device)
+                            foundDevices.add(device) // Add discovered device to the list
                         }
                     }
                 }
             }
         }
 
+        // Register for Bluetooth device found broadcast
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
         context.registerReceiver(receiver, filter)
 
+        // Clean up when the composable is disposed
         onDispose {
             context.unregisterReceiver(receiver)
             bluetoothAdapter?.cancelDiscovery()
         }
     }
 
+    // UI for displaying found devices in a modal sheet
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
@@ -174,7 +174,7 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(10.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(0.95f)
         ) {
@@ -201,14 +201,55 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
     }
 }
 
+private fun startBluetoothDiscovery(
+    bluetoothAdapter: BluetoothAdapter?,
+    foundDevices: SnapshotStateList<BluetoothDevice>,
+    context: Context
+) {
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    ) {
+        bluetoothAdapter?.takeIf { it.isEnabled }?.let {
+            if (it.isDiscovering) {
+                it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
+            }
+            foundDevices.clear() // Clear previously found devices
+            it.startDiscovery() // Start discovery for new devices
+            Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
+        } ?: run {
+            Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+        }
+    } else {
+        Toast.makeText(context, "Bluetooth permissions are required to discover devices", Toast.LENGTH_LONG).show()
+    }
+}
+
+private fun connectToDevice(context: Context, device: BluetoothDevice) {
+    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+        device.createBond() // Trigger Bluetooth device pairing
+        Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
+
+    } else {
+        Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun  ConnectToHealthDevice(device: BluetoothDevice){
+
+
+
+}
+
+
+
 @Composable
 fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) -> Unit) {
     val context = LocalContext.current
     var deviceName by remember { mutableStateOf("Unnamed Device") }
 
     // Check if BLUETOOTH_CONNECT permission is granted
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
-        == PackageManager.PERMISSION_GRANTED ||
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED ||
         ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
     ) {
         deviceName = device.name ?: "Unnamed Device"
@@ -244,13 +285,7 @@ fun ViewBluetoothDevicesButton(onClick: () -> Unit) {
     }
 }
 
-private fun connectToDevice(context: Context, device: BluetoothDevice) {
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
-        == PackageManager.PERMISSION_GRANTED
-    ) {
-        device.createBond() // Trigger Bluetooth device pairing
-        Toast.makeText(context, "Attempting to pair with ${device.name}", Toast.LENGTH_SHORT).show()
-    } else {
-        Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
-    }
-}
+
+
+
+
