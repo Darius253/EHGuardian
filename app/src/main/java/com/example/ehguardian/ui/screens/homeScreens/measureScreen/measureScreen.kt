@@ -9,6 +9,7 @@ import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +37,7 @@ import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +51,7 @@ fun MeasureScreen(
     val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
     val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("") }
     val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }
+    val (isConnected, setIsConnected) = rememberSaveable { mutableStateOf(false) } // New state variable
 
     val focusManager: FocusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -71,9 +74,13 @@ fun MeasureScreen(
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (!bluetoothEnabled) {
             ViewBluetoothDevicesButton(onClick = { setBluetoothEnabled(true) })
-        } else {
+        }
+        else {
             BluetoothAnimation(composition = composition, progress = progress)
-            ViewBluetoothDevicesSheet(onDismiss = { setBluetoothEnabled(false) }, sheetState = sheetState)
+            ViewBluetoothDevicesSheet(
+                onDismiss = { setBluetoothEnabled(false) },
+                sheetState = sheetState,
+            )
         }
 
         AddDetailsFab { setShowDialog(true) }
@@ -104,13 +111,20 @@ fun MeasureScreen(
                 }
             )
         }
+
+        // Display connection status
+
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("InlinedApi")
 @Composable
-fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
+fun ViewBluetoothDevicesSheet(
+    onDismiss: () -> Unit,
+    sheetState: SheetState,
+
+) {
     val context = LocalContext.current
     val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
     val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
@@ -122,13 +136,21 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
             arrayOf(
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.INTERNET
             )
         } else {
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.INTERNET,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.BLUETOOTH
+            )
         }
 
-        // Check and request permissions
         val hasPermissions = permissions.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
@@ -148,18 +170,16 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
                     BluetoothDevice.ACTION_FOUND -> {
                         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         if (device != null && !foundDevices.contains(device)) {
-                            foundDevices.add(device) // Add discovered device to the list
+                            foundDevices.add(device)
                         }
                     }
                 }
             }
         }
 
-        // Register for Bluetooth device found broadcast
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
         context.registerReceiver(receiver, filter)
 
-        // Clean up when the composable is disposed
         onDispose {
             context.unregisterReceiver(receiver)
             bluetoothAdapter?.cancelDiscovery()
@@ -189,11 +209,19 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
             if (foundDevices.isNotEmpty()) {
                 LazyColumn {
                     items(foundDevices) { device ->
-                        BluetoothDeviceItem(device = device) {
-                            connectToDevice(context, device)
-                        }
+                        BluetoothDeviceItem(device = device, onConnect = {
+                            connectToDevice(
+                                context,
+                                device,
+                            )
+                        },
+                            onDismiss = { onDismiss() }
+                        )
                     }
                 }
+
+
+
             } else {
                 Text("No devices found.", style = MaterialTheme.typography.bodyLarge)
             }
@@ -201,50 +229,233 @@ fun ViewBluetoothDevicesSheet(onDismiss: () -> Unit, sheetState: SheetState) {
     }
 }
 
+
 private fun startBluetoothDiscovery(
     bluetoothAdapter: BluetoothAdapter?,
     foundDevices: SnapshotStateList<BluetoothDevice>,
     context: Context
 ) {
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
-        ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    ) {
-        bluetoothAdapter?.takeIf { it.isEnabled }?.let {
-            if (it.isDiscovering) {
-                it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            bluetoothAdapter?.takeIf { it.isEnabled }?.let {
+                if (it.isDiscovering) {
+                    it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
+                }
+                foundDevices.clear() // Clear previously found devices
+                it.startDiscovery() // Start discovery for new devices
+                Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
             }
-            foundDevices.clear() // Clear previously found devices
-            it.startDiscovery() // Start discovery for new devices
-            Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
-        } ?: run {
-            Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(
+                context,
+                "Bluetooth permissions are required to discover devices",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+    else{
+        if (
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_ADMIN
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            bluetoothAdapter?.takeIf { it.isEnabled }?.let {
+                if (it.isDiscovering) {
+                    it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
+                }
+                foundDevices.clear() // Clear previously found devices
+                it.startDiscovery() // Start discovery for new devices
+                Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Bluetooth permissions are required to discover devices",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+}
+
+private fun connectToDevice(
+    context: Context,
+    device: BluetoothDevice,
+    ) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
+
+            connectToHealthDevice(context, device)// Trigger Bluetooth device pairing
+
+
+        } else {
+            Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
+        }}
+        else{
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)== PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
+
+                connectToHealthDevice(context, device)// Trigger Bluetooth device pairing
+
+
+            } else {
+                Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
+    }
+
+
+
+
+private fun connectToHealthDevice(
+    context: Context,
+    device: BluetoothDevice,
+) {
+    // Check Bluetooth permissions based on SDK level
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
+            return
         }
     } else {
-        Toast.makeText(context, "Bluetooth permissions are required to discover devices", Toast.LENGTH_LONG).show()
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "Bluetooth permission not granted", Toast.LENGTH_SHORT).show()
+            return
+        }
+    }
+
+    val gattCallback = object : BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                when (newState) {
+                    BluetoothProfile.STATE_CONNECTED -> {
+                        Log.d("Bluetooth", "Connected to GATT server.")
+                        gatt?.discoverServices()
+                    }
+                    BluetoothProfile.STATE_DISCONNECTED -> {
+                        Log.d("Bluetooth", "Disconnected from GATT server.")
+                    }
+                }
+            } else {
+                Log.e("Bluetooth", "Connection failed with status: $status")
+                gatt?.close()
+            }
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                val customService = gatt?.getService(UUID.fromString("0000fe4a-0000-1000-8000-00805f9b34fb"))
+                val customCharacteristic = customService?.getCharacteristic(UUID.fromString("b305b680-aee7-11e1-a730-0002a5d5c51b"))
+
+                if (customCharacteristic != null) {
+                    enableNotification(gatt, customCharacteristic)
+                } else {
+                    Log.e("Bluetooth", "Characteristic not found!")
+                }
+            } else {
+                Log.e("Bluetooth", "Service discovery failed with status: $status")
+            }
+        }
+
+        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
+            characteristic?.let {
+                val value = it.value
+                val (systolic, diastolic, pulse) = parseBloodPressureData(value) ?: return@let
+                Log.i("Bluetooth", "Blood Pressure: $systolic/$diastolic, Pulse: $pulse")
+            }
+        }
+
+        override fun onCharacteristicRead(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d("Bluetooth", "Characteristic read successfully.")
+            } else {
+                Log.e("Bluetooth", "Failed to read characteristic with status: $status")
+            }
+        }
+    }
+
+    try {
+        val gatt = device.connectGatt(context, false, gattCallback)
+        if (gatt == null) {
+            Log.e("Bluetooth", "Failed to connect to GATT server")
+            Toast.makeText(context, "Failed to connect to device", Toast.LENGTH_SHORT).show()
+        } else {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                gatt.device.createBond()
+            } else {
+                gatt.connect()
+            }
+            Log.d("Bluetooth", "Connection Status = ${gatt.device.bondState}")
+        }
+    } catch (e: Exception) {
+        Log.e("Bluetooth", "Error connecting to device: ${e.message}")
+        Toast.makeText(context, "Error connecting to device: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 }
 
-private fun connectToDevice(context: Context, device: BluetoothDevice) {
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-        device.createBond() // Trigger Bluetooth device pairing
-        Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
-
-    } else {
-        Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
-    }
+// Function to enable notifications
+@SuppressLint("MissingPermission")
+private fun enableNotification(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic) {
+    gatt?.setCharacteristicNotification(characteristic, true)
+    val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+    descriptor?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+    gatt?.writeDescriptor(descriptor)
+    Log.d("Bluetooth", "Notification enabled for characteristic ${characteristic.uuid}")
 }
 
-private fun  ConnectToHealthDevice(device: BluetoothDevice){
+// Function to parse blood pressure data
+fun parseBloodPressureData(value: ByteArray): Triple<Int, Int, Int>? {
+    if (value.size < 7) return null
 
+    val flags = value[0].toInt() and 0xFF
+    val systolic = ((value[1].toInt() and 0xFF) or ((value[2].toInt() and 0xFF) shl 8)) * 0.1f
+    val diastolic = ((value[3].toInt() and 0xFF) or ((value[4].toInt() and 0xFF) shl 8)) * 0.1f
+    val pulseRate = ((value[5].toInt() and 0xFF) or ((value[6].toInt() and 0xFF) shl 8))
 
-
+    return Triple(systolic.toInt(), diastolic.toInt(), pulseRate)
 }
+
+
 
 
 
 @Composable
-fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) -> Unit) {
+fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var deviceName by remember { mutableStateOf("Unnamed Device") }
 
@@ -262,7 +473,10 @@ fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) ->
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            )
+            {
                 Text(
                     text = deviceName,
                     fontWeight = FontWeight.Bold,
@@ -270,7 +484,11 @@ fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) ->
                 )
                 Text(text = device.address, style = MaterialTheme.typography.bodySmall)
             }
-            Button(onClick = { onConnect(device) }) {
+            Button(onClick = {
+                onConnect(device)
+                onDismiss()
+            }
+            ) {
                 Text("Connect")
             }
         }
