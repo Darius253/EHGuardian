@@ -58,7 +58,7 @@ fun HomeScreenContents(
     // Display content based on the selected item
     when (selectedItem) {
         0 -> Home(modifier = modifier, onSignOutSuccess = onSignOutSuccess)
-        1 -> MeasureScreen(modifier = modifier)
+        1 -> MeasureScreen()
         2 -> HealthDataScreen(modifier = modifier)
         3 -> ProfileScreen(modifier = modifier)
         else -> Home(modifier = modifier) // Default to Home if no match
