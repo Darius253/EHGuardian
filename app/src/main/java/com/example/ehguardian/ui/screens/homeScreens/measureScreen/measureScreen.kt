@@ -9,8 +9,6 @@ import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -44,7 +41,8 @@ import java.util.UUID
 @Composable
 fun MeasureScreen(
     modifier: Modifier = Modifier,
-    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
     val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
@@ -73,7 +71,12 @@ fun MeasureScreen(
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (!bluetoothEnabled) {
-            ViewBluetoothDevicesButton(onClick = { setBluetoothEnabled(true) })
+            ViewBluetoothDevicesButton(
+                onClick = {
+                    setBluetoothEnabled(true)
+                    bluetoothViewModel.autoConnectToDevice(context)
+                }
+            )
         }
         else {
             BluetoothAnimation(composition = composition, progress = progress)
@@ -123,6 +126,7 @@ fun MeasureScreen(
 fun ViewBluetoothDevicesSheet(
     onDismiss: () -> Unit,
     sheetState: SheetState,
+    bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
 ) {
     val context = LocalContext.current
@@ -158,7 +162,7 @@ fun ViewBluetoothDevicesSheet(
         if (!hasPermissions) {
             ActivityCompat.requestPermissions(context as Activity, permissions, 1)
         } else {
-            startBluetoothDiscovery(bluetoothAdapter, foundDevices, context)
+            bluetoothViewModel.startBluetoothDiscovery(bluetoothAdapter, foundDevices, context)
         }
     }
 
@@ -210,7 +214,7 @@ fun ViewBluetoothDevicesSheet(
                 LazyColumn {
                     items(foundDevices) { device ->
                         BluetoothDeviceItem(device = device, onConnect = {
-                            connectToDevice(
+                            bluetoothViewModel.connectToDevice(
                                 context,
                                 device,
                             )
@@ -230,225 +234,8 @@ fun ViewBluetoothDevicesSheet(
 }
 
 
-private fun startBluetoothDiscovery(
-    bluetoothAdapter: BluetoothAdapter?,
-    foundDevices: SnapshotStateList<BluetoothDevice>,
-    context: Context
-) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            bluetoothAdapter?.takeIf { it.isEnabled }?.let {
-                if (it.isDiscovering) {
-                    it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
-                }
-                foundDevices.clear() // Clear previously found devices
-                it.startDiscovery() // Start discovery for new devices
-                Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
-            } ?: run {
-                Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(
-                context,
-                "Bluetooth permissions are required to discover devices",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-    else{
-        if (
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_ADMIN
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            bluetoothAdapter?.takeIf { it.isEnabled }?.let {
-                if (it.isDiscovering) {
-                    it.cancelDiscovery() // Stop any ongoing discovery before starting a new one
-                }
-                foundDevices.clear() // Clear previously found devices
-                it.startDiscovery() // Start discovery for new devices
-                Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
-            } ?: run {
-                Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(
-                context,
-                "Bluetooth permissions are required to discover devices",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-}
-
-private fun connectToDevice(
-    context: Context,
-    device: BluetoothDevice,
-    ) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
-
-            connectToHealthDevice(context, device)// Trigger Bluetooth device pairing
 
 
-        } else {
-            Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
-        }}
-        else{
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)== PackageManager.PERMISSION_GRANTED
-            ) {
-                Toast.makeText(context, "Attempting to pair with ${device.name ?: "Unknown"}", Toast.LENGTH_SHORT).show()
-
-                connectToHealthDevice(context, device)// Trigger Bluetooth device pairing
-
-
-            } else {
-                Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
-            }
-
-        }
-
-    }
-
-
-
-
-private fun connectToHealthDevice(
-    context: Context,
-    device: BluetoothDevice,
-) {
-    // Check Bluetooth permissions based on SDK level
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Bluetooth connect permission not granted", Toast.LENGTH_SHORT).show()
-            return
-        }
-    } else {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Bluetooth permission not granted", Toast.LENGTH_SHORT).show()
-            return
-        }
-    }
-
-    val gattCallback = object : BluetoothGattCallback() {
-        @SuppressLint("MissingPermission")
-        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                when (newState) {
-                    BluetoothProfile.STATE_CONNECTED -> {
-                        Log.d("Bluetooth", "Connected to GATT server.")
-                        gatt?.discoverServices()
-                    }
-                    BluetoothProfile.STATE_DISCONNECTED -> {
-                        Log.d("Bluetooth", "Disconnected from GATT server.")
-                    }
-                }
-            } else {
-                Log.e("Bluetooth", "Connection failed with status: $status")
-                gatt?.close()
-            }
-        }
-
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                val customService = gatt?.getService(UUID.fromString("0000fe4a-0000-1000-8000-00805f9b34fb"))
-                val customCharacteristic = customService?.getCharacteristic(UUID.fromString("b305b680-aee7-11e1-a730-0002a5d5c51b"))
-
-                if (customCharacteristic != null) {
-                    enableNotification(gatt, customCharacteristic)
-                } else {
-                    Log.e("Bluetooth", "Characteristic not found!")
-                }
-            } else {
-                Log.e("Bluetooth", "Service discovery failed with status: $status")
-            }
-        }
-
-        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
-            characteristic?.let {
-                val value = it.value
-                val (systolic, diastolic, pulse) = parseBloodPressureData(value) ?: return@let
-                Log.i("Bluetooth", "Blood Pressure: $systolic/$diastolic, Pulse: $pulse")
-            }
-        }
-
-        override fun onCharacteristicRead(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("Bluetooth", "Characteristic read successfully.")
-            } else {
-                Log.e("Bluetooth", "Failed to read characteristic with status: $status")
-            }
-        }
-    }
-
-    try {
-        val gatt = device.connectGatt(context, false, gattCallback)
-        if (gatt == null) {
-            Log.e("Bluetooth", "Failed to connect to GATT server")
-            Toast.makeText(context, "Failed to connect to device", Toast.LENGTH_SHORT).show()
-        } else {
-            if (device.bondState == BluetoothDevice.BOND_NONE) {
-                gatt.device.createBond()
-            } else {
-                gatt.connect()
-            }
-            Log.d("Bluetooth", "Connection Status = ${gatt.device.bondState}")
-        }
-    } catch (e: Exception) {
-        Log.e("Bluetooth", "Error connecting to device: ${e.message}")
-        Toast.makeText(context, "Error connecting to device: ${e.message}", Toast.LENGTH_SHORT).show()
-    }
-}
-
-// Function to enable notifications
-@SuppressLint("MissingPermission")
-private fun enableNotification(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic) {
-    gatt?.setCharacteristicNotification(characteristic, true)
-    val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
-    descriptor?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-    gatt?.writeDescriptor(descriptor)
-    Log.d("Bluetooth", "Notification enabled for characteristic ${characteristic.uuid}")
-}
-
-// Function to parse blood pressure data
-fun parseBloodPressureData(value: ByteArray): Triple<Int, Int, Int>? {
-    if (value.size < 7) return null
-
-    val flags = value[0].toInt() and 0xFF
-    val systolic = ((value[1].toInt() and 0xFF) or ((value[2].toInt() and 0xFF) shl 8)) * 0.1f
-    val diastolic = ((value[3].toInt() and 0xFF) or ((value[4].toInt() and 0xFF) shl 8)) * 0.1f
-    val pulseRate = ((value[5].toInt() and 0xFF) or ((value[6].toInt() and 0xFF) shl 8))
-
-    return Triple(systolic.toInt(), diastolic.toInt(), pulseRate)
-}
 
 
 
