@@ -12,14 +12,13 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 
-// Base URL of your API
 
 
 // Define your Retrofit API interface
 // Retrofit API Service
 interface NewsApiService {
     @Headers(
-        "x-rapidapi-key: 03ef9b87e2mshcf6283f5332f6eep1504b5jsnd62b13d8370c",
+        "x-rapidapi-key: b532490f19msh7ff0655157640cdp1087eejsnc94c91f1b7b4",
         "x-rapidapi-host: newsnow.p.rapidapi.com",
         "Content-Type: application/json"
     )
