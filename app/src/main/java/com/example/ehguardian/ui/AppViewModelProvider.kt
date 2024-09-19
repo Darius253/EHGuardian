@@ -8,6 +8,7 @@ import com.example.ehguardian.EhGuardianApplication
 import com.example.ehguardian.ui.screens.authenticationScreens.login.LoginViewModel
 import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.example.ehguardian.ui.screens.homeScreens.measureScreen.BluetoothViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -23,6 +24,11 @@ object AppViewModelProvider {
         initializer {
             val app = (this as CreationExtras).ehGuardianApplication()
             HomeViewModel(app.container.userRepository)
+        }
+
+        initializer {
+            val app = (this as CreationExtras).ehGuardianApplication()
+            BluetoothViewModel()
         }
     }
 }
