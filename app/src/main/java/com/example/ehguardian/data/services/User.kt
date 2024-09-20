@@ -2,10 +2,16 @@ package com.example.ehguardian.data.services
 
 
 import android.util.Log
+import com.example.ehguardian.data.models.Circle
+import com.example.ehguardian.data.models.CircleCenter
+import com.example.ehguardian.data.models.HospitalItem
+import com.example.ehguardian.data.models.HospitalSearchTextRequest
+import com.example.ehguardian.data.models.LocationBias
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.NewsRequest
 import com.example.ehguardian.data.models.UserModel
+import com.example.ehguardian.network.HospitalsApiInstance
 import com.example.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -192,6 +198,40 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
             }
         } catch (e: Exception) {
             Log.e("NewsFlow", "Failed to fetch health news: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    suspend fun fetchNearbyHospitals(): List<HospitalItem> {
+
+
+        val requestBody = HospitalSearchTextRequest(
+            textQuery = "Health",
+            openNow = true,
+            pageSize = 10,
+            locationBias = LocationBias(
+                circle = Circle(
+                    center = CircleCenter(
+                        latitude = 37.7749,
+                        longitude = -122.4194
+                    ),
+                    radius = 5000.0
+                )
+            )
+        )
+        return try {
+            val response = HospitalsApiInstance.api.getHospitals(requestBody)
+            if (response.isSuccessful) {
+                val body = response.body()
+                body?.hospitals ?: emptyList()
+            } else {
+                emptyList()
+
+            }
+
+    }
+        catch (e: Exception) {
+            Log.e("HospitalFlow", "Failed to fetch nearby hospitals: ${e.message}", e)
             emptyList()
         }
     }
