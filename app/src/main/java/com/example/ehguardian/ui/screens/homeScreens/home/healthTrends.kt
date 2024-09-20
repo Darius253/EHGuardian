@@ -41,7 +41,7 @@ import coil.compose.AsyncImage
 import com.example.ehguardian.R
 import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
-import com.example.ehguardian.ui.screens.homeScreens.ModalBottomHeader
+import com.example.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
