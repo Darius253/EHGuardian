@@ -2,6 +2,7 @@ package com.example.ehguardian.data.repositories
 
 
 
+import com.example.ehguardian.data.models.HospitalItem
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
@@ -27,7 +28,7 @@ interface  UserRepository{
 
     suspend fun getUserMeasurements(): Flow<List<MeasurementData>>
 
-
+    suspend fun fetchNearbyHospitals():List<HospitalItem>
 
     suspend fun fetchHealthNews():List<NewsItem>
 
