@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens
+package com.example.ehguardian.ui.screens.homeScreens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,6 +63,9 @@ fun SettingsPopUp(
     val sheetState = rememberModalBottomSheetState()
     var showPopUp by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+    var showNearbyHospitals by rememberSaveable {
+        mutableStateOf(false)
+    }
 
 
 
@@ -81,6 +84,9 @@ fun SettingsPopUp(
                 onDismiss = onDismiss)
         }
     ) {
+       if (showNearbyHospitals) {
+           NearbyHospitals(onDismiss = { showNearbyHospitals = false })
+       }
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp)
@@ -98,7 +104,9 @@ fun SettingsPopUp(
                    SettingsItem(
                        leadingIcon = Icons.Filled.LocalHospital,
                        title = "View Hospitals Nearby",
-                       onClick = { /*TODO*/ }
+                       onClick = {
+                           showNearbyHospitals = true
+                       }
                    )
                    SettingsDivider()
                    SettingsItem(
@@ -314,7 +322,8 @@ fun AlertPopUp(
             Text(text = "Cancel",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onDismiss() }
+                modifier = Modifier
+                    .clickable { onDismiss() }
                     .padding(end = 20.dp)
             )
         },
