@@ -3,6 +3,7 @@ package com.example.ehguardian.data.repositories
 
 
 import android.util.Log
+import com.example.ehguardian.data.models.HospitalItem
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
@@ -144,5 +145,13 @@ class FirebaseUserRepository(
     }
 
 
+    override suspend fun fetchNearbyHospitals(): List<HospitalItem> {
+        return try {
+            val hospitals = userService.fetchNearbyHospitals()
+            hospitals
+        } catch (e: Exception) {
+            return emptyList()
+        }
 
+    }
 }
