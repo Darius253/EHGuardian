@@ -22,18 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.example.ehguardian.R
 import com.example.ehguardian.ui.AppViewModelProvider
-import com.example.ehguardian.ui.NavigationClass
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
-import com.example.ehguardian.ui.screens.homeScreens.SettingsPopUp
+import com.example.ehguardian.ui.screens.homeScreens.settings.SettingsPopUp
 import java.time.LocalTime
 
 @SuppressLint("DefaultLocale")
