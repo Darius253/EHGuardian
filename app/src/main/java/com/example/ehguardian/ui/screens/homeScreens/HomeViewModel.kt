@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ehguardian.data.models.HospitalItem
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
@@ -17,6 +18,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
+
+
+    private val _hospitals = MutableLiveData<List<HospitalItem>>()
+    val hospitals: LiveData<List<HospitalItem>> = _hospitals
 
     private val _userDetails = MutableStateFlow<UserModel?>(null)
     val userDetails: StateFlow<UserModel?> = _userDetails
@@ -114,6 +119,23 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to fetch health news", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    fun fetchNearbyHospitals(context: Context) {
+        viewModelScope.launch {
+            try {
+                // Fetch the hospitals from the repository
+                val hospitalsList = userRepository.fetchNearbyHospitals(context)
+                _hospitals.value = hospitalsList
+            } catch (e: Exception) {
+                // Log and show error message
+                Log.e("HospitalViewModel", "Failed to fetch nearby hospitals: ${e.message}", e)
+                _errorMessage.value = e.message
+                Toast.makeText(context, "Failed to fetch nearby hospitals", Toast.LENGTH_SHORT).show()
+
+            }
+
         }
     }
 
