@@ -1,5 +1,8 @@
 package com.example.ehguardian.ui.screens.homeScreens.settings
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,27 +10,42 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Directions
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.R
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NearbyHospitals(onDismiss: () -> Unit) {
-    val items = listOf(
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    )
-
+fun NearbyHospitals(
+    onDismiss: () -> Unit,
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     val sheetState = rememberModalBottomSheetState()
+    val hospitalList by homeViewModel.hospitals.observeAsState(emptyList())
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        homeViewModel.fetchNearbyHospitals(context = context)
+    }
+
+
+
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
@@ -35,44 +53,76 @@ fun NearbyHospitals(onDismiss: () -> Unit) {
         sheetState = sheetState,
         dragHandle = { ModalBottomHeader(headerText = "Nearby Hospitals", onDismiss = onDismiss) }
     ) {
+        if (hospitalList.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+            {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+            }
+        }
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(0.95f),
             verticalArrangement = Arrangement.spacedBy(20.dp),
-        )
-        {
-            items(items.size) { item ->
-                LocationInfo()
+        ) {
+            items(hospitalList.size) { item ->
+                val hospital = hospitalList[item]
+                LocationInfo(
+                    name = hospital.displayName.name,
+                    address = hospital.address,
+                    rating = when (hospital.rating) {
+                        null -> "N/A"
+                        else -> "${hospital.rating}/5.0"
+                    },
+                    businessStatus = hospital.businessStatus,
+                    status = "OPEN",
+
+                    phone = hospital.phone,
+                    googleMapsUri = hospital.googleMapsUri,
+
+                )
             }
         }
-
-
-
-
-
-
     }
 }
 
 
 
 @Composable
-fun LocationInfo(){
+fun LocationInfo(
+    name: String ,
+    address: String,
+    rating: String ,
+    businessStatus: String,
+    status: String,
+    phone: String = "",
+    googleMapsUri: String = "",
+    context: Context = LocalContext.current
+){
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HospitalInfo(
-            name = "Name of Hospital",
-            address = "8 Hunter Close, Borehamwood",
-            rating = "2.8/5.0",
-            distance = "800m away",
-            status = "Closed"
+            name =name,
+            address = address,
+            rating = rating,
+            distance = businessStatus,
+            status = status
         )
-        ActionButtons()
+        ActionButtons(
+            phone = phone,
+            googleMapsUri = googleMapsUri,
+            context = context
+        )
         HorizontalDivider(
 
         )
@@ -100,7 +150,10 @@ fun HospitalInfo(
             Text(
                 text = name,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
             )
             Box(
                 modifier = Modifier.background(
@@ -128,12 +181,11 @@ fun HospitalInfo(
                 contentDescription = "Location Icon",
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = address,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.W400
+                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)),
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -143,35 +195,63 @@ fun HospitalInfo(
                 contentDescription = "Distance Icon",
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(text = distance)
         }
 
         Text(
             text = status,
-            color = MaterialTheme.colorScheme.error
+            color = Color.Green,
         )
     }
 }
 
 @Composable
-fun ActionButtons() {
+fun ActionButtons(
+    phone: String = "",
+    googleMapsUri: String = "",
+    context: Context = LocalContext.current
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         ActionButtonItem(
-            onClick = { /*TODO*/ },
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_DIAL,
+                        Uri.parse("tel:$phone")
+                    )
+                )
+            },
             icon = Icons.Outlined.Phone,
             text = "Call"
         )
         ActionButtonItem(
-            onClick = { /*TODO*/ },
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(googleMapsUri)
+                    )
+                )
+
+            },
             icon = Icons.Outlined.Directions,
             text = "Directions"
         )
         ActionButtonItem(
-            onClick = { /*TODO*/ },
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_SEND
+                    ).apply {
+                        type = "Share Location of $googleMapsUri"
+                        putExtra(Intent.EXTRA_TEXT, googleMapsUri)
+                    }
+                )
+            },
             icon = Icons.Outlined.Share,
             text = "Share"
         )
