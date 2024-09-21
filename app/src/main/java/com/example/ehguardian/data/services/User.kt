@@ -1,6 +1,14 @@
 package com.example.ehguardian.data.services
 
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import com.example.ehguardian.data.models.Circle
 import com.example.ehguardian.data.models.CircleCenter
@@ -18,7 +26,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.resume
 
 class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
 
@@ -202,20 +212,67 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         }
     }
 
-    suspend fun fetchNearbyHospitals(): List<HospitalItem> {
 
 
+
+    @SuppressLint("MissingPermission")
+    private suspend fun getLocation(context: Context): Location = suspendCancellableCoroutine { continuation ->
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        var location: Location
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(newLocation: Location) {
+                location = newLocation
+                locationManager.removeUpdates(this)
+                continuation.resume(location)
+            }
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+            override fun onProviderEnabled(provider: String) {}
+            override fun onProviderDisabled(provider: String) {}
+        }
+
+        if (hasGps || hasNetwork) {
+            if (hasGps) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    5000,
+                    0F,
+                    locationListener
+                )
+            }
+            if (hasNetwork) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    5000,
+                    0F,
+                    locationListener
+                )
+            }
+            continuation.invokeOnCancellation {
+                locationManager.removeUpdates(locationListener)
+            }
+        } else {
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+    }
+
+    suspend fun fetchNearbyHospitals(context: Context): List<HospitalItem> {
+        val location = getLocation(context)
         val requestBody = HospitalSearchTextRequest(
-            textQuery = "Health",
+            textQuery = "Healthcare centers and Hospitals",
             openNow = true,
-            pageSize = 10,
+            pageSize = 15,
             locationBias = LocationBias(
                 circle = Circle(
                     center = CircleCenter(
-                        latitude = 37.7749,
-                        longitude = -122.4194
+                        latitude = location.latitude,
+                        longitude = location.longitude
                     ),
-                    radius = 5000.0
                 )
             )
         )
@@ -226,16 +283,12 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                 body?.hospitals ?: emptyList()
             } else {
                 emptyList()
-
             }
-
-    }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("HospitalFlow", "Failed to fetch nearby hospitals: ${e.message}", e)
             emptyList()
         }
     }
-
 
 
 }
