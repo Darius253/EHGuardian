@@ -12,8 +12,7 @@
     <!-- Location Permissions for Bluetooth Scanning on Android 10 and 11 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
-        android:required="false" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-feature android:name="android.software.companion_device_setup"/>
     <uses-feature android:name="android.hardware.bluetooth" />
 
