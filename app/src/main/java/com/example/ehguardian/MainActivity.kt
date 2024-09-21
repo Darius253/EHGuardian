@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var enableBtLauncher: ActivityResultLauncher<Intent>
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var discoverableLauncher: ActivityResultLauncher<Intent>
     private lateinit var auth: FirebaseAuth
 
     private val requestCode = 1
@@ -62,6 +63,14 @@ class MainActivity : ComponentActivity() {
             } else {
                 showToast("Bluetooth is required to use Bluetooth features")
                 startActivityForResult(discoverableIntent, requestCode)
+                checkBluetooth()
+            }
+        }
+        discoverableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                showToast("Device is discoverable")
+            } else {
+                showToast("Device is not discoverable")
             }
         }
 
@@ -84,6 +93,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
     }
 
     private fun checkPermissionsAndBluetooth() {
@@ -93,7 +104,7 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
                 Manifest.permission.INTERNET
             )
         } else {
@@ -105,6 +116,8 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.BLUETOOTH
             )
         }
+
+
 
         val permissionsNeeded = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -137,13 +150,15 @@ class MainActivity : ComponentActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_BT_CONNECT) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 checkBluetooth()
             } else {
                 showToast("Bluetooth permission is required to enable Bluetooth")
             }
         }
     }
+
+
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
