@@ -2,14 +2,13 @@ package com.example.ehguardian.data.repositories
 
 
 
+import android.content.Context
 import android.util.Log
 import com.example.ehguardian.data.models.HospitalItem
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.services.User
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -145,11 +144,12 @@ class FirebaseUserRepository(
     }
 
 
-    override suspend fun fetchNearbyHospitals(): List<HospitalItem> {
+    override suspend fun fetchNearbyHospitals(context: Context): List<HospitalItem> {
         return try {
-            val hospitals = userService.fetchNearbyHospitals()
+            val hospitals = userService.fetchNearbyHospitals(context)
             hospitals
         } catch (e: Exception) {
+            Log.e("HospitalFlow", "Failed to fetch nearby hospitals: ${e.message}", e)
             return emptyList()
         }
 
