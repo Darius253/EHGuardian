@@ -15,7 +15,7 @@ data class LocationBias(
 
 data class Circle(
     val center: CircleCenter,
-    val radius: Double
+//    val radius: Double
 )
 
 data class CircleCenter(
@@ -31,21 +31,23 @@ data class HospitalsModel(
 
 )
 
+data class DisplayName(
+    @SerializedName("text")
+    val name: String
+)
 
 
 data class HospitalItem(
     @SerializedName("displayName")
-    val name: String,
+    val displayName: DisplayName,
 
     @SerializedName("shortFormattedAddress")
     val address: String,
 
     @SerializedName("rating")
-    val rating: String,
+    val rating: String? = null,
 
 
-    @SerializedName("OpeningHours")
-    val openingHours: OpeningHours,
 
     @SerializedName("nationalPhoneNumber")
     val phone: String,
@@ -57,6 +59,6 @@ data class HospitalItem(
     val businessStatus: String
 )
 
-data class OpeningHours(
-    val openNow: Boolean
-)
+
+
+
