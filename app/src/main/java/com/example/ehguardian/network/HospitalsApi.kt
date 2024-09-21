@@ -15,14 +15,14 @@ interface HospitalsApi {
         "Content-Type: application/json",
         "X-Goog-Api-Key: AIzaSyBQ2I9uh_6cLB2_owrWl_BMWy0MmHWt8HI",  // Replace with actual API Key
         "X-Goog-FieldMask: places.displayName,places.shortFormattedAddress," +
-                "places.rating,places.OpeningHours,places.nationalPhoneNumber,places.googleMapsUri,places.businessStatus"
+                "places.rating,places.nationalPhoneNumber,places.googleMapsUri,places.businessStatus"
     )
-    @POST("places:searchText?fields=*")
+    @POST("v1/places:searchText?fields=*")
     suspend fun getHospitals(@Body request: HospitalSearchTextRequest): retrofit2.Response<HospitalsModel>
 }
 
 object HospitalsApiInstance {
-    private const val BASE_URL = "https://places.googleapis.com/v1/"
+    private const val BASE_URL = "https://places.googleapis.com/"
 
     val api: HospitalsApi by lazy {
         Retrofit.Builder()
