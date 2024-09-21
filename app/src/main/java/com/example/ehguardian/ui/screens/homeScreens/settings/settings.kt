@@ -1,5 +1,9 @@
 package com.example.ehguardian.ui.screens.homeScreens.settings
 
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
@@ -66,6 +71,14 @@ fun SettingsPopUp(
     var showNearbyHospitals by rememberSaveable {
         mutableStateOf(false)
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -105,7 +118,14 @@ fun SettingsPopUp(
                        leadingIcon = Icons.Filled.LocalHospital,
                        title = "View Hospitals Nearby",
                        onClick = {
-                           showNearbyHospitals = true
+                           if (isLocationPermissionGranted(context)) {
+                               showNearbyHospitals = true
+                           }
+                           else{
+                               Toast.makeText(context, "Location permission is required to view nearby hospitals",
+                                   Toast.LENGTH_SHORT).show()
+                           }
+
                        }
                    )
                    SettingsDivider()
@@ -332,4 +352,28 @@ fun AlertPopUp(
         )
 
 }
+
+private fun isLocationPermissionGranted(context: Context): Boolean {
+    return if (ActivityCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        ActivityCompat.requestPermissions(
+            context as Activity,
+            arrayOf(
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+            1
+        )
+        false
+    } else {
+        true
+    }
+}
+
 
