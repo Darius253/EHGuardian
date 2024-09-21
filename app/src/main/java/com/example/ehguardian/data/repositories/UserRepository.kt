@@ -2,6 +2,7 @@ package com.example.ehguardian.data.repositories
 
 
 
+import android.content.Context
 import com.example.ehguardian.data.models.HospitalItem
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
@@ -28,7 +29,7 @@ interface  UserRepository{
 
     suspend fun getUserMeasurements(): Flow<List<MeasurementData>>
 
-    suspend fun fetchNearbyHospitals():List<HospitalItem>
+    suspend fun fetchNearbyHospitals(context: Context):List<HospitalItem>
 
     suspend fun fetchHealthNews():List<NewsItem>
 
