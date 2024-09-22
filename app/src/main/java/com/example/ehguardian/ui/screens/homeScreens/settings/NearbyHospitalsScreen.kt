@@ -247,8 +247,9 @@ fun ActionButtons(
                     Intent(
                         Intent.ACTION_SEND
                     ).apply {
-                        type = "Share Location of $googleMapsUri"
+                        type =  "text/plain"
                         putExtra(Intent.EXTRA_TEXT, googleMapsUri)
+                        putExtra(Intent.EXTRA_SUBJECT, "Share Hospital Location")
                     }
                 )
             },
