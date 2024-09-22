@@ -81,12 +81,13 @@ fun MeasureScreen(
         )
     }
 
+    val hasPermissions = permissions.all {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }
+
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
         if (!bluetoothEnabled) {
-            val hasPermissions = permissions.all {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-            }
 
             if (!hasPermissions) {
                 ActivityCompat.requestPermissions(context as Activity, permissions, 1)
