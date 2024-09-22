@@ -9,6 +9,7 @@ import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,7 +35,6 @@ import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,14 +69,38 @@ fun MeasureScreen(
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
     val formattedDate = createdDate.format(formatter)
 
+    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+        )
+    } else {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.BLUETOOTH
+        )
+    }
+
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
         if (!bluetoothEnabled) {
-            ViewBluetoothDevicesButton(
-                onClick = {
-                    setBluetoothEnabled(true)
-                    bluetoothViewModel.autoConnectToDevice(context)
-                }
-            )
+            val hasPermissions = permissions.all {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
+
+            if (!hasPermissions) {
+                ActivityCompat.requestPermissions(context as Activity, permissions, 1)
+                Toast.makeText(context, "Bluetooth Permissions not granted", Toast.LENGTH_SHORT).show()
+            } else {
+                ViewBluetoothDevicesButton(
+                    onClick = {
+                        setBluetoothEnabled(true)
+                        bluetoothViewModel.autoConnectToDevice(context)
+                    }
+                )
+
+            }
+
         }
         else {
             BluetoothAnimation(composition = composition, progress = progress)
@@ -140,15 +164,10 @@ fun ViewBluetoothDevicesSheet(
             arrayOf(
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.INTERNET
             )
         } else {
             arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.INTERNET,
                 Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.BLUETOOTH
