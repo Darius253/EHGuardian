@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import okhttp3.internal.notify
 import java.util.UUID
 
 class BluetoothViewModel : ViewModel() {
@@ -71,7 +72,7 @@ class BluetoothViewModel : ViewModel() {
                     it.startDiscovery() // Start discovery for new devices
                     Toast.makeText(context, "Searching for devices...", Toast.LENGTH_SHORT).show()
                 } ?: run {
-                    Toast.makeText(context, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Some Bluetooth Permissions are not granted", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(
@@ -175,7 +176,8 @@ class BluetoothViewModel : ViewModel() {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         Log.d("Bluetooth", "Connected to GATT server.")
-                        gatt?.discoverServices() // Discover services after successful connection
+                        gatt?.discoverServices()
+                   gatt?.notify()
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         Log.d("Bluetooth", "Disconnected from GATT server.")
                         gatt?.close() // Close connection on disconnect
