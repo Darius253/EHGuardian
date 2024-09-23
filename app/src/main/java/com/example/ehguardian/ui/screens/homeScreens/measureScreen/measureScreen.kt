@@ -96,7 +96,7 @@ fun MeasureScreen(
                 ViewBluetoothDevicesButton(
                     onClick = {
                         setBluetoothEnabled(true)
-                        bluetoothViewModel.autoConnectToDevice(context)
+//                        bluetoothViewModel.autoConnectToDevice(context)
                     }
                 )
 
@@ -155,8 +155,6 @@ fun ViewBluetoothDevicesSheet(
 
 ) {
     val context = LocalContext.current
-    val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
-    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
     val foundDevices = remember { mutableStateListOf<BluetoothDevice>() }
 
     // Check and request Bluetooth permissions
@@ -182,7 +180,7 @@ fun ViewBluetoothDevicesSheet(
         if (!hasPermissions) {
             ActivityCompat.requestPermissions(context as Activity, permissions, 1)
         } else {
-            bluetoothViewModel.startBluetoothDiscovery(bluetoothAdapter, foundDevices, context)
+            bluetoothViewModel.startBluetoothDiscovery(foundDevices, context)
         }
     }
 
@@ -206,7 +204,6 @@ fun ViewBluetoothDevicesSheet(
 
         onDispose {
             context.unregisterReceiver(receiver)
-            bluetoothAdapter?.cancelDiscovery()
         }
     }
 
@@ -309,6 +306,8 @@ fun ViewBluetoothDevicesButton(onClick: () -> Unit) {
         Text(text = "View Available Bluetooth Devices")
     }
 }
+
+
 
 
 
