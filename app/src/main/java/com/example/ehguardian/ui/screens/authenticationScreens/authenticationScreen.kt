@@ -68,7 +68,7 @@ fun AuthenticationScreen(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ToggleScreenButton(isLogin = isLogin,
+                ToggleScreenButton(isFirstPage = isLogin,
                   onButtonClick =  { isLogin = !isLogin},
                     firstText = "Login",
                     secondText = "Sign Up",
@@ -97,11 +97,11 @@ fun AuthenticationScreen(
 
 
 @Composable
-fun ToggleScreenButton(isLogin: Boolean, onButtonClick: () -> Unit, firstText: String, secondText: String, color: Color) {
+fun ToggleScreenButton(isFirstPage: Boolean, onButtonClick: () -> Unit, firstText: String, secondText: String, color: Color) {
     val boxOffset by animateDpAsState(
-        targetValue = if (isLogin) 0.dp else 180.dp,
+        targetValue = if (isFirstPage) 0.dp else 180.dp,
         label = "boxOffset",
-        animationSpec = tween(durationMillis = 900)
+        animationSpec = tween(durationMillis = 600)
     )
 
     Row(
@@ -139,7 +139,7 @@ fun ToggleScreenButton(isLogin: Boolean, onButtonClick: () -> Unit, firstText: S
                         text = firstText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.W600,
-                            color = if (isLogin) MaterialTheme.colorScheme.onPrimary else Color.Black
+                            color = if (isFirstPage) MaterialTheme.colorScheme.onPrimary else Color.Black
                         )
                     )
                 }
@@ -149,7 +149,7 @@ fun ToggleScreenButton(isLogin: Boolean, onButtonClick: () -> Unit, firstText: S
                         text = secondText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.W600,
-                            color = if (isLogin) Color.Black else MaterialTheme.colorScheme.onPrimary
+                            color = if (isFirstPage) Color.Black else MaterialTheme.colorScheme.onPrimary
                         )
                     )
                 }
