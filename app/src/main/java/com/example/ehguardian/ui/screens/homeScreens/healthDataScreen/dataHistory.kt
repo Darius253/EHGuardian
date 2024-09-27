@@ -53,7 +53,7 @@ fun HealthDataScreen(
         ) {
             Column {
                 ToggleScreenButton(
-                    isLogin = isHistory,
+                    isFirstPage = isHistory,
                     onButtonClick = { isHistory = !isHistory },
                     firstText = "History",
                     secondText = "Chart",
