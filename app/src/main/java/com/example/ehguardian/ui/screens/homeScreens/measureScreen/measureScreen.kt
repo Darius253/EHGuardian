@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -32,6 +33,7 @@ import com.airbnb.lottie.compose.*
 import com.example.ehguardian.R
 import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
 import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -42,14 +44,12 @@ import java.time.format.DateTimeFormatter
 fun MeasureScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
     val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
     val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
     val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("") }
-    val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }
-    val (isConnected, setIsConnected) = rememberSaveable { mutableStateOf(false) } // New state variable
+    val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }// New state variable
 
     val focusManager: FocusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -68,6 +68,8 @@ fun MeasureScreen(
     val createdDate = LocalDateTime.now()
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
     val formattedDate = createdDate.format(formatter)
+
+
 
     val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         arrayOf(
@@ -96,7 +98,6 @@ fun MeasureScreen(
                 ViewBluetoothDevicesButton(
                     onClick = {
                         setBluetoothEnabled(true)
-//                        bluetoothViewModel.autoConnectToDevice(context)
                     }
                 )
 
@@ -154,6 +155,7 @@ fun ViewBluetoothDevicesSheet(
     bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
 ) {
+    var isFirstPage by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val foundDevices = remember { mutableStateListOf<BluetoothDevice>() }
 
@@ -180,7 +182,7 @@ fun ViewBluetoothDevicesSheet(
         if (!hasPermissions) {
             ActivityCompat.requestPermissions(context as Activity, permissions, 1)
         } else {
-            bluetoothViewModel.startBluetoothDiscovery(foundDevices, context)
+            bluetoothViewModel.startBluetoothDiscovery(context, foundDevices)
         }
     }
 
@@ -202,6 +204,7 @@ fun ViewBluetoothDevicesSheet(
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
         context.registerReceiver(receiver, filter)
 
+
         onDispose {
             context.unregisterReceiver(receiver)
         }
@@ -212,41 +215,87 @@ fun ViewBluetoothDevicesSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(12.dp),
+        dragHandle = {
+            ToggleScreenButton(
+                isFirstPage = isFirstPage,
+                onButtonClick = { isFirstPage = !isFirstPage },
+                firstText = "Available Devices",
+                secondText = "Paired Devices",
+                color = Color.White
+            )
+        }
     ) {
         Column(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(0.95f)
         ) {
-            Text(
-                text = "Available Bluetooth Devices",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+
 
             if (foundDevices.isNotEmpty()) {
-                LazyColumn {
-                    items(foundDevices) { device ->
-                        BluetoothDeviceItem(device = device, onConnect = {
-                            bluetoothViewModel.connectToDevice(
-                                context,
-                                device,
-                            )
-                        },
-                            onDismiss = { onDismiss() }
-                        )
+                for (device in foundDevices) {
+                if (isFirstPage) {
+                        if (device.bondState == BluetoothDevice.BOND_NONE) {
+                            LazyColumn {
+                                items(foundDevices) { device ->
+                                    BluetoothDeviceItem(device = device, onConnect = {
+                                        bluetoothViewModel.connectToDevice(
+                                            device,
+                                            context
+                                        )
+
+                                    },
+                                        onDismiss = { onDismiss() }
+                                    )
+                                }
+                            }
+
+                        }
+
+
                     }
+                    else{
+                        if (device.bondState == BluetoothDevice.BOND_BONDED) {
+                            LazyColumn {
+                                items(foundDevices) { device ->
+                                    BluetoothDeviceItem(device = device, onConnect = {
+                                        bluetoothViewModel.connectToDevice(
+                                            device,
+                                            context,
+
+                                        )
+
+                                    },
+                                        onDismiss = { onDismiss() },
+                                        pairedDevices = true,
+                                        onUnpair = {
+                                            bluetoothViewModel.unPairDevice(device, context)
+                                        }
+                                    )
+                                }
+                            }
+
+                        }
                 }
 
 
 
-            } else {
-                Text("No devices found.", style = MaterialTheme.typography.bodyLarge)
+                }
+
             }
+            else{
+                Text(text = "No Devices Found")
+            }
+
         }
+
+
+
+
+
+
     }
 }
 
@@ -259,46 +308,98 @@ fun ViewBluetoothDevicesSheet(
 
 
 @Composable
-fun BluetoothDeviceItem(device: BluetoothDevice, onConnect: (BluetoothDevice) -> Unit, onDismiss: () -> Unit) {
+fun BluetoothDeviceItem(device: BluetoothDevice,
+                        onConnect: (BluetoothDevice) -> Unit, onDismiss: () -> Unit,
+                        pairedDevices: Boolean = false,
+                        onUnpair: () -> Unit = {}) {
     val context = LocalContext.current
     var deviceName by remember { mutableStateOf("Unnamed Device") }
 
     // Check if BLUETOOTH_CONNECT permission is granted
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_CONNECT
+        ) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH
+        ) == PackageManager.PERMISSION_GRANTED
     ) {
         deviceName = device.name ?: "Unnamed Device"
     }
 
-    Column {
+    Column{
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier.weight(1f)
+
             )
             {
                 Text(
                     text = deviceName,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Text(text = device.address, style = MaterialTheme.typography.bodySmall)
+
+                if (pairedDevices) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    ) {
+                        Button(
+                            shape = RoundedCornerShape(4.dp),
+                            onClick = {
+                                onConnect(device)
+                                onDismiss()
+                            }
+                        ) {
+                            Text("Sync Data")
+                        }
+
+                        Button(
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            onClick = {
+                                onUnpair()
+                                onDismiss()
+                            }
+                        ) {
+                            Text("Unpair")
+                        }
+                    }
+                }
+
             }
-            Button(onClick = {
-                onConnect(device)
-                onDismiss()
+            if (!pairedDevices) {
+                Button(
+                    shape = RoundedCornerShape(4.dp),
+                    onClick = {
+                        onConnect(device)
+                        onDismiss()
+                    }
+                ) {
+                    Text("Connect")
+                }
+
             }
-            ) {
-                Text("Connect")
-            }
+
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
         Divider(color = Color.Gray)
     }
-}
+
+    }
+
 
 @Composable
 fun ViewBluetoothDevicesButton(onClick: () -> Unit) {
@@ -306,6 +407,7 @@ fun ViewBluetoothDevicesButton(onClick: () -> Unit) {
         Text(text = "View Available Bluetooth Devices")
     }
 }
+
 
 
 
