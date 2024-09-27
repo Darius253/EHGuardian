@@ -1,3 +1,5 @@
+package com.example.ehguardian.ui.screens.homeScreens.measureScreen
+
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
@@ -5,7 +7,7 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
-import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -16,266 +18,254 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.util.*
 
-class BluetoothViewModel(private val context: Context) : ViewModel() {
+class BluetoothViewModel : ViewModel() {
 
-    private val TAG = "BluetoothViewModel"
-    private val CCCDESCRIPTORUUID = "00002902-0000-1000-8000-00805f9b34fb"
-    private val BloodPressureServiceUUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
-    private val BloodPressureMeasurementCharUUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
-
-    private val _systolic: MutableLiveData<Int> = MutableLiveData()
+    private val _systolic = MutableLiveData<Int>()
     val systolic: LiveData<Int> get() = _systolic
 
-    private val _diastolic: MutableLiveData<Int> = MutableLiveData()
+    private val _diastolic = MutableLiveData<Int>()
     val diastolic: LiveData<Int> get() = _diastolic
 
-    private val _pulse: MutableLiveData<Int> = MutableLiveData()
+    private val _pulse = MutableLiveData<Int>()
     val pulse: LiveData<Int> get() = _pulse
 
-    private val _connectionStatus: MutableLiveData<String> = MutableLiveData()
-    val connectionStatus: LiveData<String> get() = _connectionStatus
 
-    private val commandQueue: Queue<Runnable> = LinkedList()
-    private var commandQueueBusy = false
-    private val notifyingCharacteristics = mutableSetOf<UUID>()
+
     private lateinit var bluetoothGatt: BluetoothGatt
-
     private val bleHandler = Handler(Looper.getMainLooper())
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences("BluetoothPrefs", Context.MODE_PRIVATE)
-
-    init {
-        reconnectToStoredDevices()
-    }
 
     @SuppressLint("MissingPermission")
-    fun startBluetoothDiscovery(foundDevices: SnapshotStateList<BluetoothDevice>) {
+    fun startBluetoothDiscovery(context: Context, foundDevices: SnapshotStateList<BluetoothDevice>) {
         val adapter = BluetoothAdapter.getDefaultAdapter()
 
         if (adapter == null || !adapter.isEnabled) {
-            updateConnectionStatus("Bluetooth not available or not enabled")
+            Toast.makeText(context, "Bluetooth not available or not enabled", Toast.LENGTH_SHORT).show()
             return
+        }
+
+        // Check permissions for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(context, "Please grant Bluetooth scan permissions", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         val scanner = adapter.bluetoothLeScanner ?: run {
-            updateConnectionStatus("Bluetooth scanner not available")
+            Toast.makeText(context, "Bluetooth scanner not available", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val filters = listOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(BloodPressureServiceUUID)).build())
+        val filters = listOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(BLOOD_PRESSURE_SERVICE_UUID)).build())
         val scanSettings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-            .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
-            .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
-            .setReportDelay(0L)
             .build()
 
         val scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                val device: BluetoothDevice = result.device
+                val device = result.device
                 if (!foundDevices.contains(device)) {
                     foundDevices.add(device)
+                    Log.d(TAG, "Found device: ${device.name ?: "Unknown"} - ${device.address}")
                 }
             }
 
             override fun onScanFailed(errorCode: Int) {
                 Log.e(TAG, "BLE Scan Failed with code $errorCode")
-                updateConnectionStatus("Scan failed: $errorCode")
+                Toast.makeText(context, "Scan failed: $errorCode", Toast.LENGTH_SHORT).show()
             }
         }
 
         scanner.startScan(filters, scanSettings, scanCallback)
-        updateConnectionStatus("Scanning for devices...")
+        Toast.makeText(context, "Scanning for devices...", Toast.LENGTH_LONG).show()
 
-        Handler(Looper.getMainLooper()).postDelayed({
+        // Stop scanning after 2 minutes
+        bleHandler.postDelayed({
             scanner.stopScan(scanCallback)
-            updateConnectionStatus("Stopped scanning after 2 minutes")
-        }, 120000)
+            Toast.makeText(context, "Stopped scanning after 2 minutes", Toast.LENGTH_SHORT).show()
+        }, SCAN_PERIOD)
     }
 
     @SuppressLint("MissingPermission")
-    fun connectToDevice(device: BluetoothDevice) {
-        updateConnectionStatus("Connecting to ${device.name ?: "Unknown"}")
-        connectToHealthDevice(device)
+    fun connectToDevice(device: BluetoothDevice, context: Context) {
+            Toast.makeText(context, "Connecting to device..", Toast.LENGTH_SHORT).show()
+            connectToHealthDevice(device, context)
+
     }
 
     @SuppressLint("MissingPermission")
-    private fun connectToHealthDevice(device: BluetoothDevice) {
+    fun unPairDevice(device: BluetoothDevice, context: Context) {
+        if (device.bondState == BluetoothDevice.BOND_BONDED) {
+            try {
+                device::class.java.getMethod("removeBond").invoke(device)
+                showToast(context, "Bond has been removed successfully.")
+            } catch (e: Exception) {
+                showToast(context, "Removing bond has been failed. ${e.message}")
+            }
+
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun connectToHealthDevice(device: BluetoothDevice, context: Context) {
         val gattCallback = object : BluetoothGattCallback() {
             override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    gatt.close()
+                    return
+                }
+
                 when (newState) {
                     BluetoothProfile.STATE_CONNECTED -> {
-                        Log.d(TAG, "Connected to ${device.name}")
-                        updateConnectionStatus("Connected to ${device.name}")
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            if (device.bondState == BluetoothDevice.BOND_NONE) {
-                                device.createBond()
-                            } else {
-                                if (!gatt.discoverServices()) {
-                                    Log.e(TAG, "Service discovery failed to start")
-                                    updateConnectionStatus("Service discovery failed to start")
-                                }
-                            }
-                        }, if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) 1000 else 0)
+                        // If the device is already bonded, discover services immediately
+                        if (device.bondState == BluetoothDevice.BOND_BONDED) {
+                            gatt.discoverServices()
+
+                        } else {
+                            device.createBond()
+                            gatt.discoverServices()
+
+                        }
+
+
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
-                        Log.d(TAG, "Disconnected from ${device.name}")
-                        updateConnectionStatus("Disconnected from ${device.name}")
+                        Log.d(TAG, "Disconnected from ${device.name ?: "Unknown"}")
                         gatt.close()
-                        // Attempt to reconnect
-                        connectToHealthDevice(device)
                     }
-                    else -> updateConnectionStatus("Connection state changed: $newState")
+                    else -> Log.d(TAG, "Connection state changed: $newState")
                 }
             }
 
             override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.i(TAG, "Services discovered: ${gatt.services.size} for '${device.name}'")
-                    updateConnectionStatus("Services discovered for ${device.name}")
+                    for (service in gatt.services) {
+                        Log.i(TAG, "Service UUID: ${service.uuid}")
+                    }
 
+
+                    // Look for the specific service and characteristic
                     gatt.services.forEach { service ->
-                        if (service.uuid == BloodPressureServiceUUID) {
+                        if (service.uuid == BLOOD_PRESSURE_SERVICE_UUID) {
                             service.characteristics.forEach { characteristic ->
-                                if (characteristic.uuid == BloodPressureMeasurementCharUUID) {
+                                Log.i(TAG, "Found characteristic: ${characteristic.uuid}")
+                                if (characteristic.uuid == BLOOD_PRESSURE_MEASUREMENT_CHAR_UUID) {
                                     enableNotifications(characteristic)
                                 }
                             }
                         }
                     }
-
-                    // Store the device as paired
-                    storepairedDevice(device)
                 } else {
                     Log.e(TAG, "Service discovery failed with status $status")
-                    updateConnectionStatus("Service discovery failed")
+
                     gatt.disconnect()
                 }
             }
 
             override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
                 val value = characteristic.value.clone()
-                bleHandler.post {
-                    processCharacteristicUpdate(value, characteristic)
+               try{ bleHandler.post {
+                    processCharacteristicUpdate(value, characteristic, context)
                 }
             }
+                catch (e: Exception){
+                  showToast(context, "Error Syncing Data, Please try again later ${e.message}")
 
-            // Implement other callback methods as needed...
+                }        }
+
+
         }
 
+        // Use connectGatt with autoConnect set to false
         bluetoothGatt = device.connectGatt(context, true, gattCallback)
     }
 
-    private fun enableNotifications(characteristic: BluetoothGattCharacteristic) {
-        if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
-            setNotify(characteristic, true)
-        }
-        if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
-            setNotify(characteristic, true)
-        }
-    }
-
     @SuppressLint("MissingPermission")
-    private fun setNotify(characteristic: BluetoothGattCharacteristic, enable: Boolean) {
-        val descriptor = characteristic.getDescriptor(UUID.fromString(CCCDESCRIPTORUUID)) ?: run {
-            Log.e(TAG, "Could not get CCC descriptor for characteristic ${characteristic.uuid}")
-            return
-        }
+    private fun enableNotifications(characteristic: BluetoothGattCharacteristic) {
+        if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0 ||
+            characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
 
-        val value = if (enable) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-        else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+            // Enable notifications on the client side
+            bluetoothGatt.setCharacteristicNotification(characteristic, true)
 
-        descriptor.value = value
+            // Write the descriptor to enable notifications or indications
+            val descriptor = characteristic.getDescriptor(UUID.fromString(CCCD_DESCRIPTOR_UUID))
+            descriptor?.let {
+                val enableValue = if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+                    BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                else
+                    BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
 
-        bluetoothGatt.writeDescriptor(descriptor).also { success ->
-            if (!success) {
-                Log.e(TAG, "Failed to write descriptor: ${descriptor.uuid}")
+                it.value = enableValue
+                bluetoothGatt.writeDescriptor(it)
+            } ?: run {
+                Log.e(TAG, "Failed to get CCC descriptor for characteristic ${characteristic.uuid}")
             }
         }
     }
 
-    private fun processCharacteristicUpdate(value: ByteArray, characteristic: BluetoothGattCharacteristic) {
-        if (characteristic.uuid == BloodPressureMeasurementCharUUID) {
-            // Parse blood pressure measurement as per Bluetooth SIG specifications
+    private fun processCharacteristicUpdate(value: ByteArray, characteristic: BluetoothGattCharacteristic, context: Context) {
+        if (characteristic.uuid == BLOOD_PRESSURE_MEASUREMENT_CHAR_UUID) {
             val flags = value[0].toInt()
             var index = 1
 
-            // Check if blood pressure is in mmHg or kPa
+            // Verify units based on flags (bit 0)
             val units = if (flags and 0x01 == 0) "mmHg" else "kPa"
 
-            // Parse systolic, diastolic, and mean arterial pressure
-            val systolic = IEEE11073Float.readFloatLE(value, index)
-            index += 2
-            val diastolic = IEEE11073Float.readFloatLE(value, index)
-            index += 2
-            val meanArterialPressure = IEEE11073Float.readFloatLE(value, index)
-            index += 2
+            // Read systolic, diastolic, and pulse rate values
+            val systolic = parseIEEE11073Float(value, index)
+            index += 4  // Move index by 4 bytes (3 bytes for mantissa and exponent + 1 reserved)
 
-            // Parse timestamp if present
-            if (flags and 0x02 != 0) {
-                // Parse timestamp (year, month, day, hours, minutes, seconds)
-                index += 7
-            }
+            val diastolic = parseIEEE11073Float(value, index)
+            index += 4  // Move index by 4 bytes (3 bytes for mantissa and exponent + 1 reserved)
 
-            // Parse pulse rate if present
             var pulseRate: Float? = null
-            if (flags and 0x04 != 0) {
-                pulseRate = IEEE11073Float.readFloatLE(value, index)
-                index += 2
+            if (flags and 0x04 != 0) {  // Check if pulse rate is present
+                pulseRate = parseIEEE11073Float(value, index)
+                index += 4  // Move index by 4 bytes for pulse rate
             }
 
-            // Update LiveData
-            _systolic.value = systolic.toInt()
-            _diastolic.value = diastolic.toInt()
+            // Update LiveData with correct values
+            _systolic.value = systolic?.toInt() ?: 0
+            _diastolic.value = diastolic?.toInt() ?: 0
             pulseRate?.let { _pulse.value = it.toInt() }
 
-            updateConnectionStatus("Blood Pressure: $systolic/$diastolic $units, Pulse: ${pulseRate ?: "N/A"}")
+            // Log the values to ensure they're correct
+            Log.d(TAG, "Flags: $flags")
+            Log.d(TAG, "Systolic: $systolic $units, Diastolic: $diastolic $units, Pulse Rate: $pulseRate $units")
+            Toast.makeText(context, "Systolic: $systolic $units, Diastolic: $diastolic $units, Pulse Rate: $pulseRate $units", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Raw Data: ${value.joinToString(separator = " ") { String.format("%02X", it) }}")
         }
     }
 
-    private fun storepairedDevice(device: BluetoothDevice) {
-        val pairedDevices = getPairedDevices().toMutableSet()
-        pairedDevices.add(device.address)
-        val json = Gson().toJson(pairedDevices)
-        sharedPreferences.edit().putString("paired_devices", json).apply()
+    private fun parseIEEE11073Float(data: ByteArray, offset: Int): Float? {
+        if (data.size < offset + 4) return null  // Check if there are enough bytes to parse
+
+        val mantissa = (data[offset].toInt() and 0xFF) or
+                ((data[offset + 1].toInt() and 0xFF) shl 8) or
+                ((data[offset + 2].toInt() and 0xFF) shl 16)
+
+        val exponent = data[offset + 3].toInt()  // Last byte is the exponent
+
+        return (mantissa * Math.pow(10.0, exponent.toDouble())).toFloat()
     }
 
-    private fun getPairedDevices(): Set<String> {
-        val json = sharedPreferences.getString("paired_devices", null)
-        return if (json != null) {
-            Gson().fromJson(json, object : TypeToken<Set<String>>() {}.type)
-        } else {
-            emptySet()
-        }
+
+    private companion object {
+        private const val SCAN_PERIOD: Long = 120000L // 2 minutes
+        private const val TAG = "BluetoothViewModel"
+        private const val CCCD_DESCRIPTOR_UUID = "00002902-0000-1000-8000-00805f9b34fb"
+        private val BLOOD_PRESSURE_SERVICE_UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
+        private val BLOOD_PRESSURE_MEASUREMENT_CHAR_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
+        private val Heart_RATE_MEASUREMENT_CHAR_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
     }
 
-    private fun reconnectToStoredDevices() {
-        val pairedDevices = getPairedDevices()
-        val adapter = BluetoothAdapter.getDefaultAdapter()
-        pairedDevices.forEach { address ->
-            adapter.getRemoteDevice(address)?.let { device ->
-                connectToDevice(device)
-            }
-        }
-    }
 
-    private fun updateConnectionStatus(status: String) {
-        _connectionStatus.postValue(status)
-        Log.d(TAG, status)
-    }
 
-    // IEEE 11073 20601 floating point structure to float conversion
-    private object IEEE11073Float {
-        fun readFloatLE(data: ByteArray, offset: Int): Float {
-            val mantissa = (data[offset].toInt() and 0xFF) or
-                    ((data[offset + 1].toInt() and 0xFF) shl 8) or
-                    ((data[offset + 2].toInt() and 0xFF) shl 16)
-            val exponent = data[offset + 3].toInt() and 0xFF
-            return (mantissa * Math.pow(10.0, exponent.toDouble() - 3)).toFloat()
-        }
+    private fun showToast(context: Context, message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
