@@ -3,6 +3,7 @@ package com.example.ehguardian.ui.screens.homeScreens.measureScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -121,7 +122,8 @@ fun ManuallyAddDetails(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            if (systolic.isNotEmpty() && diastolic.isNotEmpty() && heartRate.isNotEmpty()) {
+            if (systolic.isNotEmpty() && diastolic.isNotEmpty() && heartRate.isNotEmpty() &&
+                systolic!== "0" && diastolic!== "0" && heartRate!== "0") {
                 UploadButton(
                     onUpload = onUpload,
                 )
@@ -229,19 +231,28 @@ fun HeartRateInput(
 @Composable
 fun UploadButton(
     onUpload: () -> Unit,
+    modifier: Modifier= Modifier
 ) {
 
     TextButton(
-        modifier = Modifier.padding(start = 200.dp),
+        modifier = modifier.padding(start = 170.dp),
         onClick = {
             onUpload()
-        }
+        },
+
     ) {
         Text(
-            text = "Upload",
+            modifier = modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.medium
+
+            ).padding(10.dp),
+            text = "Upload Measurement",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+
         )
     }
 }
