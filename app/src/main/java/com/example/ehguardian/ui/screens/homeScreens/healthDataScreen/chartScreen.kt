@@ -83,25 +83,34 @@ private fun getLinesForFilter(
 ): Pair<List<Line>, List<String>> {
     return when (filter) {
         "Blood Pressure" -> {
-            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
-            val points = userMeasurements.map { measurement ->
-                io.jetchart.line.Point(
-                    value = measurement.systolic.toFloat(), // Systolic as X-axis value
-                    label =  measurement.timestamp , // Diastolic as Y-axis value
+            // Reverse the userMeasurements list to display the last items first
+            val reversedMeasurements = userMeasurements.reversed()
 
+            val labels = List(reversedMeasurements.size) { index -> (index + 1).toString() }
+
+            val points = reversedMeasurements.map { measurement ->
+                io.jetchart.line.Point(
+                    value = measurement.systolic.toFloat(), // Systolic as Y-axis value
+                    label = measurement.timestamp, // Timestamp or any other label you want to display
                 )
             }
+
             val lines = listOf(
                 Line(
                     points = points,
                     lineDrawer = SolidLineDrawer(thickness = 5.dp, color = Color(0xFF5CC87C))
                 )
             )
+
             Pair(lines, labels)
         }
+
         "Heart Rate" -> {
-            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
-            val points = userMeasurements.map { measurement ->
+            // Reverse the userMeasurements list to display the last items first
+            val reversedMeasurements = userMeasurements.reversed()
+
+            val labels = List(reversedMeasurements.size) { index -> (index + 1).toString() }
+            val points = reversedMeasurements.map { measurement ->
                 io.jetchart.line.Point(
                     value = measurement.pulse.toFloat(),
                     label = measurement.timestamp
@@ -115,9 +124,13 @@ private fun getLinesForFilter(
             )
             Pair(lines, labels)
         }
+
         "Body Mass Index" -> {
-            val labels = List(userMeasurements.size) { index -> (index + 1).toString() }
-            val points = userMeasurements.map { measurement ->
+            // Reverse the userMeasurements list to display the last items first
+            val reversedMeasurements = userMeasurements.reversed()
+
+            val labels = List(reversedMeasurements.size) { index -> (index + 1).toString() }
+            val points = reversedMeasurements.map { measurement ->
                 io.jetchart.line.Point(
                     value = measurement.bmi.toFloatOrNull() ?: 0f,
                     label = measurement.timestamp
@@ -131,6 +144,7 @@ private fun getLinesForFilter(
             )
             Pair(lines, labels)
         }
+
         else -> Pair(emptyList(), emptyList())
     }
 }
