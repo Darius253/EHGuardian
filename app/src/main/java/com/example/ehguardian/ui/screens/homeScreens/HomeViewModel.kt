@@ -42,7 +42,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
         fetchUserMeasurements() // Ensure measurements are fetched on initialization
     }
 
-    private fun fetchUserDetails() {
+     fun fetchUserDetails() {
         viewModelScope.launch {
             try {
                 userRepository.getUser().collect { userDetails ->
@@ -54,7 +54,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
         }
     }
 
-    private fun fetchUserMeasurements() {
+     fun fetchUserMeasurements() {
         viewModelScope.launch {
             try {
                 userRepository.getUserMeasurements().collect { measurements ->
@@ -80,7 +80,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _errorMessage.value = e.message
-                Toast.makeText(context, "Failed to update details", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to update details", Toast.LENGTH_LONG).show()
             }
         }
     }
