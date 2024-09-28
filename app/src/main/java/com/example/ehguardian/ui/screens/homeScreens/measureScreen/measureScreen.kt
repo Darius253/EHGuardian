@@ -14,8 +14,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothConnected
+import androidx.compose.material.icons.filled.BluetoothDisabled
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,11 +49,17 @@ import java.time.format.DateTimeFormatter
 fun MeasureScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
-    val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
-    val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
-    val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("") }
+    val (systolic, setSystolic) = rememberSaveable { mutableStateOf("0") }
+    val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("0") }
+    val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("0") }
+
+// Observe the LiveData and update the state
+    val systolicValue by bluetoothViewModel.systolic.observeAsState()
+    val diastolicValue by bluetoothViewModel.diastolic.observeAsState()
+    val heartRateValue by bluetoothViewModel.pulse.observeAsState()
     val (bluetoothEnabled, setBluetoothEnabled) = rememberSaveable { mutableStateOf(false) }// New state variable
 
     val focusManager: FocusManager = LocalFocusManager.current
@@ -87,6 +98,17 @@ fun MeasureScreen(
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    // Update state whenever LiveData values change
+    LaunchedEffect(systolicValue) {
+        systolicValue?.let { setSystolic(it.toString()) }
+    }
+    LaunchedEffect(diastolicValue) {
+        diastolicValue?.let { setDiastolic(it.toString()) }
+    }
+    LaunchedEffect(heartRateValue) {
+        heartRateValue?.let { setHeartRate(it.toString()) }
+    }
+
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
         if (!bluetoothEnabled) {
@@ -106,7 +128,7 @@ fun MeasureScreen(
         }
         else {
             BluetoothAnimation(composition = composition, progress = progress)
-            ViewBluetoothDevicesSheet(
+            ViewBluetoothDevicesModalSheet(
                 onDismiss = { setBluetoothEnabled(false) },
                 sheetState = sheetState,
             )
@@ -114,10 +136,14 @@ fun MeasureScreen(
 
         AddDetailsFab { setShowDialog(true) }
 
-        if (showDialog) {
+        if (showDialog || systolic!="0" || diastolic!="0"  || heartRate!="0" ) {
             OverlayBackground()
             ManuallyAddDetails(
-                onDismiss = { setShowDialog(false) },
+                onDismiss = {
+                    setShowDialog(false)
+                    setSystolic("0")
+                    setDiastolic("0")
+                    setHeartRate("0") },
                 systolic = systolic,
                 diastolic = diastolic,
                 heartRate = heartRate,
@@ -126,6 +152,7 @@ fun MeasureScreen(
                 onHeartRateChange = setHeartRate,
                 onDone = { focusManager.clearFocus() },
                 onUpload = {
+
                     setShowDialog(false)
                     homeViewModel.uploadUserMeasurement(
                         context = context,
@@ -137,6 +164,12 @@ fun MeasureScreen(
                             bmi = String.format("%.2f", bmi)
                         )
                     )
+                    homeViewModel.fetchUserDetails()
+                    homeViewModel.fetchUserMeasurements()
+                    setSystolic("0")
+                    setDiastolic("0")
+                    setHeartRate("0")
+
                 }
             )
         }
@@ -149,7 +182,7 @@ fun MeasureScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("InlinedApi")
 @Composable
-fun ViewBluetoothDevicesSheet(
+fun ViewBluetoothDevicesModalSheet(
     onDismiss: () -> Unit,
     sheetState: SheetState,
     bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -253,6 +286,13 @@ fun ViewBluetoothDevicesSheet(
                             }
 
                         }
+                    else{
+                            Text(
+                                modifier = Modifier.align(
+                                    Alignment.CenterHorizontally
+                                ),
+                                text = "No Bluetooth Devices Found")
+                        }
 
 
                     }
@@ -278,6 +318,14 @@ fun ViewBluetoothDevicesSheet(
                             }
 
                         }
+                    else{
+                        Text(
+                            modifier = Modifier.align(
+                                Alignment.CenterHorizontally
+                            ),
+                            text = "No Paired Devices Found")
+
+                        }
                 }
 
 
@@ -298,12 +346,6 @@ fun ViewBluetoothDevicesSheet(
 
     }
 }
-
-
-
-
-
-
 
 
 
@@ -328,74 +370,101 @@ fun BluetoothDeviceItem(device: BluetoothDevice,
         deviceName = device.name ?: "Unnamed Device"
     }
 
-    Column{
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
+    if (pairedDevices)Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        Text(
+            text = deviceName,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
 
-            )
-            {
-                Text(
-                    text = deviceName,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+         Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        )
+        {
+            Button(
+                shape = RoundedCornerShape(4.dp),
+                onClick = {
+                    onConnect(device)
+                    onDismiss()
+                }
+            ) {
+                Icon(imageVector = Icons.Filled.Sync, contentDescription = "Sync Icon",
+                    )
+
+                Text("Sync Data",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold)
+            }
+            Button(
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                onClick = {
+                    onUnpair()
+                    onDismiss()
+                }
+            ) {
+                Icon(imageVector = Icons.Filled.BluetoothDisabled, contentDescription = "Unpair Icon")
+
+                Text("Unpair",
+                    color = MaterialTheme.colorScheme.onError,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
                 )
-
-                if (pairedDevices) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(20.dp),
-                    ) {
-                        Button(
-                            shape = RoundedCornerShape(4.dp),
-                            onClick = {
-                                onConnect(device)
-                                onDismiss()
-                            }
-                        ) {
-                            Text("Sync Data")
-                        }
-
-                        Button(
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            onClick = {
-                                onUnpair()
-                                onDismiss()
-                            }
-                        ) {
-                            Text("Unpair")
-                        }
-                    }
-                }
-
             }
-            if (!pairedDevices) {
-                Button(
-                    shape = RoundedCornerShape(4.dp),
-                    onClick = {
-                        onConnect(device)
-                        onDismiss()
-                    }
-                ) {
-                    Text("Connect")
-                }
-
-            }
-
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+
+        Spacer(modifier = Modifier.height(8.dp))
         Divider(color = Color.Gray)
+    }
+    else{
+       Column(
+           modifier = Modifier
+               .fillMaxWidth()
+       ){
+           Row(
+               modifier = Modifier.fillMaxWidth(),
+               horizontalArrangement = Arrangement.SpaceBetween,
+               verticalAlignment = Alignment.CenterVertically
+           ) {
+               Text(
+                   modifier = Modifier.weight(1f),
+                   text = deviceName,
+                   fontWeight = FontWeight.Bold,
+                   style = MaterialTheme.typography.titleMedium,
+                   maxLines = 1,
+                   overflow = TextOverflow.Ellipsis
+               )
+               Button(
+
+                   shape = RoundedCornerShape(4.dp),
+                   onClick = {
+                       onConnect(device)
+                       onDismiss()
+                   }
+               ) {
+                   Icon(imageVector = Icons.Filled.BluetoothConnected, contentDescription = "Bluetooth Icon",
+                   )
+
+                   Text("Connect",
+                       style = MaterialTheme.typography.bodyMedium,
+                       fontWeight = FontWeight.Bold)
+               }
+
+           }
+
+           Spacer(modifier = Modifier.height(8.dp))
+           Divider(color = Color.Gray)
+       }
+
     }
 
     }
