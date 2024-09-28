@@ -93,7 +93,7 @@ fun Home(modifier: Modifier = Modifier,
                                 value= latestMeasurement.first().diastolic,
                                 MaterialTheme.colorScheme.onPrimaryContainer
                             )
-                            TextData("Pulse", "80", MaterialTheme.colorScheme.onPrimaryContainer)
+                            TextData("Pulse", latestMeasurement.first().pulse, MaterialTheme.colorScheme.onPrimaryContainer)
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
