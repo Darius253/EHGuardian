@@ -80,7 +80,7 @@ fun HealthDataScreen(
                 showPopUp = true
             },
             modifier = Modifier
-                .padding(start = 325.dp, top = 590.dp),
+                .padding(start = 325.dp, top = 595.dp),
 
         ) {
 
