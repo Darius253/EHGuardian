@@ -1,6 +1,7 @@
 package com.example.ehguardian.ui.screens.authenticationScreens.login
 
 
+import android.util.Patterns.EMAIL_ADDRESS
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,8 +48,6 @@ fun LoginScreen(
     val email by loginViewModel.email
     val password by loginViewModel.password
     val isLoading by loginViewModel.isLoading
-    val errorMessage by loginViewModel.errorMessage
-
     val context = LocalContext.current
 
     Column(
@@ -76,7 +75,6 @@ fun LoginScreen(
         EmailTextField(
             email = email,
             onEmailChange = loginViewModel::onEmailChange,
-            errorMessage = errorMessage
 
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -85,7 +83,6 @@ fun LoginScreen(
         PasswordTextField(
             password = password,
             onPasswordChange = loginViewModel::onPasswordChange,
-            errorMessage = errorMessage,
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -140,7 +137,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun EmailTextField(email: String, onEmailChange: (String) -> Unit, errorMessage: String? = null) {
+fun EmailTextField(email: String, onEmailChange: (String) -> Unit ) {
 
 
     OutlinedTextField(
@@ -151,7 +148,12 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit, errorMessage:
         singleLine = true,
         label = { Text(text = "Email") },
         supportingText = {
-            errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if(email.isNotEmpty() && !EMAIL_ADDRESS.matcher(email).matches() )
+            Text("Email must be valid", color = MaterialTheme.colorScheme.error)
+
+            else if(email.isEmpty())
+                Text("This field is required", color = MaterialTheme.colorScheme.error)
+
         },
 
         leadingIcon = {
@@ -169,7 +171,6 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit, errorMessage:
 fun PasswordTextField(
     password: String,
     onPasswordChange: (String) -> Unit,
-    errorMessage: String? = null
 ) {
     var isVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -180,7 +181,10 @@ fun PasswordTextField(
         singleLine = true,
         maxLines = 1,
         supportingText = {
-            errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if(password.isNotEmpty() && password.length < 8)
+                Text("Password must be at least 8 characters long", color = MaterialTheme.colorScheme.error)
+            else if(password.isEmpty())
+                Text("This field is required", color = MaterialTheme.colorScheme.error)
         },
         label = { Text(text = "Password") },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
