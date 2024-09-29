@@ -56,13 +56,13 @@ sealed class BottomNavItem(
 
     data object History : BottomNavItem(
         title = "History",
-        icon = Icons.Outlined.StackedBarChart,
+        icon = Icons.Outlined.BarChart,
         selectedIcon = Icons.Filled.StackedBarChart
     )
 
     data object Profile : BottomNavItem(
         title = "Profile",
-        icon = Icons.Outlined.Person,
+        icon = Icons.Outlined.AccountCircle,
         selectedIcon = Icons.Filled.Person
     )
 }
