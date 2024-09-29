@@ -56,7 +56,7 @@ class SignUpViewModel(
     val password: LiveData<String> = _password
 
     private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> = _errorMessage
+    private val errorMessage: LiveData<String?> = _errorMessage
 
 
     // Date format for day, month, and year
@@ -91,6 +91,7 @@ class SignUpViewModel(
                     if (success) {
                         Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
                         onSignUpSuccess()
+                        clearInputFields()
                     } else {
                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                     }
@@ -98,9 +99,10 @@ class SignUpViewModel(
                 clearErrorMessage()
 
                 _isLoading.value = false
-                clearInputFields() // Optional: clear fields after successful sign-up
+//                clearInputFields() // Optional: clear fields after successful sign-up
             } catch (e: Exception) {
                 _errorMessage.value = e.message
+                Toast.makeText(context, "$errorMessage", Toast.LENGTH_SHORT).show()
                 _isLoading.value = false
             }
         }
@@ -108,21 +110,17 @@ class SignUpViewModel(
 
     // Input validation function
     private fun validateInputs(): Boolean {
-        if (_email.value.isNullOrEmpty() || _password.value.isNullOrEmpty() ||
-            _firstname.value.isNullOrEmpty() ||
-            _surname.value.isNullOrEmpty() ||
-            _gender.value.isNullOrEmpty() ||
-            _dateOfBirth.value.isNullOrEmpty() ) {
-            _errorMessage.value = "This field cannot be empty"
-            return false
-        }
-        return true
+        return !(_email.value.isNullOrEmpty() || _password.value.isNullOrEmpty() ||
+                _firstname.value.isNullOrEmpty() ||
+                _surname.value.isNullOrEmpty() ||
+                _gender.value.isNullOrEmpty() ||
+                _dateOfBirth.value.isNullOrEmpty())
     }
 
     // Clear error message
     private fun clearErrorMessage() { _errorMessage.value = null }
 
-    // Clear input fields after sign-up
+//    // Clear input fields after sign-up
     private fun clearInputFields() {
         _email.value = ""
         _password.value = ""
