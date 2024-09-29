@@ -39,7 +39,6 @@ fun SignUpScreen(
     val id = signUpViewModel.id
     val email by signUpViewModel.email.observeAsState("")
     val password by signUpViewModel.password.observeAsState("")
-    val errorMessage by signUpViewModel.errorMessage.observeAsState(null)
     val firstName by signUpViewModel.firstname.observeAsState("")
     val lastName by signUpViewModel.surname.observeAsState("")
     val selectedGender by signUpViewModel.gender.observeAsState("")
@@ -92,7 +91,9 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
                 supportingText = {
-                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                   if(firstName.isEmpty()){
+                       Text("This field is required", color = MaterialTheme.colorScheme.error)
+                   }
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -106,7 +107,9 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 1,
                 supportingText = {
-                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                   if(lastName.isEmpty()){
+                       Text("This field is required", color = MaterialTheme.colorScheme.error)
+                   }
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -118,14 +121,12 @@ fun SignUpScreen(
         EmailTextField(
             email = email,
             onEmailChange = signUpViewModel::onEmailChanged,
-            errorMessage = errorMessage
 
         )
         Spacer(modifier = Modifier.height(8.dp))
         PasswordTextField(
             password = password,
             onPasswordChange = signUpViewModel::onPasswordChanged,
-            errorMessage = errorMessage
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -135,7 +136,10 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = selectedGender,
                 supportingText = {
-                    errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    if(!selectedGender.contains("Male") && !selectedGender.contains("Female")) {
+                        Text("This field is required", color = MaterialTheme.colorScheme.error)
+                    }
+
                 },
                 onValueChange = {
                 },
@@ -215,7 +219,15 @@ fun SignUpScreen(
 
 
 
+
             )
+        if (dateOfBirth.isEmpty()){
+            Text(
+                text = "This field is required",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
         if (showCalendar) {
             DatePickerModal(
                 onDateSelected = {
