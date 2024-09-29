@@ -105,7 +105,6 @@ fun SettingsPopUp(
                 .padding(16.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(0.95f),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // First Card Section
@@ -246,6 +245,7 @@ fun ModalBottomHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+
                 .background(MaterialTheme.colorScheme.surface),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -281,8 +281,8 @@ fun SettingsItem(
 ) {
     Row(
         modifier = Modifier
-            .padding(16.dp)
             .clickable { onClick() }
+            .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
