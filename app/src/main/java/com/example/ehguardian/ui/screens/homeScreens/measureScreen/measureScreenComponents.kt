@@ -235,7 +235,7 @@ fun UploadButton(
 ) {
 
     TextButton(
-        modifier = modifier.padding(start = 170.dp),
+        modifier = modifier.padding(start = 120.dp),
         onClick = {
             onUpload()
         },
