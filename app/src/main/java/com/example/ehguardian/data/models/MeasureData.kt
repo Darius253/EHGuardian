@@ -6,5 +6,5 @@ data class MeasurementData(
     val diastolic: String = "",
     val pulse: String = "",
     val timestamp: String = "",
-    val bmi: String = ""
+    val bmi: String = "0"
 )
