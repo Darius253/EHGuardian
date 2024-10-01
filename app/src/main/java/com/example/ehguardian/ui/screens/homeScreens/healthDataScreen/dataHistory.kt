@@ -51,29 +51,39 @@ fun HealthDataScreen(
         Box(
             modifier= Modifier.fillMaxSize(),
         ) {
-            Column {
-                ToggleScreenButton(
-                    isFirstPage = isHistory,
-                    onButtonClick = { isHistory = !isHistory },
-                    firstText = "History",
-                    secondText = "Chart",
-                    color = MaterialTheme.colorScheme.primaryContainer,
+            if (userMeasurements.size > 1) {
+                Column {
+                    ToggleScreenButton(
+                        isFirstPage = isHistory,
+                        onButtonClick = { isHistory = !isHistory },
+                        firstText = "History",
+                        secondText = "Chart",
+                        color = MaterialTheme.colorScheme.primaryContainer,
 
-                    )
+                        )
 
-                if (isHistory) {
-                    HistoryPage(
-                        modifier = modifier,
-                        userMeasurements = userMeasurements
-                    )
-                } else {
-                    ChartPage(
-                        modifier = modifier,
-                        userMeasurements = userMeasurements
-                    )
+                    if (isHistory) {
+                        HistoryPage(
+                            modifier = modifier,
+                            userMeasurements = userMeasurements
+                        )
+                    } else {
+                        ChartPage(
+                            modifier = modifier,
+                            userMeasurements = userMeasurements
+                        )
+                    }
+
                 }
 
             }
+            else{
+                HistoryPage(
+                    modifier = modifier.padding(top = 50.dp),
+                    userMeasurements = userMeasurements
+                )
+            }
+
         }
         FloatingActionButton(
             onClick = {
