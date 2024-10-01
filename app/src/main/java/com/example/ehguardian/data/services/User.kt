@@ -108,7 +108,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     suspend fun updateUserDetails(userModel: UserModel): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
-            return try {
+             try {
                 // Update the user document with new details in Firestore
                 firestore.collection("users").document(user.uid)
                     .update(
@@ -124,10 +124,11 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                         )
                     ).await()  // Await to ensure it's executed in the coroutine
 
-                true  // Return true if successful
+               return  true  // Return true if successful
             } catch (e: Exception) {
                 e.printStackTrace()
-                false  // Return false if an error occurs
+
+                return false  // Return false if an error occurs
             }
         }
         return false  // Return false if no current user is found
@@ -136,7 +137,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
     suspend fun uploadUserMeasurement(measurementData: MeasurementData): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
-        return if (user != null) {
+         if (user != null) {
             try {
                 // Get reference to the user's document
                 val userDocRef = firestore.collection("users").document(user.uid)
@@ -147,13 +148,13 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                 // Upload the data
                 measurementRef.set(measurementData).await()
 
-                true // Return true if upload was successful
+                return true // Return true if upload was successful
             } catch (e: Exception) {
                 e.printStackTrace()
-                false // Return false if there was an error
+               return false // Return false if there was an error
             }
         } else {
-            false // Return false if the user is not authenticated
+            return false // Return false if the user is not authenticated
         }
     }
 
