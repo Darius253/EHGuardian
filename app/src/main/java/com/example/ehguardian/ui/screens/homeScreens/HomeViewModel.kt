@@ -61,7 +61,6 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                     _userMeasurements.value = measurements
                 }
 
-                Log.d("HomeViewModel", "Fetched ${userMeasurements.value.size} measurements")
             } catch (e: Exception) {
                 _errorMessage.value = e.message
             }
@@ -96,7 +95,6 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _errorMessage.value = e.message
-                Log.e("HomeViewModel", "Error uploading measurement: ${e.message}")
                 Toast.makeText(context, "Failed to upload measurement", Toast.LENGTH_SHORT).show()
             }
         }
@@ -115,7 +113,6 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
             } catch (e: Exception) {
                 // Log and show error message
-                Log.e("NewsViewModel", "Failed to fetch health news: ${e.message}", e)
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to fetch health news", Toast.LENGTH_SHORT).show()
             }
@@ -129,8 +126,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
                 val hospitalsList = userRepository.fetchNearbyHospitals(context)
                 _hospitals.value = hospitalsList
             } catch (e: Exception) {
-                // Log and show error message
-                Log.e("HospitalViewModel", "Failed to fetch nearby hospitals: ${e.message}", e)
+                // show error message
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to fetch nearby hospitals", Toast.LENGTH_SHORT).show()
 
