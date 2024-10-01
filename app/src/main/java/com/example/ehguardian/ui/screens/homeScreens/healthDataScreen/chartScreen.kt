@@ -55,7 +55,7 @@ fun ChartPage(
             labels = labels,
             modifier = Modifier
                 .fillMaxSize() // This ensures the LineChart fills the entire available space
-                .padding(16.dp), // Optional padding
+                .padding(10.dp), // Optional padding
             animation = fadeInAnimation(900),
             pointDrawer = FilledPointDrawer(
                 color = MaterialTheme.colorScheme.primary,
@@ -71,7 +71,7 @@ fun ChartPage(
                 labelTextColor = MaterialTheme.colorScheme.onSurface,
                 labelTextSize = MaterialTheme.typography.titleMedium.fontSize,
             ),
-            horizontalOffsetPercentage = 1f
+
         )
     }
 }
@@ -81,6 +81,9 @@ private fun getLinesForFilter(
     filter: String,
     userMeasurements: List<MeasurementData>
 ): Pair<List<Line>, List<String>> {
+    if (userMeasurements.isEmpty()) {
+        return Pair(emptyList(), emptyList())
+    }
     return when (filter) {
         "Blood Pressure" -> {
             // Reverse the userMeasurements list to display the last items first
@@ -125,6 +128,7 @@ private fun getLinesForFilter(
             Pair(lines, labels)
         }
 
+
         "Body Mass Index" -> {
             // Reverse the userMeasurements list to display the last items first
             val reversedMeasurements = userMeasurements.reversed()
@@ -132,7 +136,7 @@ private fun getLinesForFilter(
             val labels = List(reversedMeasurements.size) { index -> (index + 1).toString() }
             val points = reversedMeasurements.map { measurement ->
                 io.jetchart.line.Point(
-                    value = measurement.bmi.toFloatOrNull() ?: 0f,
+                    value =  measurement.bmi.toFloatOrNull() ?: 0f,
                     label = measurement.timestamp
                 )
             }
