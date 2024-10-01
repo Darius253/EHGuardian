@@ -128,20 +128,23 @@ fun Home(modifier: Modifier = Modifier,
                                 TextData(
                                     text = "kg/m²",
                                     value = (
-                                            if (userDetails != null) {
-                                                val weight = userDetails!!.userWeight.toDouble()
-                                                val height = userDetails!!.userHeight.toDouble()
+                                            if (userDetails != null && userDetails!!.userWeight.isNotEmpty() && userDetails!!.userHeight.isNotEmpty()) {
 
-                                                if (weight > 0 && height > 0) {
-                                                    // Perform the BMI calculation with floating-point division
-                                                    val bmi = weight / (height * height)
+                                                    val weight = userDetails!!.userWeight.toDouble()
+                                                    val height = userDetails!!.userHeight.toDouble()
 
-                                                    // Format the result to a string with two decimal places
-                                                    String.format("%.2f", bmi)
-                                                } else {
-                                                    "N/A" // Handle invalid weight or height (e.g. 0 or negative values)
+                                                    if (weight > 0 && height > 0) {
+                                                        // Perform the BMI calculation with floating-point division
+                                                        val bmi = weight / (height * height)
+
+                                                        // Format the result to a string with two decimal places
+                                                        String.format("%.2f", bmi)
+                                                    } else {
+                                                        "N/A" // Handle invalid weight or height (e.g. 0 or negative values)
+                                                    }
                                                 }
-                                            } else {
+
+                                            else {
                                                 "N/A"
                                             }
                                             ).toString(),
@@ -150,6 +153,7 @@ fun Home(modifier: Modifier = Modifier,
                                 )
 
                             }
+
                         }
                         item {
                             HealthCard(
