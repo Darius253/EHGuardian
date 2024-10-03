@@ -45,6 +45,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,13 +58,14 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.ui.AppViewModelProvider
 import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPopUp(
     onDismiss: () -> Unit,
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onSignOutSuccess: () -> Unit,
+    onSignOutSuccess: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showPopUp by rememberSaveable { mutableStateOf(false) }
@@ -71,16 +73,9 @@ fun SettingsPopUp(
     var showNearbyHospitals by rememberSaveable {
         mutableStateOf(false)
     }
+    val helpSheetState = rememberModalBottomSheetState()
 
-
-
-
-
-
-
-
-
-
+    val coroutineScope = rememberCoroutineScope()
 
 
     ModalBottomSheet(
@@ -94,12 +89,13 @@ fun SettingsPopUp(
         dragHandle = {
             ModalBottomHeader(
                 headerText = "Settings",
-                onDismiss = onDismiss)
+                onDismiss = onDismiss
+            )
         }
     ) {
-       if (showNearbyHospitals) {
-           NearbyHospitals(onDismiss = { showNearbyHospitals = false })
-       }
+        if (showNearbyHospitals) {
+            NearbyHospitals(onDismiss = { showNearbyHospitals = false })
+        }
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp)
@@ -108,109 +104,126 @@ fun SettingsPopUp(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // First Card Section
-           item {
-               Card(
-                   modifier = Modifier.fillMaxWidth(),
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
 
-                   ) {
-                   SettingsItem(
-                       leadingIcon = Icons.Filled.LocalHospital,
-                       title = "View Hospitals Nearby",
-                       onClick = {
-                           if (isLocationPermissionGranted(context)) {
-                               showNearbyHospitals = true
-                           }
-                           else{
-                               Toast.makeText(context, "Location permission is required to view nearby hospitals",
-                                   Toast.LENGTH_SHORT).show()
-                           }
+                    ) {
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.LocalHospital,
+                        title = "View Hospitals Nearby",
+                        onClick = {
+                            if (isLocationPermissionGranted(context)) {
+                                showNearbyHospitals = true
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Location permission is required to view nearby hospitals",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
 
-                       }
-                   )
-                   SettingsDivider()
-                   SettingsItem(
-                       leadingIcon = Icons.Filled.Notifications,
-                       title = "Push Notifications",
-                       onClick = { /*TODO*/ }
-                   )
-                   SettingsDivider()
-                   SettingsItem(
-                       leadingIcon = Icons.Filled.Download,
-                       title = "Export All Health Data",
-                       onClick = { /*TODO*/ }
-                   )
-                   SettingsDivider()
-                   SettingsItem(
-                       leadingIcon = Icons.Filled.QuestionAnswer,
-                       title = "Help & Support",
-                       onClick = { /*TODO*/ }
-                   )
-                   SettingsDivider()
-                   SettingsItem(
-                       leadingIcon = Icons.Filled.Language,
-                       title = "Change Language",
-                       onClick = { /*TODO*/ },
-                   )
-               }
-           }
+                        }
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Notifications,
+                        title = "Push Notifications",
+                        onClick = { /*TODO*/ }
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Download,
+                        title = "Export All Health Data",
+                        onClick = { /*TODO*/ }
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.QuestionAnswer,
+                        title = "Help & Support",
+                        onClick = {
+                            coroutineScope.launch {
+                                helpSheetState.show()
+                            }
 
-            item{Spacer(modifier = Modifier.height(16.dp))}
+
+
+                        }
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Language,
+                        title = "Change Language",
+                        onClick = { /*TODO*/ },
+                    )
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Second Card Section
 
-            item{Card(
-                modifier = Modifier.fillMaxWidth(),
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
 
-            ) {
-                SettingsItem(
-                    leadingIcon = Icons.Filled.PrivacyTip,
-                    title = "Terms & Conditions",
-                    onClick = { /*TODO*/ },
+                    ) {
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.PrivacyTip,
+                        title = "Terms & Conditions",
+                        onClick = { /*TODO*/ },
 
+                        )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Visibility,
+                        title = "Privacy Policy",
+                        onClick = { /*TODO*/ },
+
+                        )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Share,
+                        title = "Share App",
+                        onClick = { /*TODO*/ },
+                    )
+
+                }
+            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+
+                    ) {
+                    SettingsItem(
+                        leadingIcon = Icons.AutoMirrored.Filled.Logout,
+                        title = "Logout",
+                        onClick = {
+
+                            showPopUp = true
+
+                        },
+                        color = Color.Red
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        leadingIcon = Icons.Filled.Delete,
+                        title = "Delete Account",
+                        onClick = { /*TODO*/ },
+                        color = Color.Red
+                    )
+                }
+            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item {
+                Text(
+                    text = "Version 1.0.0",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                SettingsDivider()
-                SettingsItem(
-                    leadingIcon = Icons.Filled.Visibility,
-                    title = "Privacy Policy",
-                    onClick = { /*TODO*/ },
-
-                )
-                SettingsDivider()
-                SettingsItem(
-                    leadingIcon = Icons.Filled.Share,
-                    title = "Share App",
-                    onClick = { /*TODO*/ },
-                )
-
-            }}
-            item{Spacer(modifier = Modifier.height(16.dp))}
-
-            item{Card(
-                modifier = Modifier.fillMaxWidth(),
-
-            ) {
-                SettingsItem(
-                    leadingIcon = Icons.AutoMirrored.Filled.Logout,
-                    title = "Logout",
-                    onClick = {
-
-                        showPopUp = true
-
-                    },
-                    color = Color.Red
-                )
-                SettingsDivider()
-                SettingsItem(
-                    leadingIcon = Icons.Filled.Delete,
-                    title = "Delete Account",
-                    onClick = { /*TODO*/ },
-                    color = Color.Red
-                )
-            }}
-            item{Spacer(modifier = Modifier.height(16.dp))}
-            item{Text(text = "Version 1.0.0",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,)}
+            }
 
             item {
                 if (showPopUp) {
@@ -219,13 +232,13 @@ fun SettingsPopUp(
                         message = "Are you sure you want to sign out?",
                         confirmText = "Yes",
                         onDismiss = {
-                        showPopUp = false
-                    },
+                            showPopUp = false
+                        },
                         onSignOutSuccess = {
-                         signUpViewModel.signOut(
-                             onSignOutSuccess = onSignOutSuccess,
-                             context = context
-                         )
+                            signUpViewModel.signOut(
+                                onSignOutSuccess = onSignOutSuccess,
+                                context = context
+                            )
 
                             onDismiss()
 
@@ -233,9 +246,22 @@ fun SettingsPopUp(
                         })
                 }
             }
+            item{
+                if(helpSheetState.isVisible)
+                HelpAndSupportPopUp(
+                    onDismiss = { coroutineScope.launch {
+                        helpSheetState.hide()
+                    }
+                   },
+                    helpSheetState
+                )
+            }
+
         }
     }
 }
+
+
 
 @Composable
 fun ModalBottomHeader(
