@@ -34,9 +34,11 @@ import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 @Composable
 fun NearbyHospitals(
     onDismiss: () -> Unit,
-    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+     sheetState : SheetState = rememberModalBottomSheetState()
+
 ) {
-    val sheetState = rememberModalBottomSheetState()
+
     val hospitalList by homeViewModel.hospitals.observeAsState(emptyList())
     val context = LocalContext.current
 
