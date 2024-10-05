@@ -3,6 +3,8 @@ package com.example.ehguardian.ui.screens.authenticationScreens.login
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ehguardian.data.repositories.UserRepository
@@ -19,8 +21,9 @@ class LoginViewModel(
     var password = mutableStateOf("")
         private set
 
-    var isLoading = mutableStateOf(false)
-        private set
+    private var _isLoading = MutableLiveData(true)
+        var isLoading: LiveData<Boolean> = _isLoading
+
 
     var errorMessage = mutableStateOf<String?>(null)
         private set
@@ -38,33 +41,31 @@ class LoginViewModel(
     fun signIn(
         context: Context,
         onSignInSuccess: () -> Unit) {
-        isLoading.value = true
+        _isLoading.value = true
         if (email.value.isEmpty() || password.value.isEmpty()) {
             errorMessage.value = "Email and Password cannot be empty"
             Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
 
-            isLoading.value = false
+            _isLoading.value = false
             return
         }
 
         else {
-
         errorMessage.value = null
-
         viewModelScope.launch {
             try {
                 userRepository.userSignIn(email.value, password.value,
                     onComplete = {
                         success, userId ->
                         if (success) {
-                            isLoading.value = false
+                            _isLoading.value = false
                             errorMessage.value = null
                             Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                             onSignInSuccess()
 
                         }
                         else {
-                            isLoading.value = false
+                           _isLoading.value = false
                             errorMessage.value = "Login failed"
                             Toast.makeText(context, userId, Toast.LENGTH_SHORT).show()
 
@@ -74,11 +75,12 @@ class LoginViewModel(
 
 
             } catch (e: Exception) {
+                _isLoading.value = false
                 errorMessage.value = "Login failed: ${e.message}"
                 Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
-                isLoading.value = false
+                _isLoading.value = false
             } finally {
-                isLoading.value = false
+                _isLoading.value = false
             }
         }
     }

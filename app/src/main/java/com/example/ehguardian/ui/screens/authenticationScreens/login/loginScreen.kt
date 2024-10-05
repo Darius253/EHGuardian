@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +48,7 @@ fun LoginScreen(
 ) {
     val email by loginViewModel.email
     val password by loginViewModel.password
-    val isLoading by loginViewModel.isLoading
+    val isLoading by loginViewModel.isLoading.observeAsState()
     val context = LocalContext.current
 
     Column(
@@ -88,7 +89,7 @@ fun LoginScreen(
 
         // Sign In Button
 
-        if(!isLoading)
+        if(isLoading == true)
         Button(
             onClick = { loginViewModel.signIn(
                 context = context,
