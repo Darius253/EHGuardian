@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
@@ -31,7 +32,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -44,11 +47,12 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     onSignInClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
-     loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val email by loginViewModel.email
     val password by loginViewModel.password
-    val isLoading by loginViewModel.isLoading.observeAsState()
+    val isLoading by loginViewModel.isLoading.observeAsState(false)  // Default to false to avoid null
+
     val context = LocalContext.current
 
     Column(
@@ -76,7 +80,6 @@ fun LoginScreen(
         EmailTextField(
             email = email,
             onEmailChange = loginViewModel::onEmailChange,
-
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -87,44 +90,37 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign In Button
-
-        if(isLoading == true)
-        Button(
-            onClick = { loginViewModel.signIn(
-                context = context,
-                onSignInSuccess = {
-                    onSignInClick()
-
-                }
-
+        // Sign In Button or Loading Indicator based on isLoading
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                strokeWidth = 2.dp
             )
-
-
-                      },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp)
-
-        ) {
-            Text(
-                text = "Sign In",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
-
-            )
+        } else {
+            Button(
+                onClick = {
+                    loginViewModel.signIn(
+                        context = context,
+                        onSignInSuccess = { onSignInClick() }
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Sign In",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
+                )
+            }
         }
-        else CircularProgressIndicator(
-            modifier = Modifier.size(24.dp),
-            color = MaterialTheme.colorScheme.onSurface,
-            strokeWidth = 2.dp
-        )
 
         // Forgot Password
         Spacer(modifier = Modifier.height(3.dp))
-
         TextButton(
-            onClick = onForgotPasswordClick // Use the callback
+            onClick = onForgotPasswordClick
         ) {
             Text(
                 text = "Forgot Password? Tap Here!",
@@ -137,9 +133,10 @@ fun LoginScreen(
     }
 }
 
+
 @Composable
 fun EmailTextField(email: String, onEmailChange: (String) -> Unit ) {
-
+    val focusManager: FocusManager = LocalFocusManager.current
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
@@ -147,9 +144,10 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit ) {
         onValueChange = onEmailChange,
         maxLines = 1,
         singleLine = true,
+
         label = { Text(text = "Email") },
         supportingText = {
-        if(email.isNotEmpty() && !EMAIL_ADDRESS.matcher(email).matches() )
+       if(email.isNotEmpty() && !EMAIL_ADDRESS.matcher(email).matches() )
             Text("Email must be valid", color = MaterialTheme.colorScheme.error)
 
             else if(email.isEmpty())
@@ -164,7 +162,8 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit ) {
             )
         },
         shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
     )
 }
 
@@ -174,6 +173,8 @@ fun PasswordTextField(
     onPasswordChange: (String) -> Unit,
 ) {
     var isVisible by rememberSaveable { mutableStateOf(false) }
+    val focusManager: FocusManager = LocalFocusManager.current
+
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
@@ -204,6 +205,7 @@ fun PasswordTextField(
             }
         },
         shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
     )
 }
