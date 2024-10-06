@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.repositories.UserRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,8 +25,8 @@ class SignUpViewModel(
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private var _isLoading = MutableLiveData(false) // Initially not loading
+    var isLoading: LiveData<Boolean> = _isLoading
 
     private val _firstname = MutableLiveData<String>()
     val firstname: LiveData<String> = _firstname
@@ -70,8 +71,8 @@ class SignUpViewModel(
     fun onGenderChanged(newGender: String) { _gender.value = newGender }
     fun onWeightChanged(newWeight: Double) { _weight.value = newWeight }
     fun onHeightChanged(newHeight: Double) { _height.value = newHeight }
-    fun onBloodSugarLevelChanged(newBloodSugarLevel: Double) { _bloodSugarLevel.value = newBloodSugarLevel }
-    fun onCholesterolLevelChanged(newCholesterolLevel: Double) { _cholesterolLevel.value = newCholesterolLevel }
+//    fun onBloodSugarLevelChanged(newBloodSugarLevel: Double) { _bloodSugarLevel.value = newBloodSugarLevel }
+//    fun onCholesterolLevelChanged(newCholesterolLevel: Double) { _cholesterolLevel.value = newCholesterolLevel }
 
     // Update date of birth with day, month, and year only
     fun onDateOfBirthChanged(newDateOfBirth: Date) {
@@ -80,11 +81,13 @@ class SignUpViewModel(
 
     // Sign-up function
     fun signUp(user: UserModel, context: Context, onSignUpSuccess: () -> Unit) {
-        if (!validateInputs()) return
-        _isLoading.value = true
+        if (!validateInputs())
+            return
         clearErrorMessage()
 
         viewModelScope.launch {
+            _isLoading.value = true
+            delay(1000)
             try {
                 userRepository.userSignUp(user, onComplete = {
                     success, errorMessage ->
@@ -92,13 +95,14 @@ class SignUpViewModel(
                         Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
                         onSignUpSuccess()
                         clearInputFields()
+                        _isLoading.value = false
                     } else {
                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                        _isLoading.value = false
                     }
                 })
                 clearErrorMessage()
 
-                _isLoading.value = false
 //                clearInputFields() // Optional: clear fields after successful sign-up
             } catch (e: Exception) {
                 _errorMessage.value = e.message
