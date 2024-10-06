@@ -152,8 +152,6 @@ fun MeasureScreen(
                 onHeartRateChange = setHeartRate,
                 onDone = { focusManager.clearFocus() },
                 onUpload = {
-
-                    setShowDialog(false)
                     homeViewModel.uploadUserMeasurement(
                         context = context,
                         measurementData = MeasurementData(
@@ -162,13 +160,17 @@ fun MeasureScreen(
                             pulse = heartRate,
                             timestamp = formattedDate,
                             bmi = String.format("%.2f", bmi)
-                        )
+                        ),
+                        onSuccess = {
+                            setShowDialog(false)
+                            homeViewModel.fetchUserDetails()
+                            homeViewModel.fetchUserMeasurements()
+                            setSystolic("0")
+                            setDiastolic("0")
+                            setHeartRate("0")
+                        }
                     )
-                    homeViewModel.fetchUserDetails()
-                    homeViewModel.fetchUserMeasurements()
-                    setSystolic("0")
-                    setDiastolic("0")
-                    setHeartRate("0")
+
 
                 }
             )
