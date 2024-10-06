@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ehguardian.data.repositories.UserRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
@@ -21,12 +22,12 @@ class LoginViewModel(
     var password = mutableStateOf("")
         private set
 
-    private var _isLoading = MutableLiveData(true)
-        var isLoading: LiveData<Boolean> = _isLoading
+    private var _isLoading = MutableLiveData(false) // Initially not loading
+    var isLoading: LiveData<Boolean> = _isLoading
 
 
-    var errorMessage = mutableStateOf<String?>(null)
-        private set
+    private var errorMessage = mutableStateOf<String?>(null)
+
 
     // Update email and password
     fun onEmailChange(newEmail: String) {
@@ -40,49 +41,40 @@ class LoginViewModel(
 
     fun signIn(
         context: Context,
-        onSignInSuccess: () -> Unit) {
-        _isLoading.value = true
+        onSignInSuccess: () -> Unit
+    ) {
+
         if (email.value.isEmpty() || password.value.isEmpty()) {
             errorMessage.value = "Email and Password cannot be empty"
             Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
-
-            _isLoading.value = false
             return
-        }
-
-        else {
-        errorMessage.value = null
-        viewModelScope.launch {
-            try {
-                userRepository.userSignIn(email.value, password.value,
-                    onComplete = {
-                        success, userId ->
+        } else {
+            errorMessage.value = null
+            _isLoading.value = true
+            // Show loading indicator
+            viewModelScope.launch {
+                try {
+                    delay(
+                        1000
+                    )
+                    userRepository.userSignIn(email.value, password.value) { success, error ->
                         if (success) {
-                            _isLoading.value = false
                             errorMessage.value = null
                             Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                             onSignInSuccess()
-
-                        }
-                        else {
-                           _isLoading.value = false
+                        } else {
                             errorMessage.value = "Login failed"
-                            Toast.makeText(context, userId, Toast.LENGTH_SHORT).show()
-
+                            Toast.makeText(context, "Login failed: $error", Toast.LENGTH_LONG).show()
                         }
-
-                })
-
-
-            } catch (e: Exception) {
-                _isLoading.value = false
-                errorMessage.value = "Login failed: ${e.message}"
-                Toast.makeText(context, errorMessage.value, Toast.LENGTH_SHORT).show()
-                _isLoading.value = false
-            } finally {
-                _isLoading.value = false
+                    }
+                } catch (e: Exception) {
+                    errorMessage.value = "Login failed: ${e.message}"
+                    Toast.makeText(context, errorMessage.value, Toast.LENGTH_LONG).show()
+                } finally {
+                    _isLoading.value = false
+                }
             }
         }
     }
-        }
+
 }
