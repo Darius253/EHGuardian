@@ -2,7 +2,6 @@ package com.example.ehguardian.ui.screens.homeScreens
 
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,6 +12,7 @@ import com.example.ehguardian.data.models.MeasurementData
 import com.example.ehguardian.data.models.NewsItem
 import com.example.ehguardian.data.models.UserModel
 import com.example.ehguardian.data.repositories.UserRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,10 +29,11 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val _userMeasurements = MutableStateFlow<List<MeasurementData>>(emptyList())
     val userMeasurements: StateFlow<List<MeasurementData>> = _userMeasurements
 
+  private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
 
 
     private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> = _errorMessage
 
     private val _newsLiveData = MutableLiveData<List<NewsItem>>()
     val newsLiveData: LiveData<List<NewsItem>> = _newsLiveData
@@ -56,6 +57,7 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
      fun fetchUserMeasurements() {
         viewModelScope.launch {
+
             try {
                 userRepository.getUserMeasurements().collect { measurements ->
                     _userMeasurements.value = measurements
@@ -69,27 +71,36 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     fun updateUserDetails(user: UserModel, context: Context) {
         viewModelScope.launch {
+            _isLoading.value = true
+
             try {
+                delay(1000)
                 val success = userRepository.updateUserDetails(user)
                 _userDetails.value = user
                 if (success) {
                     Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                    _isLoading.value = false
                 } else {
                     Toast.makeText(context, "Failed to update details", Toast.LENGTH_SHORT).show()
+                    _isLoading.value = false
                 }
             } catch (e: Exception) {
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to update details", Toast.LENGTH_LONG).show()
+                _isLoading.value = false
             }
         }
     }
 
-    fun uploadUserMeasurement(context: Context, measurementData: MeasurementData) {
+    fun uploadUserMeasurement(context: Context, measurementData: MeasurementData, onSuccess: () -> Unit) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
+                _isLoading.value = false
                 val success = userRepository.uploadUserMeasurement(measurementData)
                 if (success) {
                     Toast.makeText(context, "Measurement uploaded successfully", Toast.LENGTH_SHORT).show()
+                    onSuccess()
                 } else {
                     Toast.makeText(context, "Failed to upload measurement", Toast.LENGTH_SHORT).show()
                 }
