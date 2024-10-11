@@ -131,17 +131,23 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     }
 
     fun fetchNearbyHospitals(context: Context) {
+        _isLoading.value = true
         viewModelScope.launch {
+            delay(1000)
             try {
                 // Fetch the hospitals from the repository
                 val hospitalsList = userRepository.fetchNearbyHospitals(context)
                 _hospitals.value = hospitalsList
+                _isLoading.value = false
             } catch (e: Exception) {
                 // show error message
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to fetch nearby hospitals", Toast.LENGTH_SHORT).show()
+                _isLoading.value = false
 
             }
+
+
 
         }
     }
