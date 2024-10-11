@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ehguardian.R
@@ -41,6 +42,7 @@ fun NearbyHospitals(
 
     val hospitalList by homeViewModel.hospitals.observeAsState(emptyList())
     val context = LocalContext.current
+    val isLoading by homeViewModel.isLoading.observeAsState(false)
 
     LaunchedEffect(Unit) {
         homeViewModel.fetchNearbyHospitals(context = context)
@@ -55,46 +57,59 @@ fun NearbyHospitals(
         sheetState = sheetState,
         dragHandle = { ModalBottomHeader(headerText = "Nearby Hospitals", onDismiss = onDismiss) }
     ) {
-        if (hospitalList.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(32.dp).align(Alignment.CenterHorizontally).padding(vertical = 16.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                strokeWidth = 2.dp,
+
             )
-            {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+        } else {
+            if (hospitalList.isEmpty()) {
+                Column(
+
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 )
+                {
+                    Image(
+                        painter = painterResource(id = R.drawable.disconnected),
+                        contentDescription = "No data image"
+                    )
+
+                    Text(text = "No nearby hospitals found. Check your internet connection and try again.",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp),)
+                }
             }
-        }
-        LazyColumn(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .fillMaxHeight(0.95f),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            items(hospitalList.size) { item ->
-                val hospital = hospitalList[item]
-                LocationInfo(
-                    name = hospital.displayName.name,
-                    address = hospital.address,
-                    rating = when (hospital.rating) {
-                        null -> "N/A"
-                        else -> "${hospital.rating}/5.0"
-                    },
-                    businessStatus = hospital.businessStatus,
-                    status = "OPEN",
+            LazyColumn(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.9f),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                items(hospitalList.size) { item ->
+                    val hospital = hospitalList[item]
+                    LocationInfo(
+                        name = hospital.displayName.name,
+                        address = hospital.address,
+                        rating = when (hospital.rating) {
+                            null -> "N/A"
+                            else -> "${hospital.rating}/5.0"
+                        },
+                        businessStatus = hospital.businessStatus,
+                        status = "OPEN",
 
-                    phone = hospital.phone,
-                    googleMapsUri = hospital.googleMapsUri,
+                        phone = hospital.phone,
+                        googleMapsUri = hospital.googleMapsUri,
 
-                )
+                        )
+                }
             }
         }
     }
 }
-
 
 
 @Composable
