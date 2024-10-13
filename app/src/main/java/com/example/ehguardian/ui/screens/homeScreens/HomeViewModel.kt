@@ -114,18 +114,21 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
 
     fun fetchHealthNews(context: Context) {
+        _isLoading.value = true
         viewModelScope.launch {
+            delay(1000)
             try {
                 // Fetch the news from the repository
                 val newsList = userRepository.fetchHealthNews()
 
                 // Update UI or LiveData with the fetched news
                 _newsLiveData.value = newsList // Assuming _newsLiveData is a MutableLiveData<List<NewsItem>>
-
+                _isLoading.value = false
             } catch (e: Exception) {
                 // Log and show error message
                 _errorMessage.value = e.message
                 Toast.makeText(context, "Failed to fetch health news", Toast.LENGTH_SHORT).show()
+                _isLoading.value = false
             }
         }
     }
