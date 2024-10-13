@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -51,6 +52,7 @@ fun HealthTrends(
 ) {
         val context = LocalContext.current
     val newsList by homeViewModel.newsLiveData.observeAsState(emptyList())
+    val loading by homeViewModel.isLoading.observeAsState(false)
     LaunchedEffect(Unit) {
         homeViewModel.fetchHealthNews(context = context)
     }
@@ -70,6 +72,13 @@ fun HealthTrends(
             },
             onDismissRequest = onDismiss
         ) {
+            if(loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 20.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+                else{
 
             if (newsList.isEmpty()) {
 
@@ -124,7 +133,7 @@ fun HealthTrends(
             }
         }
     }
-}
+}}
 
 @Composable
 fun NewsCard(
