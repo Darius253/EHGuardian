@@ -1,6 +1,12 @@
 package com.example.ehguardian.ui.screens.homeScreens.profile
 
 
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,10 +45,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,24 +62,61 @@ import com.example.ehguardian.R
 
 
 @Composable
-fun ProfileImage() {
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .size(120.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
+fun profileImage(
+
+) : Uri? {
+    val context = LocalContext.current
+    var selectedImage by remember { mutableStateOf<Uri?>(null) }
+    val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            selectedImage = uri
+        } else {
+            Toast.makeText(context, "No image selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+    Box {
+
+        Box(
             modifier = Modifier
-                .size(100.dp)
-                .padding(16.dp),
-            painter = painterResource(id = R.drawable.user),
-            contentDescription = "User Profile Image",
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+                .clip(CircleShape)
+                .size(120.dp)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(16.dp),
+                painter = painterResource(id = R.drawable.user),
+                contentDescription = "User Profile Image",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+            )
+
+        }
+
+        Image(
+            painter = painterResource(id = R.drawable.camera),
+            contentDescription = "Upload Image Button",
+            modifier = Modifier
+                .clickable {
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
+
+                }
+                .size(35.dp)
+                .align(Alignment.BottomEnd)
         )
     }
+    return selectedImage
 }
+
+
+
+
+
+
+
+
 
 @Composable
 fun NameInputFields(
@@ -97,6 +145,10 @@ fun NameInputFields(
         )
     }
 }
+
+
+
+
 
 @Composable
 fun GenderDropdown(
@@ -184,10 +236,13 @@ fun DateOfBirthInputField(
                 }
             },
             shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.clickable(
-                onClick = { onCalendarToggle(!showCalendar)
-                }
-            ).fillMaxWidth()
+            modifier = Modifier
+                .clickable(
+                    onClick = {
+                        onCalendarToggle(!showCalendar)
+                    }
+                )
+                .fillMaxWidth()
         )
     }
 }
@@ -364,7 +419,8 @@ fun InputField(
                                 1.dp,
                                 MaterialTheme.colorScheme.onSurface,
                                 MaterialTheme.shapes.medium
-                            ).background(MaterialTheme.colorScheme.tertiaryContainer)
+                            )
+                            .background(MaterialTheme.colorScheme.tertiaryContainer)
                         ,
                         contentAlignment = Alignment.Center,
                     ) {
