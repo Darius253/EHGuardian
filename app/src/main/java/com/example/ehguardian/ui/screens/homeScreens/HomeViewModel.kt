@@ -2,6 +2,7 @@ package com.example.ehguardian.ui.screens.homeScreens
 
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
 
+
     private val _hospitals = MutableLiveData<List<HospitalItem>>()
     val hospitals: LiveData<List<HospitalItem>> = _hospitals
 
@@ -31,6 +33,10 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
   private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
+
+
+    private val _selectedUserImage = MutableStateFlow<Uri?>(null)
+    val selectedUserImage: StateFlow<Uri?> = _selectedUserImage
 
 
     private val _errorMessage = MutableLiveData<String?>()
@@ -154,6 +160,9 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
         }
     }
+
+
+
 
 }
 
