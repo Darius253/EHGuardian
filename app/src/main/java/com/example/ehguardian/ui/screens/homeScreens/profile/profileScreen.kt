@@ -1,6 +1,7 @@
 package com.example.ehguardian.ui.screens.homeScreens.profile
 
 
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -67,94 +68,109 @@ fun ProfileScreen(
                 bloodSugarLevel != initialBloodSugarLevel ||
                 dateOfBirth != initialDateOfBirth
 
-        LazyColumn(
-            modifier = modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item { ProfileImage() }
-            item { Spacer(modifier = Modifier.height(50.dp)) }
-            item {
-                NameInputFields(
-                    firstName = firstName,
-                    lastName = lastName,
-                    onNameChange = { (newFirstName, newLastName) ->
-                        firstName = newFirstName
-                        lastName = newLastName
-                    },
-                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
-                )
-            }
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-            item {
-                GenderDropdown(
-                    label = "Gender",
-                    selectedGender = selectedGender,
-                    isExpanded = isGenderMenuExpanded,
-                    onGenderSelected = { selectedGender = it },
-                    onExpandedChange = { isGenderMenuExpanded = it }
-                )
-            }
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-            item {
-                DateOfBirthInputField(
-                    label = "Date of Birth",
-                    dateOfBirth = dateOfBirth.toString(),
-                    showCalendar = showCalendar,
-                    onCalendarToggle = { showCalendar = it },
-                    onValueChange = { newDateOfBirth ->
-                        dateOfBirth = newDateOfBirth
-                    },
-                    // Clear focus after selecting date
-                )
-            }
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-            item {
-                WeightAndHeightInputFields(
-                    weight = weight,
-                    height = height,
-                    onWeightChange = { weight = it },
-                    onHeightChange = { height = it },
-                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
-                )
-            }
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-            item {
-                CholesterolAndBloodSugarInputFields(
-                    cholesterolLevel = cholesterolLevel,
-                    bloodSugarLevel = bloodSugarLevel,
-                    onCholesterolChange = { cholesterolLevel = it },
-                    onBloodSugarChange = { bloodSugarLevel = it },
-                    onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
-                )
-            }
-            item { Spacer(modifier = Modifier.height(50.dp)) }
 
-            // Conditionally show the "Update" button only if any field is changed
-            if (isChanged) {
+
+
+
+
+
+        Box {
+
+            LazyColumn(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+
+
                 item {
-                    if (isLoaded) {
-                        CircularProgressIndicator()
-                    } else {
+                    ProfileImage(
 
-                        UpdateDetailsButton(onClick = {
-                            userDetails?.let {
-                                homeViewModel.updateUserDetails(
-                                    it.copy(
-                                        firstname = firstName,
-                                        lastname = lastName,
-                                        gender = selectedGender,
-                                        userWeight = weight,
-                                        userHeight = height,
-                                        cholesterolLevel = cholesterolLevel,
-                                        bloodSugarLevel = bloodSugarLevel,
-                                        dateOfBirth = dateOfBirth
-                                    ),
-                                    context,
-                                )
-                            }
-                        })
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(50.dp)) }
+                item {
+                    NameInputFields(
+                        firstName = firstName,
+                        lastName = lastName,
+                        onNameChange = { (newFirstName, newLastName) ->
+                            firstName = newFirstName
+                            lastName = newLastName
+                        },
+                        onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item {
+                    GenderDropdown(
+                        label = "Gender",
+                        selectedGender = selectedGender,
+                        isExpanded = isGenderMenuExpanded,
+                        onGenderSelected = { selectedGender = it },
+                        onExpandedChange = { isGenderMenuExpanded = it }
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item {
+                    DateOfBirthInputField(
+                        label = "Date of Birth",
+                        dateOfBirth = dateOfBirth.toString(),
+                        showCalendar = showCalendar,
+                        onCalendarToggle = { showCalendar = it },
+                        onValueChange = { newDateOfBirth ->
+                            dateOfBirth = newDateOfBirth
+                        },
+                        // Clear focus after selecting date
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item {
+                    WeightAndHeightInputFields(
+                        weight = weight,
+                        height = height,
+                        onWeightChange = { weight = it },
+                        onHeightChange = { height = it },
+                        onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item {
+                    CholesterolAndBloodSugarInputFields(
+                        cholesterolLevel = cholesterolLevel,
+                        bloodSugarLevel = bloodSugarLevel,
+                        onCholesterolChange = { cholesterolLevel = it },
+                        onBloodSugarChange = { bloodSugarLevel = it },
+                        onDone = { focusManager.clearFocus() } // Clear focus when "Done" is clicked
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(50.dp)) }
+
+                // Conditionally show the "Update" button only if any field is changed
+                if (isChanged) {
+                    item {
+                        if (isLoaded) {
+                            CircularProgressIndicator()
+                        } else {
+
+                            UpdateDetailsButton(onClick = {
+                                userDetails?.let {
+                                    homeViewModel.updateUserDetails(
+                                        it.copy(
+                                            firstname = firstName,
+                                            lastname = lastName,
+                                            gender = selectedGender,
+                                            userWeight = weight,
+                                            userHeight = height,
+                                            cholesterolLevel = cholesterolLevel,
+                                            bloodSugarLevel = bloodSugarLevel,
+                                            dateOfBirth = dateOfBirth
+                                        ),
+                                        context,
+                                    )
+                                }
+                            })
+                        }
                     }
                 }
             }
@@ -177,5 +193,7 @@ fun ProfileScreen(
                     )
 
         }
+
     }
 }
+
