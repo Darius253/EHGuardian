@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -53,61 +54,95 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.ehguardian.R
+import com.example.ehguardian.ui.AppViewModelProvider
+import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 
 
 @Composable
-fun profileImage(
+fun ProfileImage(
+    selectedImage: Uri? = null,
+    onImageSelected: (Uri) -> Unit
 
-) : Uri? {
+)  {
     val context = LocalContext.current
-    var selectedImage by remember { mutableStateOf<Uri?>(null) }
+
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            selectedImage = uri
+        onImageSelected(uri)
+
+           Toast.makeText(context, "Image selected", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "No image selected", Toast.LENGTH_SHORT).show()
         }
     }
-    Box {
 
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(120.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(16.dp),
-                painter = painterResource(id = R.drawable.user),
-                contentDescription = "User Profile Image",
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
-            )
 
-        }
+        Box {
 
-        Image(
-            painter = painterResource(id = R.drawable.camera),
-            contentDescription = "Upload Image Button",
-            modifier = Modifier
-                .clickable {
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            if (selectedImage != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(120.dp)
+                ){
 
+                    AsyncImage(model = selectedImage,
+                        contentDescription ="Profile Image",
+                        contentScale = ContentScale.Crop,
+                        filterQuality = FilterQuality.High,
+
+                    )
 
                 }
-                .size(35.dp)
-                .align(Alignment.BottomEnd)
-        )
-    }
-    return selectedImage
+
+
+            }else {
+
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(120.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(16.dp),
+                        painter = painterResource(id = R.drawable.user),
+                        contentDescription = "User Profile Image",
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+                    )
+
+                }
+            }
+
+            Image(
+                painter = painterResource(id = R.drawable.camera),
+                contentDescription = "Upload Image Button",
+                modifier = Modifier
+                    .clickable {
+                        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
+
+                    }
+                    .size(35.dp)
+                    .align(Alignment.BottomEnd)
+            )
+        }
+
+
 }
 
 
