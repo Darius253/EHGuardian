@@ -7,6 +7,7 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -24,10 +25,14 @@ import com.example.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.storageMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import java.io.File
 import kotlin.coroutines.resume
 
 class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
@@ -107,9 +112,21 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
     suspend fun updateUserDetails(userModel: UserModel): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
+       val  storageRef = Firebase.storage.reference;
         if (user != null) {
              try {
-                // Update the user document with new details in Firestore
+                 val file = Uri.fromFile(File("path/to/${userModel.userImage}"))
+                val  metadata = storageMetadata {
+                     contentType = "image/jpeg"
+                 }
+                 val userProfileImageRef = storageRef
+                     .child("images/${file.lastPathSegment}")
+                 val uploadUserImage = userProfileImageRef.putFile(file, metadata)
+
+                 uploadUserImage.await()
+
+
+                 // Update the user document with new details in Firestore
                 firestore.collection("users").document(user.uid)
                     .update(
                         mapOf(
@@ -120,7 +137,8 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                             "userHeight" to userModel.userHeight,
                             "dateOfBirth" to userModel.dateOfBirth,
                             "bloodSugarLevel" to userModel.bloodSugarLevel,
-                            "cholesterolLevel" to userModel.cholesterolLevel
+                            "cholesterolLevel" to userModel.cholesterolLevel,
+                            "userImage" to userProfileImageRef.path,
                         )
                     ).await()  // Await to ensure it's executed in the coroutine
 
