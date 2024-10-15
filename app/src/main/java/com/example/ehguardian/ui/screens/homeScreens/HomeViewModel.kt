@@ -4,6 +4,7 @@ package com.example.ehguardian.ui.screens.homeScreens
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,8 +36,8 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
 
-    private val _selectedUserImage = MutableStateFlow<Uri?>(null)
-    val selectedUserImage: StateFlow<Uri?> = _selectedUserImage
+    private val _selectedUserImage = MutableLiveData<Uri?>(null)
+    val selectedUserImage: LiveData<Uri?> = _selectedUserImage
 
 
     private val _errorMessage = MutableLiveData<String?>()
@@ -160,6 +161,8 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
         }
     }
+
+
 
 
 
