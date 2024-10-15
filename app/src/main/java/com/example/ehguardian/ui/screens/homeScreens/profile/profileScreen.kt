@@ -43,6 +43,7 @@ fun ProfileScreen(
         val initialCholesterolLevel = userDetails!!.cholesterolLevel
         val initialBloodSugarLevel = userDetails!!.bloodSugarLevel
         val initialDateOfBirth = userDetails!!.dateOfBirth
+        val initialImage = userDetails!!.userImage
 
         // Current editable values
         var firstName by rememberSaveable { mutableStateOf(initialFirstName) }
@@ -52,10 +53,14 @@ fun ProfileScreen(
         var selectedGender by rememberSaveable { mutableStateOf(initialGender) }
         var cholesterolLevel by rememberSaveable { mutableStateOf(initialCholesterolLevel) }
         var bloodSugarLevel by rememberSaveable { mutableStateOf(initialBloodSugarLevel) }
+        var selectedImage by rememberSaveable { mutableStateOf(initialImage) }
         var isGenderMenuExpanded by rememberSaveable { mutableStateOf(false) }
         var showCalendar by rememberSaveable { mutableStateOf(false) }
         val datePickerState = rememberDatePickerState()
         var dateOfBirth by rememberSaveable { mutableStateOf(initialDateOfBirth) }
+
+
+
         val isLoaded by homeViewModel.isLoading.observeAsState(false)
 
         // Compare current values with initial values
@@ -66,13 +71,7 @@ fun ProfileScreen(
                 selectedGender != initialGender ||
                 cholesterolLevel != initialCholesterolLevel ||
                 bloodSugarLevel != initialBloodSugarLevel ||
-                dateOfBirth != initialDateOfBirth
-
-
-
-
-
-
+                dateOfBirth != initialDateOfBirth || selectedImage != initialImage
 
         Box {
 
@@ -86,7 +85,10 @@ fun ProfileScreen(
 
                 item {
                     ProfileImage(
-
+                        selectedImage = selectedImage,
+                        onImageSelected = {
+                            selectedImage = it
+                        }
                     )
                 }
                 item { Spacer(modifier = Modifier.height(50.dp)) }
@@ -152,7 +154,6 @@ fun ProfileScreen(
                         if (isLoaded) {
                             CircularProgressIndicator()
                         } else {
-
                             UpdateDetailsButton(onClick = {
                                 userDetails?.let {
                                     homeViewModel.updateUserDetails(
@@ -164,7 +165,8 @@ fun ProfileScreen(
                                             userHeight = height,
                                             cholesterolLevel = cholesterolLevel,
                                             bloodSugarLevel = bloodSugarLevel,
-                                            dateOfBirth = dateOfBirth
+                                            dateOfBirth = dateOfBirth,
+                                            userImage = selectedImage,
                                         ),
                                         context,
                                     )
