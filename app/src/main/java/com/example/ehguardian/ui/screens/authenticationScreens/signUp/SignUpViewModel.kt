@@ -17,8 +17,7 @@ class SignUpViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _id = UUID.randomUUID().toString()
-    val id: String = _id
+
 
 
     // Mutable live data for the input fields
