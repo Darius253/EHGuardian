@@ -36,7 +36,7 @@ fun SignUpScreen(
 
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-    val id = signUpViewModel.id
+
     val email by signUpViewModel.email.observeAsState("")
     val password by signUpViewModel.password.observeAsState("")
     val firstName by signUpViewModel.firstname.observeAsState("")
@@ -249,7 +249,6 @@ fun SignUpScreen(
         if (!isLoading)
         Button(
             onClick = {signUpViewModel.signUp(user = UserModel(
-                id = id,
                 email = email,
                 password = password,
                 firstname = firstName,
@@ -261,6 +260,7 @@ fun SignUpScreen(
                 createdDate = formattedDate,
                 bloodSugarLevel = "",
                 cholesterolLevel = "",
+                userImage = "",
             ),
                 context = context,
                       onSignUpSuccess = onSignUpClick
