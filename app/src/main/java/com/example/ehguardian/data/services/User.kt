@@ -27,7 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.google.firebase.storage.storageMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -80,6 +79,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             // Reference to the Firestore document
+
             val userDoc = firestore.collection("users").document(user.uid)
             try {
                 // Fetch the document asynchronously using coroutines
@@ -102,7 +102,6 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                     )
                 }
             } catch (e: Exception) {
-                // Handle the error, log it or return null
                 e.printStackTrace()
             }
         }
@@ -112,16 +111,14 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
     suspend fun updateUserDetails(userModel: UserModel): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
-       val  storageRef = Firebase.storage.reference;
+       val  storageRef = Firebase.storage.reference
         if (user != null) {
              try {
                  val file = Uri.fromFile(File("path/to/${userModel.userImage}"))
-                val  metadata = storageMetadata {
-                     contentType = "image/jpeg"
-                 }
+
                  val userProfileImageRef = storageRef
                      .child("images/${file.lastPathSegment}")
-                 val uploadUserImage = userProfileImageRef.putFile(file, metadata)
+                 val uploadUserImage = userProfileImageRef.putFile(file)
 
                  uploadUserImage.await()
 
