@@ -4,7 +4,6 @@ import java.io.Serializable
 
 
 data class UserModel(
-    var id: String,
     var email: String = "",
     var gender: String,
     var password: String = "",
@@ -13,10 +12,10 @@ data class UserModel(
     var userWeight: String,
     var userHeight: String,
     var dateOfBirth: Serializable,
-    var createdDate: Serializable = System.currentTimeMillis(),
+    var createdDate: Serializable,
     var cholesterolLevel:String,
     var bloodSugarLevel: String,
-    var userImage: Uri? = null,
+    var userImage: String,
 
 
     )
