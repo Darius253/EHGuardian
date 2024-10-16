@@ -1,7 +1,7 @@
 package com.example.ehguardian.ui.screens.homeScreens.profile
 
 
-import android.net.Uri
+
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +31,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -48,7 +48,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,27 +61,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.example.ehguardian.R
-import com.example.ehguardian.ui.AppViewModelProvider
-import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
 
 
 @Composable
 fun ProfileImage(
-    selectedImage: Uri? = null,
-    onImageSelected: (Uri) -> Unit
+    selectedImage: String,
+    onImageSelected: (String) -> Unit
 
 )  {
     val context = LocalContext.current
 
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-        onImageSelected(uri)
+        onImageSelected(uri.toString())
 
-           Toast.makeText(context, "Image selected", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "No image selected", Toast.LENGTH_SHORT).show()
         }
@@ -90,19 +85,19 @@ fun ProfileImage(
 
         Box {
 
-            if (selectedImage != null) {
+            if (selectedImage.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
                         .size(120.dp)
                 ){
 
-                    AsyncImage(model = selectedImage,
+                   AsyncImage(model = selectedImage,
                         contentDescription ="Profile Image",
                         contentScale = ContentScale.Crop,
-                        filterQuality = FilterQuality.High,
-
+                        filterQuality = FilterQuality.Medium,
                     )
+
 
                 }
 
