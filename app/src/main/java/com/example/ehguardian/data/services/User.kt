@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
-import java.io.File
+import java.util.Calendar
 import kotlin.coroutines.resume
 
 class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
@@ -46,7 +46,25 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid
-                    firestore.collection("users").document(userId!!).set(userModel)
+                    firestore.collection("users").document(userId!!).set(
+                        mapOf(
+                            "firstname" to userModel.firstname,
+                            "lastname" to userModel.lastname,
+                            "gender" to userModel.gender,
+                            "userWeight" to userModel.userWeight,
+                            "userHeight" to userModel.userHeight,
+                            "dateOfBirth" to userModel.dateOfBirth,
+                            "bloodSugarLevel" to userModel.bloodSugarLevel,
+                            "cholesterolLevel" to userModel.cholesterolLevel,
+                            "id" to userId,
+                            "userImage" to userModel.userImage,
+                            "email" to userModel.email,
+                            "password" to userModel.password,
+                            "createdAt" to Calendar.getInstance().time,
+
+                        )
+
+                    )
                     onComplete(true, auth.currentUser?.uid)
 
                 } else {
@@ -98,7 +116,8 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                         bloodSugarLevel = data?.get("bloodSugarLevel") as? String
                             ?: "",  // Fixed here
                         cholesterolLevel = data?.get("cholesterolLevel") as? String ?: "",
-                        id = data?.get("id") as? String ?: ""
+                        userImage = data?.get("userImage") as? String ?: "",
+                        createdDate = data?.get("createdDate") as? String ?: "",
                     )
                 }
             } catch (e: Exception) {
@@ -114,13 +133,29 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
        val  storageRef = Firebase.storage.reference
         if (user != null) {
              try {
-                 val file = Uri.fromFile(File("path/to/${userModel.userImage}"))
+                 val file = Uri.parse(userModel.userImage)
 
                  val userProfileImageRef = storageRef
-                     .child("images/${file.lastPathSegment}")
-                 val uploadUserImage = userProfileImageRef.putFile(file)
+                     .child("profile_images/${user.uid}${file.lastPathSegment}")
+                 val uploadTask = userProfileImageRef.putFile(file)
 
-                 uploadUserImage.await()
+
+
+                 val urlTask = uploadTask.continueWithTask { task ->
+                     if (!task.isSuccessful) {
+                         task.exception?.let {
+                             throw it
+                         }
+                     }
+                     userProfileImageRef.downloadUrl
+                 }.addOnCompleteListener { task ->
+                     if (task.isSuccessful) {
+                         val downloadUri = task.result
+                         userModel.userImage = downloadUri.toString()
+                     }
+                 }
+                 urlTask.await()
+
 
 
                  // Update the user document with new details in Firestore
@@ -135,12 +170,13 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                             "dateOfBirth" to userModel.dateOfBirth,
                             "bloodSugarLevel" to userModel.bloodSugarLevel,
                             "cholesterolLevel" to userModel.cholesterolLevel,
-                            "userImage" to userProfileImageRef.path,
-                        )
+                            "userImage" to urlTask.result),
+
                     ).await()  // Await to ensure it's executed in the coroutine
 
                return  true  // Return true if successful
             } catch (e: Exception) {
+
                 e.printStackTrace()
 
                 return false  // Return false if an error occurs
@@ -174,7 +210,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-    suspend fun getUserMeasurements(): Flow<List<MeasurementData>> {
+     fun getUserMeasurements(): Flow<List<MeasurementData>> {
         return flow {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
