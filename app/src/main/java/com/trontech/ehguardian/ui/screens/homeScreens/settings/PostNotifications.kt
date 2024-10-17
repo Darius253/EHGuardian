@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.ehguardian.ui.screens.homeScreens.settings
+package com.trontech.ehguardian.ui.screens.homeScreens.settings
 
 import android.widget.Toast
 import androidx.compose.foundation.background
