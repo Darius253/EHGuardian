@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.notifyAll
 import java.util.Calendar
 import kotlin.coroutines.resume
 
@@ -62,7 +63,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                             "password" to userModel.password,
                             "createdAt" to Calendar.getInstance().time,
 
-                        )
+                            )
 
                     )
                     onComplete(true, auth.currentUser?.uid)
@@ -87,9 +88,17 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
             }
     }
 
-    fun signOut(
-    ) {
-        auth.signOut()
+        fun signOut(): Boolean {
+        try {
+            auth.signOut()
+            notifyAll()
+            return true
+        }
+        catch (e:Exception){
+            e.printStackTrace()
+            return false
+        }
+
     }
 
 
@@ -130,35 +139,33 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
     suspend fun updateUserDetails(userModel: UserModel): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
-       val  storageRef = Firebase.storage.reference
+        val storageRef = Firebase.storage.reference
         if (user != null) {
-             try {
-                 val file = Uri.parse(userModel.userImage)
+            try {
+                val file = Uri.parse(userModel.userImage)
 
-                 val userProfileImageRef = storageRef
-                     .child("profile_images/${user.uid}${file.lastPathSegment}")
-                 val uploadTask = userProfileImageRef.putFile(file)
-
-
-
-                 val urlTask = uploadTask.continueWithTask { task ->
-                     if (!task.isSuccessful) {
-                         task.exception?.let {
-                             throw it
-                         }
-                     }
-                     userProfileImageRef.downloadUrl
-                 }.addOnCompleteListener { task ->
-                     if (task.isSuccessful) {
-                         val downloadUri = task.result
-                         userModel.userImage = downloadUri.toString()
-                     }
-                 }
-                 urlTask.await()
+                val userProfileImageRef = storageRef
+                    .child("profile_images/${user.uid}${file.lastPathSegment}")
+                val uploadTask = userProfileImageRef.putFile(file)
 
 
+                val urlTask = uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                    userProfileImageRef.downloadUrl
+                }.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUri = task.result
+                        userModel.userImage = downloadUri.toString()
+                    }
+                }
+                urlTask.await()
 
-                 // Update the user document with new details in Firestore
+
+                // Update the user document with new details in Firestore
                 firestore.collection("users").document(user.uid)
                     .update(
                         mapOf(
@@ -170,11 +177,12 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                             "dateOfBirth" to userModel.dateOfBirth,
                             "bloodSugarLevel" to userModel.bloodSugarLevel,
                             "cholesterolLevel" to userModel.cholesterolLevel,
-                            "userImage" to urlTask.result),
+                            "userImage" to urlTask.result
+                        ),
 
-                    ).await()  // Await to ensure it's executed in the coroutine
+                        ).await()  // Await to ensure it's executed in the coroutine
 
-               return  true  // Return true if successful
+                return true  // Return true if successful
             } catch (e: Exception) {
 
                 e.printStackTrace()
@@ -188,7 +196,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
 
     suspend fun uploadUserMeasurement(measurementData: MeasurementData): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
-         if (user != null) {
+        if (user != null) {
             try {
                 // Get reference to the user's document
                 val userDocRef = firestore.collection("users").document(user.uid)
@@ -202,7 +210,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                 return true // Return true if upload was successful
             } catch (e: Exception) {
                 e.printStackTrace()
-               return false // Return false if there was an error
+                return false // Return false if there was an error
             }
         } else {
             return false // Return false if the user is not authenticated
@@ -210,7 +218,7 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-     fun getUserMeasurements(): Flow<List<MeasurementData>> {
+    fun getUserMeasurements(): Flow<List<MeasurementData>> {
         return flow {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
@@ -239,7 +247,6 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-
     suspend fun fetchHealthNews(): List<NewsItem> {
         val requestBody = NewsRequest(
             category = "HEALTH",
@@ -265,53 +272,56 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
     }
 
 
-
-
     @SuppressLint("MissingPermission")
-    private suspend fun getLocation(context: Context): Location = suspendCancellableCoroutine { continuation ->
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    private suspend fun getLocation(context: Context): Location =
+        suspendCancellableCoroutine { continuation ->
+            val locationManager =
+                context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-        var location: Location
-        val locationListener = object : LocationListener {
-            override fun onLocationChanged(newLocation: Location) {
-                location = newLocation
-                locationManager.removeUpdates(this)
-                continuation.resume(location)
-            }
-            @Deprecated("Deprecated in Java")
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-            override fun onProviderEnabled(provider: String) {}
-            override fun onProviderDisabled(provider: String) {}
-        }
+            var location: Location
+            val locationListener = object : LocationListener {
+                override fun onLocationChanged(newLocation: Location) {
+                    location = newLocation
+                    locationManager.removeUpdates(this)
+                    continuation.resume(location)
+                }
 
-        if (hasGps || hasNetwork) {
-            if (hasGps) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    5000,
-                    0F,
-                    locationListener
-                )
+                @Deprecated("Deprecated in Java")
+                override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+                }
+
+                override fun onProviderEnabled(provider: String) {}
+                override fun onProviderDisabled(provider: String) {}
             }
-            if (hasNetwork) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    5000,
-                    0F,
-                    locationListener
-                )
+
+            if (hasGps || hasNetwork) {
+                if (hasGps) {
+                    locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        5000,
+                        0F,
+                        locationListener
+                    )
+                }
+                if (hasNetwork) {
+                    locationManager.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER,
+                        5000,
+                        0F,
+                        locationListener
+                    )
+                }
+                continuation.invokeOnCancellation {
+                    locationManager.removeUpdates(locationListener)
+                }
+            } else {
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
             }
-            continuation.invokeOnCancellation {
-                locationManager.removeUpdates(locationListener)
-            }
-        } else {
-            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
         }
-    }
 
     suspend fun fetchNearbyHospitals(context: Context): List<HospitalItem> {
         val location = getLocation(context)
@@ -342,8 +352,21 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         }
     }
 
+    suspend fun deleteAccount(): Boolean {
+        val user = FirebaseAuth.getInstance().currentUser ?: return false
+        return try {
+            val userDocRef = firestore.collection("users").document(user.uid).delete()
+            userDocRef.await()
+            user.delete().await()
 
+            true // If successful, return true
+        } catch (e: Exception) {
+            false // If an exception occurs, return false
+        }
+    }
 }
+
+
 
 
 
