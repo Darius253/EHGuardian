@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.settings
+package com.trontech.ehguardian.ui.screens.homeScreens.settings
 
 import android.app.Activity
 import android.content.Context
@@ -24,8 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ehguardian.ui.AppViewModelProvider
-import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
+import com.trontech.ehguardian.ui.AppViewModelProvider
+import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
