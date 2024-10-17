@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.healthDataScreen
+package com.trontech.ehguardian.ui.screens.homeScreens.healthDataScreen
 
 
 
@@ -18,11 +18,11 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.ehguardian.R
-import com.example.ehguardian.ui.AppViewModelProvider
-import com.example.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
-import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
-import com.example.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
+import com.trontech.ehguardian.R
+import com.trontech.ehguardian.ui.AppViewModelProvider
+import com.trontech.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
+import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 
 @Composable
