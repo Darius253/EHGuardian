@@ -64,11 +64,24 @@ fun AppNavigation(
                         }
                         launchSingleTop = true
                     }
-                }
-            )
-        }
+                },
+                onDeleteAccountSuccess={
+                    navController.navigate(NavigationClass.AuthenticationDestination.route){
+                        popUpTo(NavigationClass.HomeDestination.route){
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+
+
+
+
+
 
         }
 
+    })
+        }
     }
+}
+
 
