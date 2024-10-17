@@ -1,7 +1,7 @@
-package com.example.ehguardian.network
+package com.trontech.ehguardian.network
 
-import com.example.ehguardian.data.models.HospitalSearchTextRequest
-import com.example.ehguardian.data.models.HospitalsModel
+import com.trontech.ehguardian.data.models.HospitalSearchTextRequest
+import com.trontech.ehguardian.data.models.HospitalsModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body

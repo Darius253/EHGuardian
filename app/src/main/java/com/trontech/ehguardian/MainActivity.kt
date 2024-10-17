@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.ehguardian
+package com.trontech.ehguardian
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -16,9 +16,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import com.example.ehguardian.ui.screens.MyApp
-import com.example.ehguardian.ui.screens.homeScreens.HomeScreen
-import com.example.ehguardian.ui.theme.EHGuardianTheme
+import com.trontech.ehguardian.ui.screens.MyApp
+import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
+import com.trontech.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 

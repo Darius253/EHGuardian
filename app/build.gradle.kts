@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ehguardian"
+    namespace = "com.trontech.ehguardian"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.ehguardian"
-        minSdk = 30
+        applicationId = "com.trontech.ehguardian"
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

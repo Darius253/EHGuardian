@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.authenticationScreens.login
+package com.trontech.ehguardian.ui.screens.authenticationScreens.login
 
 
 import android.util.Patterns.EMAIL_ADDRESS
@@ -40,7 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.ehguardian.ui.AppViewModelProvider
+import com.trontech.ehguardian.ui.AppViewModelProvider
 
 @Composable
 fun LoginScreen(

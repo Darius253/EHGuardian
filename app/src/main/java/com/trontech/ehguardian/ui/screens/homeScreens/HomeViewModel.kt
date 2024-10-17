@@ -1,19 +1,18 @@
-package com.example.ehguardian.ui.screens.homeScreens
+package com.trontech.ehguardian.ui.screens.homeScreens
 
 
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ehguardian.data.models.HospitalItem
-import com.example.ehguardian.data.models.MeasurementData
-import com.example.ehguardian.data.models.NewsItem
-import com.example.ehguardian.data.models.UserModel
-import com.example.ehguardian.data.repositories.UserRepository
+import com.trontech.ehguardian.data.models.HospitalItem
+import com.trontech.ehguardian.data.models.MeasurementData
+import com.trontech.ehguardian.data.models.NewsItem
+import com.trontech.ehguardian.data.models.UserModel
+import com.trontech.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

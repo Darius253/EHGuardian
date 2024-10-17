@@ -1,4 +1,4 @@
-package com.example.ehguardian.data.models
+package com.trontech.ehguardian.data.models
 
 
 data class MeasurementData(

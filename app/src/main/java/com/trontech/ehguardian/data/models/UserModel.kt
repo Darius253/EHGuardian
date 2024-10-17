@@ -1,5 +1,4 @@
-package com.example.ehguardian.data.models
-import android.net.Uri
+package com.trontech.ehguardian.data.models
 import java.io.Serializable
 
 

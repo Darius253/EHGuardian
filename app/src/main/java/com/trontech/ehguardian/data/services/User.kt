@@ -1,4 +1,4 @@
-package com.example.ehguardian.data.services
+package com.trontech.ehguardian.data.services
 
 
 import android.annotation.SuppressLint
@@ -11,17 +11,17 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import com.example.ehguardian.data.models.Circle
-import com.example.ehguardian.data.models.CircleCenter
-import com.example.ehguardian.data.models.HospitalItem
-import com.example.ehguardian.data.models.HospitalSearchTextRequest
-import com.example.ehguardian.data.models.LocationBias
-import com.example.ehguardian.data.models.MeasurementData
-import com.example.ehguardian.data.models.NewsItem
-import com.example.ehguardian.data.models.NewsRequest
-import com.example.ehguardian.data.models.UserModel
-import com.example.ehguardian.network.HospitalsApiInstance
-import com.example.ehguardian.network.NewsApi
+import com.trontech.ehguardian.data.models.Circle
+import com.trontech.ehguardian.data.models.CircleCenter
+import com.trontech.ehguardian.data.models.HospitalItem
+import com.trontech.ehguardian.data.models.HospitalSearchTextRequest
+import com.trontech.ehguardian.data.models.LocationBias
+import com.trontech.ehguardian.data.models.MeasurementData
+import com.trontech.ehguardian.data.models.NewsItem
+import com.trontech.ehguardian.data.models.NewsRequest
+import com.trontech.ehguardian.data.models.UserModel
+import com.trontech.ehguardian.network.HospitalsApiInstance
+import com.trontech.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query

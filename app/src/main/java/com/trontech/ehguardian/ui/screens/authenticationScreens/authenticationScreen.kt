@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.authenticationScreens
+package com.trontech.ehguardian.ui.screens.authenticationScreens
 
 
 
@@ -22,9 +22,9 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.ehguardian.R
-import com.example.ehguardian.ui.screens.authenticationScreens.login.LoginScreen
-import com.example.ehguardian.ui.screens.authenticationScreens.signUp.SignUpScreen
+import com.trontech.ehguardian.R
+import com.trontech.ehguardian.ui.screens.authenticationScreens.login.LoginScreen
+import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpScreen
 
 @Composable
 fun AuthenticationScreen(
