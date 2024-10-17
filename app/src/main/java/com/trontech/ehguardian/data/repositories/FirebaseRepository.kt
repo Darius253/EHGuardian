@@ -4,6 +4,8 @@ package com.trontech.ehguardian.data.repositories
 
 import android.content.Context
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.trontech.ehguardian.data.models.HospitalItem
 import com.trontech.ehguardian.data.models.MeasurementData
 import com.trontech.ehguardian.data.models.NewsItem
@@ -46,21 +48,15 @@ class FirebaseUserRepository(
         }
     }
 
-    override suspend fun signOut(
-       onSignOutSuccess: (Boolean) -> Unit
-    ) {
-        try {
+   override  suspend fun signOut():Boolean{
+       try {
+           userService.signOut()
+           return true
+       } catch (e: Exception) {
+           return false
+       }
 
-            userService.signOut()
-            onSignOutSuccess(true)
-
-        }
-        catch (e: Exception) {
-
-            onSignOutSuccess(false)
-        }
-
-    }
+   }
 
     // Implement other methods of UserRepository
 
@@ -110,7 +106,15 @@ class FirebaseUserRepository(
     }
 
 
-    override suspend fun deleteAccount(user: UserModel) = TODO()
+    override suspend fun deleteAccount(): Boolean {
+        return try {
+        userService.deleteAccount()
+            true
+        } catch (e: Exception) {
+            false
+        }
+
+    }
 
 
 
