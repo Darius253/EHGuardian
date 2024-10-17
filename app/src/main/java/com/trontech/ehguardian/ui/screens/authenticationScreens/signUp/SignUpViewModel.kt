@@ -19,7 +19,6 @@ class SignUpViewModel(
 
 
 
-
     // Mutable live data for the input fields
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
@@ -140,24 +139,34 @@ class SignUpViewModel(
     fun signOut(
         onSignOutSuccess: () -> Unit,
         context: Context
-
-    ){
+    ) {
         viewModelScope.launch {
-            userRepository.signOut(
-                onSignOutSuccess = { success ->
-                    if (success) {
-                        onSignOutSuccess()
-                        Toast.makeText(context, "Sign out successful", Toast.LENGTH_SHORT).show()
-                    }
-                    else{
-                        Toast.makeText(context, "Sign out failed", Toast.LENGTH_SHORT).show()
-                    }
+            val success = userRepository.signOut()
 
-                }
+            val message = if (success) {
+                onSignOutSuccess()
+                "Signed out successfully"
+            } else {
+                "Failed to sign out"
+            }
 
-            )
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
 
+}
+
+    fun deleteAccount(context: Context, onDeleteSuccess: () -> Unit){
+        viewModelScope.launch {
+            val success = userRepository.deleteAccount()
+            if (success) {
+                Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                onDeleteSuccess()
+            } else {
+                Toast.makeText(context, "Failed to delete account", Toast.LENGTH_SHORT).show()
+            }
+
+        }
 
     }
+
 }
