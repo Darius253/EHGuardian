@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.settings
+package com.trontech.ehguardian.ui.screens.homeScreens.settings
 
 import android.content.Context
 import android.content.Intent
@@ -27,9 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ehguardian.R
-import com.example.ehguardian.ui.AppViewModelProvider
-import com.example.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.trontech.ehguardian.R
+import com.trontech.ehguardian.ui.AppViewModelProvider
+import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
