@@ -38,6 +38,7 @@ import java.time.LocalTime
 fun Home(modifier: Modifier = Modifier,
          homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
          onSignOutSuccess: () -> Unit = {},
+         onDeleteAccountSuccess: () -> Unit = {}
 ) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     val userDetails by homeViewModel.userDetails.collectAsState()
@@ -226,7 +227,10 @@ fun Home(modifier: Modifier = Modifier,
                         settingsPopupVisible = false
                                 },
 
-                    onSignOutSuccess = onSignOutSuccess
+                    onSignOutSuccess = {onSignOutSuccess()},
+                    onDeleteAccountSuccess = {
+                        onDeleteAccountSuccess()
+                    }
 
 
 
@@ -247,7 +251,9 @@ fun Home(modifier: Modifier = Modifier,
                     onClickSettings = { settingsPopupVisible = true }
                 )
                 Column (
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.8f),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                         ){
@@ -281,7 +287,10 @@ fun Home(modifier: Modifier = Modifier,
 
                         onDismiss = { settingsPopupVisible = false },
 
-                       onSignOutSuccess = onSignOutSuccess
+                       onSignOutSuccess = { onSignOutSuccess ()},
+                        onDeleteAccountSuccess = {
+                            onDeleteAccountSuccess()
+                        }
 
                     )
                 }
