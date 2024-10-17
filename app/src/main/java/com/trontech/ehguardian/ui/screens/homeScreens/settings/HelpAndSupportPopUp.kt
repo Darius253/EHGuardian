@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.settings
+package com.trontech.ehguardian.ui.screens.homeScreens.settings
 
 import android.content.Intent
 import android.net.Uri
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.ehguardian.R
+import com.trontech.ehguardian.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
