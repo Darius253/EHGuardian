@@ -33,15 +33,18 @@ import kotlinx.coroutines.launch
 fun SettingsPopUp(
     onDismiss: () -> Unit,
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onSignOutSuccess: () -> Unit
+    onSignOutSuccess: () -> Unit,
+    onDeleteAccountSuccess: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var showPopUp by rememberSaveable { mutableStateOf(false) }
+    var signOutPopUp by rememberSaveable { mutableStateOf(false) }
+    var deleteAccountPopUp by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     var showNearbyHospitals by rememberSaveable { mutableStateOf(false) }
     val helpSheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
     val postNotificationSheetState = rememberModalBottomSheetState()
+    val changeLanguageSheetState = rememberModalBottomSheetState()
 
     if (helpSheetState.isVisible) {
         HelpAndSupportPopUp(onDismiss = { coroutineScope.launch { helpSheetState.hide() } }, helpSheetState)
@@ -55,6 +58,11 @@ fun SettingsPopUp(
             sheetState = postNotificationSheetState
         )
     }
+    if (changeLanguageSheetState.isVisible) {
+        ChangeLanguagePopUp(onDismissRequest = { coroutineScope.launch { changeLanguageSheetState.hide() } },
+            sheetState = changeLanguageSheetState,
+
+            )}
 
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
@@ -75,12 +83,19 @@ fun SettingsPopUp(
                 }
             },
             onHelpClick = { coroutineScope.launch { helpSheetState.show() } },
-            onLogoutClick = { showPopUp = true },
-            showPopUp = showPopUp,
-            onDismiss = { showPopUp = false },
+            onLogoutClick = { signOutPopUp = true },
+            signOutPopUp  = signOutPopUp,
+            onDismiss = { onDismiss()
+                if(deleteAccountPopUp)  deleteAccountPopUp= false
+
+            else if (signOutPopUp) signOutPopUp= false  },
             signUpViewModel = signUpViewModel,
             onSignOutSuccess = onSignOutSuccess,
-            onPostNotificationClick = { coroutineScope.launch { postNotificationSheetState.show() } }
+            onPostNotificationClick = { coroutineScope.launch { postNotificationSheetState.show() } },
+            onChangeLanguageClick = { coroutineScope.launch { changeLanguageSheetState.show() } },
+            onDeletedAccountClick = { deleteAccountPopUp = true },
+            deleteAccountPopUp = deleteAccountPopUp,
+            onDeletedAccountSuccess = onDeleteAccountSuccess
         )
     }
 }
@@ -91,14 +106,21 @@ fun SettingsContent(
     onNearbyHospitalsClick: () -> Unit,
     onHelpClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    showPopUp: Boolean,
+    signOutPopUp: Boolean,
+    deleteAccountPopUp: Boolean,
     onDismiss: () -> Unit,
     onPostNotificationClick: () -> Unit,
     signUpViewModel: SignUpViewModel,
-    onSignOutSuccess: () -> Unit
+    onSignOutSuccess: () -> Unit,
+    onChangeLanguageClick: () -> Unit,
+    onDeletedAccountClick: () -> Unit,
+    onDeletedAccountSuccess: () -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.padding(16.dp).fillMaxWidth().fillMaxHeight(0.95f),
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .fillMaxHeight(0.95f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
@@ -108,7 +130,7 @@ fun SettingsContent(
                     SettingsOption(Icons.Filled.Notifications, "Enable Post Notifications", onPostNotificationClick,color = MaterialTheme.colorScheme.primary),
                     SettingsOption(Icons.Filled.Download, "Export All Health Data", color = MaterialTheme.colorScheme.primary),
                     SettingsOption(Icons.Filled.QuestionAnswer, "Help & Support", onHelpClick , MaterialTheme.colorScheme.primary),
-                    SettingsOption(Icons.Filled.Language, "Change Language", color = MaterialTheme.colorScheme.primary)
+                    SettingsOption(Icons.Filled.Language, "Change Language", color = MaterialTheme.colorScheme.primary, onClick = onChangeLanguageClick)
                 )
             )
         }
@@ -118,8 +140,22 @@ fun SettingsContent(
         item {
             SettingsCard(
                 items = listOf(
-                    SettingsOption(Icons.Filled.PrivacyTip, "Terms & Conditions", color = MaterialTheme.colorScheme.primary),
-                    SettingsOption(Icons.Filled.Visibility, "Privacy Policy", color = MaterialTheme.colorScheme.primary),
+                    SettingsOption(Icons.Filled.PrivacyTip, "Terms & Conditions", color = MaterialTheme.colorScheme.primary, onClick = {
+//                        context.startActivity(
+//                            android.content.Intent(
+//                                android.content.Intent.ACTION_VIEW,
+//                                android.net.Uri.parse("https://www.google.com")
+//                            )
+//                        )
+                    }),
+                    SettingsOption(Icons.Filled.Visibility, "Privacy Policy", color = MaterialTheme.colorScheme.primary, onClick = {
+                        context.startActivity(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse("https://www.termsfeed.com/live/f0ceea68-5d15-43d8-aa10-af02b4718de3")
+                            )
+                        )
+                    }),
                     SettingsOption(Icons.Filled.Share, "Share App", color = MaterialTheme.colorScheme.primary)
                 )
             )
@@ -130,8 +166,10 @@ fun SettingsContent(
         item {
             SettingsCard(
                 items = listOf(
-                    SettingsOption(Icons.AutoMirrored.Filled.Logout, "Logout", onLogoutClick, Color.Red),
-                    SettingsOption(Icons.Filled.Delete, "Delete Account", color = Color.Red)
+                    SettingsOption(Icons.AutoMirrored.Filled.Logout, "Logout", onClick={onLogoutClick()}, Color.Red),
+                    SettingsOption(Icons.Filled.Delete, "Delete Account", color = Color.Red, onClick = {
+                        onDeletedAccountClick()
+                    })
                 )
             )
         }
@@ -146,16 +184,29 @@ fun SettingsContent(
             )
         }
 
-        if (showPopUp) {
+        if (signOutPopUp) {
             item {
                 AlertPopUp(
                     title = "Sign Out",
                     message = "Are you sure you want to sign out?",
                     confirmText = "Yes",
-                    onDismiss = onDismiss,
-                    onSignOutSuccess = {
+                    onDismiss = { onDismiss() },
+                    onSuccess = {
+
                         signUpViewModel.signOut(onSignOutSuccess, context)
-                        onDismiss()
+                    }
+                )
+            }
+        }
+        if (deleteAccountPopUp) {
+            item {
+                AlertPopUp(
+                    title = "Delete Account",
+                    message = "Are you sure you want to delete your account?",
+                    confirmText = "Yes",
+                    onDismiss = { onDismiss() },
+                    onSuccess = {
+                        signUpViewModel.deleteAccount(context, onDeletedAccountSuccess)
                     }
                 )
             }
@@ -182,14 +233,18 @@ fun SettingsCard(items: List<SettingsOption>) {
 fun ModalBottomHeader(headerText: String, onDismiss: () -> Unit) {
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onDismiss) {
                 Icon(Icons.Filled.Close, contentDescription = "Close Icon")
             }
-            Box(modifier = Modifier.weight(1f).padding(end = 48.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .padding(end = 48.dp), contentAlignment = Alignment.Center) {
                 Text(text = headerText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
             }
         }
@@ -205,7 +260,10 @@ fun SettingsItem(
     color: Color = MaterialTheme.colorScheme.primary
 ) {
     Row(
-        modifier = Modifier.clickable { onClick?.invoke() }.padding(16.dp).fillMaxWidth(),
+        modifier = Modifier
+            .clickable { onClick?.invoke() }
+            .padding(16.dp)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -229,7 +287,7 @@ fun AlertPopUp(
     message: String,
     confirmText: String,
     onDismiss: () -> Unit,
-    onSignOutSuccess: () -> Unit
+    onSuccess: () -> Unit
 ) {
     AlertDialog(
         title = {
@@ -240,13 +298,13 @@ fun AlertPopUp(
             )
         },
         text = { Text(text = message) },
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onDismiss() },
         confirmButton = {
             Text(
                 text = confirmText,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.clickable { onSignOutSuccess(); onDismiss() }
+                modifier = Modifier.clickable { onSuccess(); onDismiss() }
             )
         },
         dismissButton = {
@@ -254,7 +312,9 @@ fun AlertPopUp(
                 text = "Cancel",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onDismiss() }.padding(end = 20.dp)
+                modifier = Modifier
+                    .clickable { onDismiss() }
+                    .padding(end = 20.dp)
             )
         }
     )
