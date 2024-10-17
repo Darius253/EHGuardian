@@ -1,4 +1,4 @@
-package com.example.ehguardian.ui.screens.homeScreens.healthDataScreen
+package com.trontech.ehguardian.ui.screens.homeScreens.healthDataScreen
 
 
 import androidx.compose.foundation.BorderStroke
@@ -26,8 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.ehguardian.R
-import com.example.ehguardian.data.models.MeasurementData
+import com.trontech.ehguardian.R
+import com.trontech.ehguardian.data.models.MeasurementData
 @Composable
 fun HistoryPage(
     modifier: Modifier,
