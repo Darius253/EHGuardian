@@ -51,7 +51,7 @@ fun HelpAndSupportPopUp(
                     context.startActivity(
                         Intent(
                             Intent.ACTION_SENDTO,
-                            Uri.parse("mailto:trondarius13@gmail.com")
+                            Uri.parse("mailto:trontech2021@gmail.com")
                         )
                     )
                 }
