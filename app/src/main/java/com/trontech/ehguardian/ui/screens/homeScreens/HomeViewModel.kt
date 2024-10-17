@@ -2,7 +2,6 @@ package com.trontech.ehguardian.ui.screens.homeScreens
 
 
 import android.content.Context
-import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,8 +34,6 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
 
-    private val _selectedUserImage = MutableLiveData<Uri?>(null)
-    val selectedUserImage: LiveData<Uri?> = _selectedUserImage
 
 
     private val _errorMessage = MutableLiveData<String?>()
