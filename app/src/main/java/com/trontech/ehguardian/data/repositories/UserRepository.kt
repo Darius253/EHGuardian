@@ -19,10 +19,9 @@ interface  UserRepository{
 
     suspend fun updateUserDetails(user: UserModel):Boolean
 
-    suspend fun signOut(
-       onSignOutSuccess: (Boolean) -> Unit)
+    suspend fun signOut():Boolean
 
-    suspend fun deleteAccount(user: UserModel)
+    suspend fun deleteAccount():Boolean
 
     suspend fun uploadUserMeasurement(measurementData: MeasurementData):Boolean
 
