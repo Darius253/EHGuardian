@@ -75,6 +75,7 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.9.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.google.firebase:firebase-storage")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
