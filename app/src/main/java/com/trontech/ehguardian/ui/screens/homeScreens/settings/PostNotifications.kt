@@ -20,6 +20,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,15 +31,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trontech.ehguardian.ui.AppViewModelProvider
+import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
 
 
 @Composable
 
 fun PostNotificationPopUp(
     sheetState : SheetState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
-    var checked by remember { mutableStateOf(false) }
+val postNotificationEnabled by homeViewModel.pushNotificationsEnabled.collectAsState()
+    var checked by remember { mutableStateOf(postNotificationEnabled) }
     val context = LocalContext.current
 
 
@@ -75,8 +81,8 @@ fun PostNotificationPopUp(
                     modifier = Modifier.padding(end = 16.dp),
                     checked = checked, onCheckedChange = {
                         checked = it
-                      if (checked)  Toast.makeText(context, "Post notifications enabled", Toast.LENGTH_SHORT).show()
-                        else Toast.makeText(context, "Post notifications disabled", Toast.LENGTH_SHORT).show()
+                        homeViewModel.setPushNotifications(context, checked)
+
                     })
             }
             Spacer(modifier = Modifier.height(16.dp))
