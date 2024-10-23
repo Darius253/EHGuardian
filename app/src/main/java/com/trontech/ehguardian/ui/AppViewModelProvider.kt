@@ -11,23 +11,23 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.trontech.ehguardian.ui.screens.homeScreens.measureScreen.BluetoothViewModel
 
 object AppViewModelProvider {
-    val Factory = viewModelFactory {
+    val Factory: ViewModelProvider.Factory = viewModelFactory {
         // Access the application instance and its dependencies
         initializer {
-            val app = (this as CreationExtras).ehGuardianApplication()
+            val app = (this).ehGuardianApplication()
             LoginViewModel(app.container.userRepository)
         }
         initializer {
-            val app = (this as CreationExtras).ehGuardianApplication()
+            val app = (this).ehGuardianApplication()
             SignUpViewModel(app.container.userRepository)
         }
         initializer {
-            val app = (this as CreationExtras).ehGuardianApplication()
-            HomeViewModel(app.container.userRepository)
+            val app = (this).ehGuardianApplication()
+            HomeViewModel(app.container.userRepository, app.userPreferencesRepository)
         }
 
         initializer {
-            val app = (this as CreationExtras).ehGuardianApplication()
+//            val app = (this).ehGuardianApplication()
             BluetoothViewModel()
         }
     }
