@@ -11,13 +11,20 @@ import com.trontech.ehguardian.data.models.HospitalItem
 import com.trontech.ehguardian.data.models.MeasurementData
 import com.trontech.ehguardian.data.models.NewsItem
 import com.trontech.ehguardian.data.models.UserModel
+import com.trontech.ehguardian.data.repositories.UserPreferencesRepository
 import com.trontech.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
+class HomeViewModel(
+    private val userRepository: UserRepository,
+    private val userPreferencesRepo: UserPreferencesRepository,
+) : ViewModel() {
 
 
 
@@ -32,6 +39,12 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
   private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
+
+    val pushNotificationsEnabled: StateFlow<Boolean> =
+        userPreferencesRepo.isPushNotificationsEnabled.map{
+            it
+
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
 
 
@@ -156,6 +169,25 @@ class HomeViewModel(private val userRepository: UserRepository) : ViewModel() {
 
 
         }
+    }
+
+    fun setPushNotifications(context: Context, isEnabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                userPreferencesRepo.savePushNotificationsPreferences(isEnabled)
+                if (isEnabled)
+                Toast.makeText(context, "Post notifications enabled", Toast.LENGTH_SHORT).show()
+                else
+                    Toast.makeText(context, "Post notifications disabled", Toast.LENGTH_SHORT).show()
+            }
+            catch (e: Exception) {
+                _errorMessage.value = e.message
+                Toast.makeText(context, "Failed to enable notifications", Toast.LENGTH_SHORT).show()
+            }
+
+
+        }
+
     }
 
 
