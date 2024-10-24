@@ -2,7 +2,10 @@ package com.trontech.ehguardian.ui.screens.homeScreens
 
 
 import android.content.Context
+import android.content.Intent
+import android.provider.Settings
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +16,7 @@ import com.trontech.ehguardian.data.models.NewsItem
 import com.trontech.ehguardian.data.models.UserModel
 import com.trontech.ehguardian.data.repositories.UserPreferencesRepository
 import com.trontech.ehguardian.data.repositories.UserRepository
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -175,8 +179,12 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 userPreferencesRepo.savePushNotificationsPreferences(isEnabled)
-                if (isEnabled)
-                Toast.makeText(context, "Post notifications enabled", Toast.LENGTH_SHORT).show()
+                if (isEnabled) {
+
+
+
+                    Toast.makeText(context, "Post notifications enabled", Toast.LENGTH_SHORT).show()
+                }
                 else
                     Toast.makeText(context, "Post notifications disabled", Toast.LENGTH_SHORT).show()
             }
