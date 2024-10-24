@@ -2,6 +2,9 @@
 
 package com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications
 
+
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trontech.ehguardian.ui.AppViewModelProvider
 import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
@@ -46,6 +50,31 @@ fun PostNotificationPopUp(
 val postNotificationEnabled by homeViewModel.pushNotificationsEnabled.collectAsState()
     var checked by remember { mutableStateOf(postNotificationEnabled) }
     val context = LocalContext.current
+
+//    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+//        if (ContextCompat
+//                .checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+//            == PackageManager.PERMISSION_GRANTED) {
+//            checked = true
+//            homeViewModel.setPushNotifications(context, true)
+//
+//        }
+//        else{
+//            context.startActivity(
+//                android.content.Intent(
+//                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+//                    android.net.Uri.fromParts("package", context.packageName, null)
+//                )
+//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY)
+//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+//
+//            )
+//            checked = false
+//            homeViewModel.setPushNotifications(context, checked)
+//
+//        }
+//    }
 
 
     ModalBottomSheet(
@@ -80,10 +109,11 @@ val postNotificationEnabled by homeViewModel.pushNotificationsEnabled.collectAsS
                 Switch(
                     modifier = Modifier.padding(end = 16.dp),
                     checked = checked, onCheckedChange = {
+
                         checked = it
                         homeViewModel.setPushNotifications(context, checked)
-
-                    })
+                        }
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "We will send you post notifications to remind you to record your health data and other important information. ",
