@@ -48,7 +48,6 @@ class Notifications(
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         val builder = NotificationCompat.Builder(context, "daily_reminder")
-            .setSmallIcon(R.drawable.heart_rate_monitor)
             .setContentTitle("Daily Reminder")
             .setContentText("Maintaining healthy habits? Check your blood pressure.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
