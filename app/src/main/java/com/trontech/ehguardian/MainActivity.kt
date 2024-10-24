@@ -22,7 +22,6 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
 import com.trontech.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
@@ -78,37 +77,23 @@ class MainActivity : ComponentActivity() {
         }
 
         checkPermissionsAndBluetooth()
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >=Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestNotificationPermission()
-            } else {
-                triggerNotification()
-            }
-        } else {
-            triggerNotification()
-        }
-    }
+
+
+            }}}
 
     @SuppressLint("InlinedApi")
+
     private fun requestNotificationPermission() {
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission is granted. You can now show notifications
-                triggerNotification()
-            }
+        ) {
         }
         requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-
-    private fun triggerNotification() {
-        val notifications = Notifications(this)
-        notifications.dailyReminderNotification()
-    }
 
 
     public override fun onStart() {
@@ -127,6 +112,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
+    }
+
+
+    public override fun onStop() {
+        super.onStop()
 
 
     }
