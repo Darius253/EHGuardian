@@ -3,6 +3,7 @@
 package com.trontech.ehguardian
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
@@ -21,6 +22,7 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
 import com.trontech.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
@@ -35,6 +37,7 @@ class MainActivity : ComponentActivity() {
         putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         auth = FirebaseAuth.getInstance()
@@ -75,7 +78,38 @@ class MainActivity : ComponentActivity() {
         }
 
         checkPermissionsAndBluetooth()
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermission()
+            } else {
+                triggerNotification()
+            }
+        } else {
+            triggerNotification()
+        }
     }
+
+    @SuppressLint("InlinedApi")
+    private fun requestNotificationPermission() {
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. You can now show notifications
+                triggerNotification()
+            }
+        }
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+
+    private fun triggerNotification() {
+        val notifications = Notifications(this)
+        notifications.dailyReminderNotification()
+    }
+
 
     public override fun onStart() {
         super.onStart()
