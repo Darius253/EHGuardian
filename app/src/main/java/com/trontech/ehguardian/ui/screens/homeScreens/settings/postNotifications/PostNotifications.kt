@@ -1,8 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.trontech.ehguardian.ui.screens.homeScreens.settings
+package com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trontech.ehguardian.ui.AppViewModelProvider
 import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 
 @Composable
