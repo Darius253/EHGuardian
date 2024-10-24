@@ -1,11 +1,13 @@
 package com.trontech.ehguardian.ui.screens.homeScreens
 
 
+import android.Manifest
 import android.content.Context
-import android.content.Intent
-import android.provider.Settings
+import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -177,13 +179,13 @@ class HomeViewModel(
 
     fun setPushNotifications(context: Context, isEnabled: Boolean) {
         viewModelScope.launch {
+
             try {
                 userPreferencesRepo.savePushNotificationsPreferences(isEnabled)
                 if (isEnabled) {
 
-
-
-                    Toast.makeText(context, "Post notifications enabled", Toast.LENGTH_SHORT).show()
+                    val notifications = Notifications(context)
+                    notifications.dailyReminderNotification()
                 }
                 else
                     Toast.makeText(context, "Post notifications disabled", Toast.LENGTH_SHORT).show()
@@ -195,6 +197,21 @@ class HomeViewModel(
 
 
         }
+
+    }
+
+    fun requestNotificationPermission(context: Context) {
+        val requestPermissionLauncher = (context as FragmentActivity).registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+
+
+            } else {
+                // Permission denied. You may want to handle this gracefully.
+            }
+        }
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 
     }
 
