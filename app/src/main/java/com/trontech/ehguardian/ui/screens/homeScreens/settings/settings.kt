@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trontech.ehguardian.ui.AppViewModelProvider
 import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.PostNotificationPopUp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
