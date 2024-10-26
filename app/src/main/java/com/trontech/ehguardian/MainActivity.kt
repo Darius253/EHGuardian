@@ -81,8 +81,12 @@ class MainActivity : ComponentActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestNotificationPermission()
 
+                }
 
-            }}}
+
+
+
+            }}
 
     @SuppressLint("InlinedApi")
 
