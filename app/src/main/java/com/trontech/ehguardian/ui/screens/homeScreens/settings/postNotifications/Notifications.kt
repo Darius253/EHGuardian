@@ -9,13 +9,10 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.trontech.ehguardian.MainActivity
-import com.trontech.ehguardian.R
 
 class Notifications(
     private val context: Context
@@ -29,7 +26,7 @@ class Notifications(
     @SuppressLint("InlinedApi")
     fun dailyReminderNotification() {
         val name = "Daily Reminder"
-        val descriptionText = "Daily Reminder to check blood pressure"
+        val descriptionText = "Daily Reminder to check blood pressure!"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val mChannel = NotificationChannel("daily_reminder", name, importance).apply {
             description = descriptionText
