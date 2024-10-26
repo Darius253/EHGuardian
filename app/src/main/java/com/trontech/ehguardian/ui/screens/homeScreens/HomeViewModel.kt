@@ -1,13 +1,9 @@
 package com.trontech.ehguardian.ui.screens.homeScreens
 
 
-import android.Manifest
+
 import android.content.Context
-import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,6 +27,8 @@ class HomeViewModel(
     private val userRepository: UserRepository,
     private val userPreferencesRepo: UserPreferencesRepository,
 ) : ViewModel() {
+
+
 
 
 
@@ -200,20 +198,7 @@ class HomeViewModel(
 
     }
 
-    fun requestNotificationPermission(context: Context) {
-        val requestPermissionLauncher = (context as FragmentActivity).registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
 
-
-            } else {
-                // Permission denied. You may want to handle this gracefully.
-            }
-        }
-        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-
-    }
 
 
 
