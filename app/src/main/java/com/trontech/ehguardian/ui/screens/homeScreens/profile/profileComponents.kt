@@ -426,6 +426,7 @@ fun InputField(
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = value,
+
             onValueChange = onValueChange,
             singleLine = true,
             maxLines = 1,
