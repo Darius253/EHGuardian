@@ -22,10 +22,10 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trontech.ehguardian.ui.AppViewModelProvider
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 
@@ -45,37 +42,20 @@ import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 fun PostNotificationPopUp(
     sheetState : SheetState,
     onDismiss: () -> Unit,
-    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
-val postNotificationEnabled by homeViewModel.pushNotificationsEnabled.collectAsState()
-    var checked by remember { mutableStateOf(postNotificationEnabled) }
+
+    var checked by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+    LaunchedEffect(Unit) {
 
-//    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-//        if (ContextCompat
-//                .checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-//            == PackageManager.PERMISSION_GRANTED) {
-//            checked = true
-//            homeViewModel.setPushNotifications(context, true)
-//
-//        }
-//        else{
-//            context.startActivity(
-//                android.content.Intent(
-//                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-//                    android.net.Uri.fromParts("package", context.packageName, null)
-//                )
-//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY)
-//                    .addFlags(android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-//
-//            )
-//            checked = false
-//            homeViewModel.setPushNotifications(context, checked)
-//
-//        }
-//    }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
 
+            checked = (ContextCompat
+                .checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED)
+
+        }
+    }
 
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
@@ -109,10 +89,17 @@ val postNotificationEnabled by homeViewModel.pushNotificationsEnabled.collectAsS
                 Switch(
                     modifier = Modifier.padding(end = 16.dp),
                     checked = checked, onCheckedChange = {
+                        context.startActivity(
+                            android.content.Intent(
+                                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                android.net.Uri.fromParts("package", context.packageName, null)
+                            )
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY)
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
 
-                        checked = it
-                        homeViewModel.setPushNotifications(context, checked)
-                        }
+                        )
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
