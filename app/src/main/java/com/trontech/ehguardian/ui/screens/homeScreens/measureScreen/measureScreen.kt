@@ -52,9 +52,9 @@ fun MeasureScreen(
     bluetoothViewModel: BluetoothViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val (showDialog, setShowDialog) = rememberSaveable { mutableStateOf(false) }
-    val (systolic, setSystolic) = rememberSaveable { mutableStateOf("0") }
-    val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("0") }
-    val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("0") }
+    val (systolic, setSystolic) = rememberSaveable { mutableStateOf("") }
+    val (diastolic, setDiastolic) = rememberSaveable { mutableStateOf("") }
+    val (heartRate, setHeartRate) = rememberSaveable { mutableStateOf("") }
 
 // Observe the LiveData and update the state
     val systolicValue by bluetoothViewModel.systolic.observeAsState()
@@ -136,20 +136,20 @@ fun MeasureScreen(
 
         AddDetailsFab { setShowDialog(true) }
 
-        if (showDialog || systolic!="0" || diastolic!="0"  || heartRate!="0" ) {
+        if (showDialog || systolic!="" || diastolic!=""  || heartRate!="" ) {
             OverlayBackground()
             ManuallyAddDetails(
                 onDismiss = {
                     setShowDialog(false)
-                    setSystolic("0")
-                    setDiastolic("0")
-                    setHeartRate("0") },
+                    setSystolic("")
+                    setDiastolic("")
+                    setHeartRate("") },
                 systolic = systolic,
                 diastolic = diastolic,
                 heartRate = heartRate,
-                onSystolicChange = setSystolic,
-                onDiastolicChange = setDiastolic,
-                onHeartRateChange = setHeartRate,
+                onSystolicChange = { if (it.length <= 3) setSystolic(it) else setSystolic(it.substring(0, 3)) },
+                onDiastolicChange = { if (it.length <= 3) setDiastolic (it)else setSystolic(it.substring(0, 3))  },
+                onHeartRateChange = { if (it.length <= 3) setHeartRate(it) else setSystolic(it.substring(0, 3)) },
                 onDone = { focusManager.clearFocus() },
                 onUpload = {
                     homeViewModel.uploadUserMeasurement(
@@ -165,9 +165,9 @@ fun MeasureScreen(
                             setShowDialog(false)
                             homeViewModel.fetchUserDetails()
                             homeViewModel.fetchUserMeasurements()
-                            setSystolic("0")
-                            setDiastolic("0")
-                            setHeartRate("0")
+                            setSystolic("")
+                            setDiastolic("")
+                            setHeartRate("")
                         }
                     )
 
