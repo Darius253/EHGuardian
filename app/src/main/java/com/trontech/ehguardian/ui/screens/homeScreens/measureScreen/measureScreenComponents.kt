@@ -123,7 +123,9 @@ fun ManuallyAddDetails(
             }
             Spacer(modifier = Modifier.height(20.dp))
             if (systolic.isNotEmpty() && diastolic.isNotEmpty() && heartRate.isNotEmpty() &&
-                systolic!== "0" && diastolic!== "0" && heartRate!== "0") {
+                systolic!== ""  && diastolic!== "" && heartRate!== "" &&
+                systolic!== "0" && diastolic!== "0" && heartRate!== "0"
+                        ) {
                 UploadButton(
                     onUpload = onUpload,
                 )
