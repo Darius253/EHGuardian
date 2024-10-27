@@ -23,7 +23,7 @@ object AppViewModelProvider {
         }
         initializer {
             val app = (this).ehGuardianApplication()
-            HomeViewModel(app.container.userRepository, app.userPreferencesRepository)
+            HomeViewModel(app.container.userRepository)
         }
 
         initializer {
