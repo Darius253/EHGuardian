@@ -97,6 +97,8 @@ fun PostNotificationPopUp(
                             addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                         }
                         context.startActivity(intent)
+
+                        onDismiss()
                     }
                 )
             }
