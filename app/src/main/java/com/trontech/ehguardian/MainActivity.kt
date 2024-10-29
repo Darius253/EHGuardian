@@ -3,7 +3,6 @@
 package com.trontech.ehguardian
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
@@ -22,6 +21,7 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
 import com.trontech.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
@@ -32,9 +32,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
 
     private val requestCode = 1
-    private val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-        putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
-    }
+    private val discoverableIntent: Intent =
+        Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
+        }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,54 +51,72 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize the Activity Result Launchers
-        enableBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                showToast("Bluetooth enabled")
-            } else {
-                showToast("Bluetooth not enabled")
+        enableBtLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    showToast("Bluetooth enabled")
+                } else {
+                    showToast("Bluetooth not enabled")
+                }
             }
-        }
 
-        requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allPermissionsGranted = permissions.values.all { it }
-            if (allPermissionsGranted) {
-                checkBluetooth()
-            } else {
-                showToast("Bluetooth is required to use Bluetooth features")
-                startActivityForResult(discoverableIntent, requestCode)
-                checkBluetooth()
+        requestPermissionsLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val allPermissionsGranted = permissions.values.all { it }
+                if (allPermissionsGranted) {
+                    checkBluetooth()
+                } else {
+                    showToast("Bluetooth is required to use Bluetooth features")
+                    startActivityForResult(discoverableIntent, requestCode)
+                    checkBluetooth()
+                }
             }
-        }
-        discoverableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                showToast("Device is discoverable")
-            } else {
-                showToast("Device is not discoverable")
+        discoverableLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    showToast("Device is discoverable")
+                } else {
+                    showToast("Device is not discoverable")
+                }
             }
-        }
 
         checkPermissionsAndBluetooth()
-        if (Build.VERSION.SDK_INT >=Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 requestNotificationPermission()
+            } else {
+                // Permission already granted, proceed with showing notifications
+                triggerNotification()
+            }
+        } else {
 
-                }
+            triggerNotification()
+        }
+    }
 
-
-
-
-            }}
-
-    @SuppressLint("InlinedApi")
-
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestNotificationPermission() {
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
-        ) {
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. You can now show notifications
+                triggerNotification()
+            } else {
+                // Permission denied. You may want to handle this gracefully.
+            }
         }
         requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
+    private fun triggerNotification() {
+        val notifications = Notifications(this)
+        notifications.dailyReminderNotification()
+    }
 
 
     public override fun onStart() {
@@ -121,11 +140,9 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    public override fun onStop() {
-        super.onStop()
 
 
-    }
+
 
     private fun checkPermissionsAndBluetooth() {
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
