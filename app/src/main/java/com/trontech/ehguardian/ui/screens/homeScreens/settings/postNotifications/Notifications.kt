@@ -1,6 +1,5 @@
 package com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,11 +7,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.trontech.ehguardian.MainActivity
+import com.trontech.ehguardian.R
 
 class Notifications(
     private val context: Context
@@ -23,7 +21,7 @@ class Notifications(
     }
 
 
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "MissingPermission")
     fun dailyReminderNotification() {
         val name = "Daily Reminder"
         val descriptionText = "Daily Reminder to check blood pressure!"
@@ -44,26 +42,21 @@ class Notifications(
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val builder = NotificationCompat.Builder(context, "daily_reminder")
+        val dailyRemainder = NotificationCompat.Builder(context, "daily_reminder")
+            .setSmallIcon(R.drawable.ic_stat_name)
             .setContentTitle("Daily Reminder")
             .setContentText("Maintaining healthy habits? Check your blood pressure.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+
 
         // Check for notification permission before showing the notification
-        with(NotificationManagerCompat.from(context)) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                 ActivityCompat.requestPermissions(
-                     context as MainActivity,
-                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                     1
-                 )
-                return
-            }
+            with(NotificationManagerCompat.from(context)) {
+
             // notificationId is a unique int for each notification that you must define.
-            notify(NOTIFICATION_ID, builder.build())
+            notificationManager.notify(NOTIFICATION_ID, dailyRemainder.build())
         }
     }
 }
