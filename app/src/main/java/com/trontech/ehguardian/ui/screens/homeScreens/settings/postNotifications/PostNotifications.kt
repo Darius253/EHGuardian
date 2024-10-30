@@ -87,7 +87,6 @@ fun PostNotificationPopUp(
                     modifier = Modifier.padding(end = 16.dp),
                     checked = checked,
                     onCheckedChange = {
-
                         val intent = Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.fromParts("package", context.packageName, null)
