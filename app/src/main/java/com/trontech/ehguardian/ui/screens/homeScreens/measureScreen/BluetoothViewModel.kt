@@ -80,7 +80,7 @@ class BluetoothViewModel : ViewModel() {
         // Stop scanning after 2 minutes
         bleHandler.postDelayed({
             scanner.stopScan(scanCallback)
-            showToast(context, "Stopped scanning after 2 minutes")
+            showToast(context, "Scanning Stopped")
         }, SCAN_PERIOD)
     }
 
