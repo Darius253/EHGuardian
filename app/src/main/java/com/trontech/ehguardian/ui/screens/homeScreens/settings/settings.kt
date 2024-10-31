@@ -3,7 +3,9 @@ package com.trontech.ehguardian.ui.screens.homeScreens.settings
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +31,7 @@ import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpVie
 import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.PostNotificationPopUp
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPopUp(
@@ -129,7 +132,7 @@ fun SettingsContent(
                 items = listOf(
                     SettingsOption(Icons.Filled.LocalHospital, "View Hospitals Nearby", onNearbyHospitalsClick, color= MaterialTheme.colorScheme.primary),
                     SettingsOption(Icons.Filled.Notifications, "Enable Post Notifications", onPostNotificationClick,color = MaterialTheme.colorScheme.primary),
-                    SettingsOption(Icons.Filled.Download, "Export All Health Data", color = MaterialTheme.colorScheme.primary),
+//                    SettingsOption(Icons.Filled.Download, "Export All Health Data", color = MaterialTheme.colorScheme.primary),
                     SettingsOption(Icons.Filled.QuestionAnswer, "Help & Support", onHelpClick , MaterialTheme.colorScheme.primary),
                     SettingsOption(Icons.Filled.Language, "Change Language", color = MaterialTheme.colorScheme.primary, onClick = onChangeLanguageClick)
                 )
@@ -141,14 +144,14 @@ fun SettingsContent(
         item {
             SettingsCard(
                 items = listOf(
-                    SettingsOption(Icons.Filled.PrivacyTip, "Terms & Conditions", color = MaterialTheme.colorScheme.primary, onClick = {
-//                        context.startActivity(
-//                            android.content.Intent(
-//                                android.content.Intent.ACTION_VIEW,
-//                                android.net.Uri.parse("https://www.google.com")
-//                            )
-//                        )
-                    }),
+//                    SettingsOption(Icons.Filled.PrivacyTip, "Terms & Conditions", color = MaterialTheme.colorScheme.primary, onClick = {
+////                        context.startActivity(
+////                            android.content.Intent(
+////                                android.content.Intent.ACTION_VIEW,
+////                                android.net.Uri.parse("https://www.google.com")
+////                            )
+////                        )
+//                    }),
                     SettingsOption(Icons.Filled.Visibility, "Privacy Policy", color = MaterialTheme.colorScheme.primary, onClick = {
                         context.startActivity(
                             android.content.Intent(
@@ -157,7 +160,7 @@ fun SettingsContent(
                             )
                         )
                     }),
-                    SettingsOption(Icons.Filled.Share, "Share App", color = MaterialTheme.colorScheme.primary)
+//                    SettingsOption(Icons.Filled.Share, "Share App", color = MaterialTheme.colorScheme.primary)
                 )
             )
         }
