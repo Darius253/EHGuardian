@@ -21,7 +21,7 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
 import com.trontech.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
+import com.trontech.ehguardian.data.repositories.workManagers.PostNotificationRepository
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
@@ -106,16 +106,17 @@ class MainActivity : ComponentActivity() {
             if (isGranted) {
                 // Permission is granted. You can now show notifications
                 triggerNotification()
-            } else {
-                // Permission denied. You may want to handle this gracefully.
             }
+//            else {
+//                WorkManager.getInstance(this).cancelUniqueWork("TwiceDailyNotificationWork")
+//            }
         }
         requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun triggerNotification() {
-        val notifications = Notifications(this)
-        notifications.dailyReminderNotification()
+        val postNotificationRepository = PostNotificationRepository(this)
+       postNotificationRepository.scheduleDailyNotification()
     }
 
 
