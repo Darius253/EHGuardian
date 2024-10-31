@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.work.WorkManager
+import com.trontech.ehguardian.data.repositories.workManagers.PostNotificationRepository
 import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -98,6 +100,13 @@ fun PostNotificationPopUp(
                         context.startActivity(intent)
 
                         onDismiss()
+
+                        val postNotificationRepository = PostNotificationRepository(context)
+                        if (checked) {
+                            postNotificationRepository.scheduleDailyNotification()
+                        } else {
+                            WorkManager.getInstance(context).cancelUniqueWork("TwiceDailyNotificationWork")
+                        }
                     }
                 )
             }
