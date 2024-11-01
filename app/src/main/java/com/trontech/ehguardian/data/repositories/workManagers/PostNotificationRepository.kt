@@ -15,13 +15,13 @@ class PostNotificationRepository(context: Context){
         val currentTime = Calendar.getInstance()
         val targetTime = Calendar.getInstance().apply {
             if (currentTime.get(Calendar.HOUR_OF_DAY) >= 8) {
-                // Set to 9 PM if after 9 AM, or move to next day if it's past 9 PM
+                // Set to 8 PM if after 8 AM, or move to next day if it's past 8 PM
                 set(Calendar.HOUR_OF_DAY, 20)
             } else {
-                // Set to the next 9 AM
+                // Set to the next 8 AM
                 set(Calendar.HOUR_OF_DAY, 8)
             }
-            set(Calendar.MINUTE, t0)
+            set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
         }
 
