@@ -124,7 +124,7 @@ fun SettingsContent(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth()
-            .fillMaxHeight(0.95f),
+            .fillMaxHeight(0.7f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
