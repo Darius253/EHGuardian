@@ -9,12 +9,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.trontech.ehguardian.ui.screens.authenticationScreens.AuthenticationScreen
+import com.trontech.ehguardian.ui.screens.authenticationScreens.ForgotPasswordScreen
 import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
 
 // Enum class to define the different navigation destinations
 enum class NavigationClass(val route: String) {
     AuthenticationDestination(route = "authentication"),
     HomeDestination(route = "home"),
+    ForgotPasswordDestination(route = "forgotPassword")
 }
 
 
@@ -49,9 +51,20 @@ fun AppNavigation(
                     }
                 },
                 onForgotPasswordClick = {
+                    navController.navigate(NavigationClass.ForgotPasswordDestination.route) {
 
+                    }
                 }
             )
+        }
+
+        composable(route = NavigationClass.ForgotPasswordDestination.route) {
+            ForgotPasswordScreen(
+
+            )
+
+
+
         }
 
         composable(route = NavigationClass.HomeDestination.route) {
