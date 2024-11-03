@@ -1,6 +1,7 @@
 package com.trontech.ehguardian.ui.screens.authenticationScreens.login
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -14,6 +15,10 @@ import kotlinx.coroutines.launch
 class LoginViewModel(
     private val userRepository: UserRepository // Inject the repository
 ) : ViewModel() {
+
+
+    private val _resetPasswordResult = MutableLiveData<Boolean>()
+    val resetPasswordResult: LiveData<Boolean> = _resetPasswordResult
 
     // State for email and password
     var email = mutableStateOf("")
@@ -64,7 +69,8 @@ class LoginViewModel(
                             onSignInSuccess()
                         } else {
                             errorMessage.value = "Login failed"
-                            Toast.makeText(context, "Login failed: $error", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Login failed: $error", Toast.LENGTH_LONG)
+                                .show()
                         }
                     }
                 } catch (e: Exception) {
@@ -77,4 +83,24 @@ class LoginViewModel(
         }
     }
 
+
+    fun resetPassword() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = userRepository.resetPassword(email.value)
+                delay(1000) // Optional delay for effect
+               _resetPasswordResult.value = response
+            } catch (e: Exception) {
+                _resetPasswordResult.value = false
+            } finally {
+                _isLoading.value = false
+            }
+
+            Log.d("ResetPassword", "Reset password result: ${_resetPasswordResult.value}")
+
+        }
+    }
+
 }
+
