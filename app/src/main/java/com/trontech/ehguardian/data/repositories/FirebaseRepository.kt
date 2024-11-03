@@ -4,8 +4,6 @@ package com.trontech.ehguardian.data.repositories
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.trontech.ehguardian.data.models.HospitalItem
 import com.trontech.ehguardian.data.models.MeasurementData
 import com.trontech.ehguardian.data.models.NewsItem
@@ -58,6 +56,11 @@ class FirebaseUserRepository(
 
    }
 
+
+    override  fun resetPassword(email: String): Boolean {
+        val result = userService.resetPassword(email)
+        return result
+    }
     // Implement other methods of UserRepository
 
     override suspend fun getUser(): Flow<UserModel> {
