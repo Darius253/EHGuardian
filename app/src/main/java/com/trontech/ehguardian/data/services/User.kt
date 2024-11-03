@@ -364,7 +364,21 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
             false // If an exception occurs, return false
         }
     }
-}
+
+     fun resetPassword(email: String): Boolean {
+
+        return  try {
+             auth.sendPasswordResetEmail(email)
+             true
+
+         } catch (e: Exception) {
+             false
+         }
+
+
+     }
+    }
+
 
 
 
