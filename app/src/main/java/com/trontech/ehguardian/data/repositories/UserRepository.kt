@@ -32,6 +32,6 @@ interface  UserRepository{
 
     suspend fun fetchHealthNews():List<NewsItem>
 
-     fun resetPassword(email: String):Boolean
+    suspend fun resetPassword(email: String):Boolean
 
 }
