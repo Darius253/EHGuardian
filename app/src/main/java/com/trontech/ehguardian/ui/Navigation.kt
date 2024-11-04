@@ -60,6 +60,14 @@ fun AppNavigation(
 
         composable(route = NavigationClass.ForgotPasswordDestination.route) {
             ForgotPasswordScreen(
+                onBackButtonClick = {
+                    navController.navigate(NavigationClass.AuthenticationDestination.route) {
+                        popUpTo(NavigationClass.ForgotPasswordDestination.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
 
             )
 
