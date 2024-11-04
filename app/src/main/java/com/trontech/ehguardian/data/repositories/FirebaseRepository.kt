@@ -57,11 +57,11 @@ class FirebaseUserRepository(
    }
 
 
-    override  fun resetPassword(email: String): Boolean {
+    override suspend fun resetPassword(email: String): Boolean {
         val result = userService.resetPassword(email)
         return result
     }
-    // Implement other methods of UserRepository
+
 
     override suspend fun getUser(): Flow<UserModel> {
         return flow {
