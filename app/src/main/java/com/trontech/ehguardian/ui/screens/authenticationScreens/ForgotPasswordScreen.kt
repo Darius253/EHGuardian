@@ -45,6 +45,7 @@ import com.trontech.ehguardian.ui.screens.homeScreens.profile.InputField
 
 
 fun ForgotPasswordScreen(
+    onBackButtonClick: () -> Unit,
     loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
 ) {
@@ -97,7 +98,43 @@ fun ForgotPasswordScreen(
                 },
             )
         }
-        if (loginViewModel.resetPasswordResult.value == false) {
+
+        if (loginViewModel.resetPasswordResult.value == false and !isLoading) {
+            item {  Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.errorContainer.copy(
+                                alpha = 0.5f
+                            ),
+                            disabledContentColor = MaterialTheme.colorScheme.onErrorContainer.copy(
+                                alpha = 0.5f
+                            )
+                        )
+                    ) {
+
+                        Row(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Warning,
+                                contentDescription = "Back Icon",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Sorry, we can't find an account with this email address. Kindly enter your email address correctly.")
+                        }
+                    }
+
+                }
+            }
+
+
+        else if (loginViewModel.resetPasswordResult.value == true and !isLoading){
             item {
                 Card(
                     modifier = Modifier
@@ -105,25 +142,35 @@ fun ForgotPasswordScreen(
                         .padding(top = 16.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        disabledContainerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
-                        disabledContentColor = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
+                            alpha = 0.5f
+                        ),
+                        disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                            alpha = 0.5f
+                        )
                     )
                 ) {
+
                     Row(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Warning,
-                            contentDescription = "Back Icon",
-                            tint = MaterialTheme.colorScheme.error
+                        Image(
+                            painter = painterResource(R.drawable.check),
+                            contentDescription = "Check Icon",
+                            modifier = Modifier.size(32.dp)
                         )
-                        Text(text = "Sorry, we can't find an account with this email address. Kindly enter your email address correctly.")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "We have sent you a link to reset your password.")
                     }
                 }
             }
         }
+
+
+
+
 
         item {
             Spacer(modifier = Modifier.height(25.dp))
@@ -164,8 +211,9 @@ fun ForgotPasswordScreen(
                 }
 
                 item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
 
-                item {
+               if(!isLoading) item {
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
@@ -174,6 +222,7 @@ fun ForgotPasswordScreen(
                         ),
                         border = ButtonDefaults.outlinedButtonBorder,
                         onClick = {
+                            onBackButtonClick()
 
 
                         },
@@ -202,6 +251,6 @@ fun ForgotPasswordScreen(
             }
         }
     }
-}
+
 
 
