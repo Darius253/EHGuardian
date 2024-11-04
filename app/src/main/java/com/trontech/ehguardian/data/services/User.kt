@@ -23,6 +23,7 @@ import com.trontech.ehguardian.data.models.UserModel
 import com.trontech.ehguardian.network.HospitalsApiInstance
 import com.trontech.ehguardian.network.NewsApi
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
@@ -365,19 +366,25 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         }
     }
 
-     fun resetPassword(email: String): Boolean {
-
-        return  try {
-             auth.sendPasswordResetEmail(email)
-             true
-
-         } catch (e: Exception) {
-             false
-         }
 
 
-     }
+    suspend fun resetPassword(email: String): Boolean {
+        val result = auth.sendPasswordResetEmail(email)
+        return try {
+            result.await()
+            true
+        } catch (e: FirebaseAuthException) {
+
+                false
+
+        } catch (e: Exception) {
+
+            false
+        }
     }
+
+
+}
 
 
 
