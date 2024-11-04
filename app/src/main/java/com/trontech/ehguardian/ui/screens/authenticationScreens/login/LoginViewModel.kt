@@ -17,7 +17,7 @@ class LoginViewModel(
 ) : ViewModel() {
 
 
-    private val _resetPasswordResult = MutableLiveData<Boolean>()
+    private val _resetPasswordResult = MutableLiveData<Boolean>(null)
     val resetPasswordResult: LiveData<Boolean> = _resetPasswordResult
 
     // State for email and password
