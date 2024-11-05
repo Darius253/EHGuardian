@@ -8,43 +8,55 @@ import com.trontech.ehguardian.backgroundWorkers.PostNotificationsWorker
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
-class PostNotificationRepository(context: Context){
+class PostNotificationRepository(context: Context) {
     private val workManager = WorkManager.getInstance(context)
 
     fun scheduleDailyNotification() {
-        val currentTime = Calendar.getInstance()
-        val targetTime = Calendar.getInstance().apply {
-            if (currentTime.get(Calendar.HOUR_OF_DAY) >= 8) {
-                // Set to 8 PM if after 8 AM, or move to next day if it's past 8 PM
-                set(Calendar.HOUR_OF_DAY, 20)
-            } else {
-                // Set to the next 8 AM
-                set(Calendar.HOUR_OF_DAY, 8)
+        try {
+            val currentTime = Calendar.getInstance()
+            val targetTime = Calendar.getInstance().apply {
+                when {
+                    // If between midnight and 8 AM, set for 8 AM today
+                    currentTime.get(Calendar.HOUR_OF_DAY) < 8 -> {
+                        set(Calendar.HOUR_OF_DAY, 8)
+                    }
+                    // If between 8 AM and 8 PM, set for 8 PM today
+                    currentTime.get(Calendar.HOUR_OF_DAY) < 20 -> {
+                        set(Calendar.HOUR_OF_DAY, 20)
+                    }
+                    // If after 8 PM, set for 8 AM tomorrow
+                    else -> {
+                        add(Calendar.DAY_OF_YEAR, 1)
+                        set(Calendar.HOUR_OF_DAY, 8)
+                    }
+                }
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
             }
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
+
+            // Calculate initial delay in milliseconds
+            val initialDelay = (targetTime.timeInMillis - currentTime.timeInMillis)
+                .coerceAtLeast(0L) // Ensure non-negative delay
+
+            val notificationWorkRequest = PeriodicWorkRequestBuilder<PostNotificationsWorker>(
+                12, TimeUnit.HOURS
+            ).apply {
+                setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            }.build()
+
+            workManager.enqueueUniquePeriodicWork(
+                WORK_NAME,
+                ExistingPeriodicWorkPolicy.UPDATE, // UPDATE instead of KEEP to ensure latest constraints
+                notificationWorkRequest
+            )
+        } catch (e: Exception) {
+            // Log error or handle appropriately
+            e.printStackTrace()
         }
-
-        // Calculate the initial delay
-        val initialDelay = targetTime.timeInMillis - currentTime.timeInMillis
-
-
-
-        val notificationWorkRequest = PeriodicWorkRequestBuilder<PostNotificationsWorker>(
-            12, TimeUnit.HOURS,  // Repeat every 12 hours
-            1, TimeUnit.HOURS     // Flex interval of 1 hour
-        )
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS) // Start at target time
-            .build()
-
-        workManager.enqueueUniquePeriodicWork(
-            "TwiceDailyNotificationWork",
-            ExistingPeriodicWorkPolicy.KEEP,
-            notificationWorkRequest
-        )
     }
 
-
-
-
+    companion object {
+        private const val WORK_NAME = "TwiceDailyNotificationWork"
+    }
 }
