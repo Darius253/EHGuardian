@@ -79,10 +79,13 @@ class FirebaseUserRepository(
     }
 
 
-    override suspend fun updateUserDetails(user: UserModel): Boolean {
+    override suspend fun updateUserDetails(user: UserModel, context: Context): Boolean {
         return try {
             // Call the updateUserDetails function from your service
-            val success = userService.updateUserDetails(user)
+            val success = userService.updateUserDetails(
+                user,
+                context = context
+            )
             success
 
         } catch (e: Exception) {
