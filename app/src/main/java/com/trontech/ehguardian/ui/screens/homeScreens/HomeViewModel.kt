@@ -85,7 +85,7 @@ class HomeViewModel(
 
             try {
                 delay(1000)
-                val success = userRepository.updateUserDetails(user)
+                val success = userRepository.updateUserDetails(user, context)
                 _userDetails.value = user
                 if (success) {
                     Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
