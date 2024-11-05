@@ -97,7 +97,6 @@ class LoginViewModel(
                 _isLoading.value = false
             }
 
-            Log.d("ResetPassword", "Reset password result: ${_resetPasswordResult.value}")
 
         }
     }
