@@ -416,6 +416,7 @@ fun InputField(
     keyboardType: KeyboardType = KeyboardType.Text,
     suffix: String = "",
     onDone: () -> Unit,
+    placeholder:@Composable () -> Unit = {}
 ) {
     Column(modifier = modifier) {
         Text(
@@ -426,6 +427,7 @@ fun InputField(
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = value,
+            placeholder = placeholder,
 
             onValueChange = onValueChange,
             singleLine = true,
