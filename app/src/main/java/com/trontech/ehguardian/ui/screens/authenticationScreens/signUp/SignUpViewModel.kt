@@ -141,16 +141,22 @@ class SignUpViewModel(
         context: Context
     ) {
         viewModelScope.launch {
-            val success = userRepository.signOut()
+            delay(100)
+            try {
+                val success = userRepository.signOut()
 
-            val message = if (success) {
-                onSignOutSuccess()
-                "Signed out successfully"
-            } else {
-                "Failed to sign out"
+                val message = if (success) {
+                    onSignOutSuccess()
+                    "Signed out successfully"
+                } else {
+                    "Failed to sign out"
+                }
+
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
-
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            catch (e: Exception) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
         }
 
 }
