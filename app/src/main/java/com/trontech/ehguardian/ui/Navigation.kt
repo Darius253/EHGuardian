@@ -76,31 +76,19 @@ fun AppNavigation(
         }
 
         composable(route = NavigationClass.HomeDestination.route) {
-            // Home Screen
-            HomeScreen(
-                onSignOutSuccess = {
-                    navController.navigate(NavigationClass.AuthenticationDestination.route){
-                        popUpTo(NavigationClass.HomeDestination.route){
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+            val navigateToAuth = {
+                navController.navigate(NavigationClass.AuthenticationDestination.route) {
+                    popUpTo(NavigationClass.HomeDestination.route) {
+                        inclusive = true
                     }
-                },
-                onDeleteAccountSuccess={
-                    navController.navigate(NavigationClass.AuthenticationDestination.route){
-                        popUpTo(NavigationClass.HomeDestination.route){
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+                    launchSingleTop = true
+                }
+            }
 
-
-
-
-
-
-        }
-
-    })
+            HomeScreen(
+                onSignOutSuccess = navigateToAuth,
+                onDeleteAccountSuccess = navigateToAuth
+            )
         }
     }
 }
