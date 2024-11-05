@@ -17,7 +17,7 @@ interface  UserRepository{
 
     suspend fun getUser(): Flow<UserModel>
 
-    suspend fun updateUserDetails(user: UserModel):Boolean
+    suspend fun updateUserDetails(user: UserModel, context: Context):Boolean
 
     suspend fun signOut():Boolean
 
