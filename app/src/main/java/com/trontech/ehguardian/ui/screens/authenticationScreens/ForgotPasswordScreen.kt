@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,7 +31,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,6 +54,7 @@ fun ForgotPasswordScreen(
 ) {
     var email by loginViewModel.email
     val isLoading by loginViewModel.isLoading.observeAsState(false)
+    val focusManager: FocusManager = LocalFocusManager.current
 
 
     LazyColumn(
@@ -80,7 +84,7 @@ fun ForgotPasswordScreen(
 
         item {
             Text(
-                text = "Please enter your email address and we will send you a link to reset your password.",
+                text = "Please enter your email address associated with your account and we will send you a link to reset your password.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             )
@@ -95,7 +99,25 @@ fun ForgotPasswordScreen(
                 onValueChange = { email = it },
                 keyboardType = KeyboardType.Email,
                 onDone = {
+                    focusManager.clearFocus()
                 },
+                placeholder = {
+                    Row(
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Email,
+                            contentDescription = "Email Icon",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "youremail@domain",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
+                }
             )
         }
 
