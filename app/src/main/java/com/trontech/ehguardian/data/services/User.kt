@@ -4,11 +4,13 @@ package com.trontech.ehguardian.data.services
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import com.trontech.ehguardian.data.models.Circle
@@ -28,11 +30,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import okhttp3.internal.notifyAll
+import java.io.ByteArrayOutputStream
 import java.util.Calendar
 import kotlin.coroutines.resume
 
@@ -137,24 +142,27 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         return null
     }
 
-
-    suspend fun updateUserDetails(userModel: UserModel): Boolean {
-        val user = FirebaseAuth.getInstance().currentUser
+    suspend fun updateUserDetails(userModel: UserModel, context: Context): Boolean {
+        val user = FirebaseAuth.getInstance().currentUser ?: return false
         val storageRef = Firebase.storage.reference
-        if (user != null) {
-            try {
-                val file = Uri.parse(userModel.userImage)
 
+        try {
+            // If userModel.userImage is not empty and represents a new image Uri
+            if (userModel.userImage.isNotEmpty() && userModel.userImage.startsWith("content://")) {
+                val file = Uri.parse(userModel.userImage)
                 val userProfileImageRef = storageRef
                     .child("profile_images/${user.uid}${file.lastPathSegment}")
-                val uploadTask = userProfileImageRef.putFile(file)
 
+                // Compress image before upload
+                val compressedImageData = compressImage(file, context)
 
+                // Upload the compressed image
+                val uploadTask = userProfileImageRef.putBytes(compressedImageData)
+
+                // Get download URL
                 val urlTask = uploadTask.continueWithTask { task ->
                     if (!task.isSuccessful) {
-                        task.exception?.let {
-                            throw it
-                        }
+                        task.exception?.let { throw it }
                     }
                     userProfileImageRef.downloadUrl
                 }.addOnCompleteListener { task ->
@@ -163,10 +171,11 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                         userModel.userImage = downloadUri.toString()
                     }
                 }
+
+                // Wait for upload to complete
                 urlTask.await()
 
-
-                // Update the user document with new details in Firestore
+                // Update Firestore with new image URL
                 firestore.collection("users").document(user.uid)
                     .update(
                         mapOf(
@@ -178,20 +187,41 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
                             "dateOfBirth" to userModel.dateOfBirth,
                             "bloodSugarLevel" to userModel.bloodSugarLevel,
                             "cholesterolLevel" to userModel.cholesterolLevel,
-                            "userImage" to urlTask.result
-                        ),
-
-                        ).await()  // Await to ensure it's executed in the coroutine
-
-                return true  // Return true if successful
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-                return false  // Return false if an error occurs
+                            "userImage" to urlTask.result.toString()
+                        )
+                    ).await()
+            } else {
+                // Update Firestore without changing the image
+                firestore.collection("users").document(user.uid)
+                    .update(
+                        mapOf(
+                            "firstname" to userModel.firstname,
+                            "lastname" to userModel.lastname,
+                            "gender" to userModel.gender,
+                            "userWeight" to userModel.userWeight,
+                            "userHeight" to userModel.userHeight,
+                            "dateOfBirth" to userModel.dateOfBirth,
+                            "bloodSugarLevel" to userModel.bloodSugarLevel,
+                            "cholesterolLevel" to userModel.cholesterolLevel,
+                            "userImage" to userModel.userImage
+                        )
+                    ).await()
             }
+
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
-        return false  // Return false if no current user is found
+    }
+
+    private suspend fun compressImage(uri: Uri, context: Context): ByteArray {
+        return withContext(Dispatchers.IO) {
+            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            val outputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+            outputStream.toByteArray()
+        }
     }
 
 
