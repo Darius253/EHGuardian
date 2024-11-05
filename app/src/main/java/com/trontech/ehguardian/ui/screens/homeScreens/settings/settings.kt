@@ -1,9 +1,13 @@
 package com.trontech.ehguardian.ui.screens.homeScreens.settings
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -23,7 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trontech.ehguardian.ui.AppViewModelProvider
@@ -49,6 +55,7 @@ fun SettingsPopUp(
     val coroutineScope = rememberCoroutineScope()
     val postNotificationSheetState = rememberModalBottomSheetState()
     val changeLanguageSheetState = rememberModalBottomSheetState()
+    val locationPermissionPopUp = rememberSaveable { mutableStateOf(false) }
 
     if (helpSheetState.isVisible) {
         HelpAndSupportPopUp(onDismiss = { coroutineScope.launch { helpSheetState.hide() } }, helpSheetState)
@@ -67,6 +74,9 @@ fun SettingsPopUp(
             sheetState = changeLanguageSheetState,
 
             )}
+    if (locationPermissionPopUp.value) {
+        LocationPermissionPopUp(context = context, onDismiss = { locationPermissionPopUp.value = false })
+    }
 
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
@@ -83,11 +93,13 @@ fun SettingsPopUp(
                 if (isLocationPermissionGranted(context)) {
                     showNearbyHospitals = true
                 } else {
+                    locationPermissionPopUp.value = true
+
                     Toast.makeText(context, "Location permission is required to view nearby hospitals", Toast.LENGTH_SHORT).show()
                 }
             },
             onHelpClick = { coroutineScope.launch { helpSheetState.show() } },
-            onLogoutClick = { signOutPopUp = true },
+            onLogoutClick = { signOutPopUp = true  },
             signOutPopUp  = signOutPopUp,
             onDismiss = { onDismiss()
                 if(deleteAccountPopUp)  deleteAccountPopUp= false
@@ -154,9 +166,9 @@ fun SettingsContent(
 //                    }),
                     SettingsOption(Icons.Filled.Visibility, "Privacy Policy", color = MaterialTheme.colorScheme.primary, onClick = {
                         context.startActivity(
-                            android.content.Intent(
-                                android.content.Intent.ACTION_VIEW,
-                                android.net.Uri.parse("https://www.termsfeed.com/live/f0ceea68-5d15-43d8-aa10-af02b4718de3")
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://www.termsfeed.com/live/f0ceea68-5d15-43d8-aa10-af02b4718de3")
                             )
                         )
                     }),
@@ -323,15 +335,91 @@ fun AlertPopUp(
         }
     )
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+
+fun LocationPermissionPopUp(
+    context: Context,
+    onDismiss: () -> Unit,
+
+){
+    BasicAlertDialog(
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        ),
+        onDismissRequest = {  },
+       modifier = Modifier
+           .background(
+               MaterialTheme.colorScheme.background,
+               shape = RoundedCornerShape(12.dp)
+           )
+           .padding(16.dp)
+           .fillMaxWidth(),
+
+        content = {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Location permission",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Please grant location permission in order to view nearby hospitals.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = {
+                    context.startActivity(Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null)
+                    ).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                        addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    })
+                    onDismiss()
+                }) {
+                    Text(text = "Grant Permission")
+
+                }
+                Button(onClick = {
+                    onDismiss()
+                },
+
+                    colors = ButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        disabledContainerColor =Color.Transparent ,
+                        disabledContentColor = Color.Transparent,
+                    )
+                    ) {
+                    Text(text = "Don't Grant Permission")
+
+                }
+            }
+
+        }
+
+    )
+
+}
+
+
+
 
 private fun isLocationPermissionGranted(context: Context): Boolean {
-    val coarsePermission = ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-    val finePermission = ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+    val coarsePermission = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+    val finePermission = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
 
     return if (coarsePermission != PackageManager.PERMISSION_GRANTED && finePermission != PackageManager.PERMISSION_GRANTED) {
         ActivityCompat.requestPermissions(
             context as Activity,
-            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION),
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
             1
         )
         false
