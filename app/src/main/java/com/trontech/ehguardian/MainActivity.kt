@@ -31,11 +31,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var discoverableLauncher: ActivityResultLauncher<Intent>
     private lateinit var auth: FirebaseAuth
 
-    private val requestCode = 1
-    private val discoverableIntent: Intent =
-        Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
-        }
+//    private val requestCode = 1
+//    private val discoverableIntent: Intent =
+//        Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+//            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1000)
+//        }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                     checkBluetooth()
                 } else {
                     showToast("Bluetooth is required to use Bluetooth features")
-                    startActivityForResult(discoverableIntent, requestCode)
+//                    startActivityForResult(discoverableIntent, requestCode)
                     checkBluetooth()
                 }
             }
@@ -201,7 +201,7 @@ class MainActivity : ComponentActivity() {
             if (grantResults.isEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 checkBluetooth()
             } else {
-                showToast("Bluetooth permission is required to enable Bluetooth")
+                showToast("Permission not granted")
             }
         }
     }
