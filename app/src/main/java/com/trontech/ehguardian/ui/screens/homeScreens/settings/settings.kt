@@ -101,7 +101,8 @@ fun SettingsPopUp(
             onHelpClick = { coroutineScope.launch { helpSheetState.show() } },
             onLogoutClick = { signOutPopUp = true  },
             signOutPopUp  = signOutPopUp,
-            onDismiss = { onDismiss()
+            onDismiss = {
+
                 if(deleteAccountPopUp)  deleteAccountPopUp= false
 
             else if (signOutPopUp) signOutPopUp= false  },
@@ -210,6 +211,7 @@ fun SettingsContent(
                     onSuccess = {
 
                         signUpViewModel.signOut(onSignOutSuccess, context)
+                        onDismiss()
                     }
                 )
             }
@@ -222,7 +224,9 @@ fun SettingsContent(
                     confirmText = "Yes",
                     onDismiss = { onDismiss() },
                     onSuccess = {
+
                         signUpViewModel.deleteAccount(context, onDeletedAccountSuccess)
+                        onDismiss()
                     }
                 )
             }
