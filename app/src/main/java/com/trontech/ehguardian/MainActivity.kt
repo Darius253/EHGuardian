@@ -126,7 +126,14 @@ class MainActivity : ComponentActivity() {
         if (currentUser != null) {
             setContent {
                 EHGuardianTheme {
-                    HomeScreen()
+                    HomeScreen(
+                        onSignOutSuccess = {
+                            finish()
+                        },
+                        onDeleteAccountSuccess =
+                        {  finish()}
+
+                    )
                 }
             }
         } else {
