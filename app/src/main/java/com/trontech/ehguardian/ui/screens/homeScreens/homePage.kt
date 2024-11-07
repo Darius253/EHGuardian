@@ -15,8 +15,8 @@ import com.trontech.ehguardian.ui.screens.homeScreens.profile.ProfileScreen
 
 @Composable
 fun HomeScreen(
-    onSignOutSuccess: () -> Unit = {},
-    onDeleteAccountSuccess: () -> Unit = {}
+    onSignOutSuccess: () -> Unit,
+    onDeleteAccountSuccess: () -> Unit
 
 ) {
     // State to keep track of the selected item in the bottom navigation
@@ -65,6 +65,7 @@ fun HomeScreenContents(
         1 -> MeasureScreen()
         2 -> HealthDataScreen(modifier = modifier)
         3 -> ProfileScreen(modifier = modifier)
-        else -> Home(modifier = modifier) // Default to Home if no match
+        else -> Home(modifier = modifier,onSignOutSuccess = { onSignOutSuccess() },
+            onDeleteAccountSuccess = { onDeleteAccountSuccess ()} ) // Default to Home if no match
     }
 }
