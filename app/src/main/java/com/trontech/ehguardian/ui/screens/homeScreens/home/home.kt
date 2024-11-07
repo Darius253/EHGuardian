@@ -33,12 +33,12 @@ import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
 import com.trontech.ehguardian.ui.screens.homeScreens.settings.SettingsPopUp
 import java.time.LocalTime
 
-@SuppressLint("DefaultLocale")
+@SuppressLint("DefaultLocale", "NewApi")
 @Composable
 fun Home(modifier: Modifier = Modifier,
          homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
-         onSignOutSuccess: () -> Unit = {},
-         onDeleteAccountSuccess: () -> Unit = {}
+         onSignOutSuccess: () -> Unit,
+         onDeleteAccountSuccess: () -> Unit,
 ) {
     var settingsPopupVisible by remember { mutableStateOf(false) }
     val userDetails by homeViewModel.userDetails.collectAsState()
