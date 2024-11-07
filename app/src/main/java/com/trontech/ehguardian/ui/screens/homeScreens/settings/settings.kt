@@ -107,12 +107,16 @@ fun SettingsPopUp(
 
             else if (signOutPopUp) signOutPopUp= false  },
             signUpViewModel = signUpViewModel,
-            onSignOutSuccess = onSignOutSuccess,
+            onSignOutSuccess = {
+                onSignOutSuccess()
+                onDismiss()},
             onPostNotificationClick = { coroutineScope.launch { postNotificationSheetState.show() } },
             onChangeLanguageClick = { coroutineScope.launch { changeLanguageSheetState.show() } },
             onDeletedAccountClick = { deleteAccountPopUp = true },
             deleteAccountPopUp = deleteAccountPopUp,
-            onDeletedAccountSuccess = onDeleteAccountSuccess
+            onDeletedAccountSuccess = {
+                onDeleteAccountSuccess()
+                onDismiss()}
         )
     }
 }
