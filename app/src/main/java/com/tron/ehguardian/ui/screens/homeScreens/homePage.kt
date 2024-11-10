@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens
+package com.tron.ehguardian.ui.screens.homeScreens
 
 
 
@@ -7,10 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.trontech.ehguardian.ui.screens.homeScreens.healthDataScreen.HealthDataScreen
-import com.trontech.ehguardian.ui.screens.homeScreens.home.Home
-import com.trontech.ehguardian.ui.screens.homeScreens.measureScreen.MeasureScreen
-import com.trontech.ehguardian.ui.screens.homeScreens.profile.ProfileScreen
+import com.tron.ehguardian.ui.screens.homeScreens.healthDataScreen.HealthDataScreen
+import com.tron.ehguardian.ui.screens.homeScreens.home.Home
+import com.tron.ehguardian.ui.screens.homeScreens.measureScreen.MeasureScreen
+import com.tron.ehguardian.ui.screens.homeScreens.profile.ProfileScreen
 
 
 @Composable

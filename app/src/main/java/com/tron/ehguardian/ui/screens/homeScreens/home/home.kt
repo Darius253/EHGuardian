@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.home
+package com.tron.ehguardian.ui.screens.homeScreens.home
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -27,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trontech.ehguardian.R
-import com.trontech.ehguardian.ui.AppViewModelProvider
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.SettingsPopUp
+import com.tron.ehguardian.R
+import com.tron.ehguardian.ui.AppViewModelProvider
+import com.tron.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.tron.ehguardian.ui.screens.homeScreens.settings.SettingsPopUp
 import java.time.LocalTime
 
 @SuppressLint("DefaultLocale", "NewApi")
