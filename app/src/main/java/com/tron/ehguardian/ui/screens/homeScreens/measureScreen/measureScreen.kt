@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.trontech.ehguardian.ui.screens.homeScreens.measureScreen
+package com.tron.ehguardian.ui.screens.homeScreens.measureScreen
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -35,11 +35,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.*
-import com.trontech.ehguardian.R
-import com.trontech.ehguardian.data.models.MeasurementData
-import com.trontech.ehguardian.ui.AppViewModelProvider
-import com.trontech.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.tron.ehguardian.R
+import com.tron.ehguardian.data.models.MeasurementData
+import com.tron.ehguardian.ui.AppViewModelProvider
+import com.tron.ehguardian.ui.screens.authenticationScreens.ToggleScreenButton
+import com.tron.ehguardian.ui.screens.homeScreens.HomeViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
