@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.trontech.ehguardian
+package com.tron.ehguardian
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -16,12 +16,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import com.trontech.ehguardian.ui.screens.MyApp
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
-import com.trontech.ehguardian.ui.theme.EHGuardianTheme
+import com.tron.ehguardian.ui.screens.MyApp
+import com.tron.ehguardian.ui.screens.homeScreens.HomeScreen
+import com.tron.ehguardian.ui.theme.EHGuardianTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.trontech.ehguardian.data.repositories.workManagers.PostNotificationRepository
+import com.tron.ehguardian.data.repositories.workManagers.PostNotificationRepository
 
 @Suppress("OVERRIDE_DEPRECATION")
 class MainActivity : ComponentActivity() {
