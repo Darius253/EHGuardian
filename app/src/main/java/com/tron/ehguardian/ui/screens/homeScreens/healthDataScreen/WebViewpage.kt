@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.healthDataScreen
+package com.tron.ehguardian.ui.screens.homeScreens.healthDataScreen
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.lottie.compose.*
-import com.trontech.ehguardian.R
+import com.tron.ehguardian.R
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
