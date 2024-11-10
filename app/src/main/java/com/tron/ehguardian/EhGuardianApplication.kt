@@ -1,9 +1,9 @@
-package com.trontech.ehguardian
+package com.tron.ehguardian
 
 import android.app.Application
-import com.trontech.ehguardian.data.repositories.FirebaseUserRepository
-import com.trontech.ehguardian.data.repositories.UserRepository
-import com.trontech.ehguardian.data.services.User
+import com.tron.ehguardian.data.repositories.FirebaseUserRepository
+import com.tron.ehguardian.data.repositories.UserRepository
+import com.tron.ehguardian.data.services.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
