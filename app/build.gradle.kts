@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.trontech.ehguardian"
+    namespace = "com.tron.ehguardian"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.trontech.ehguardian"
+        applicationId = "com.tron.ehguardian"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
@@ -62,7 +62,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
     implementation("com.airbnb.android:lottie-compose:4.0.0")
-    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.github.fracassi-marco:JetChart:1.4.1")
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")

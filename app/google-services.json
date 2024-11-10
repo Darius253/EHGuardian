@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:836467455965:android:3a072868e5e463d4952834",
+        "mobilesdk_app_id": "1:836467455965:android:d4c5e4d8f10592b2952834",
         "android_client_info": {
-          "package_name": "com.example.ehguardian"
+          "package_name": "com.tron.ehguardian"
         }
       },
       "oauth_client": [],
