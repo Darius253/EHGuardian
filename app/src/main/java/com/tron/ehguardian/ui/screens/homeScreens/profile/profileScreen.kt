@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.profile
+package com.tron.ehguardian.ui.screens.homeScreens.profile
 
 
 
@@ -15,8 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trontech.ehguardian.ui.AppViewModelProvider
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.tron.ehguardian.ui.AppViewModelProvider
+import com.tron.ehguardian.ui.screens.homeScreens.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
