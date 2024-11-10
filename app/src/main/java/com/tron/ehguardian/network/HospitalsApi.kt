@@ -1,7 +1,7 @@
-package com.trontech.ehguardian.network
+package com.tron.ehguardian.network
 
-import com.trontech.ehguardian.data.models.HospitalSearchTextRequest
-import com.trontech.ehguardian.data.models.HospitalsModel
+import com.tron.ehguardian.data.models.HospitalSearchTextRequest
+import com.tron.ehguardian.data.models.HospitalsModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
