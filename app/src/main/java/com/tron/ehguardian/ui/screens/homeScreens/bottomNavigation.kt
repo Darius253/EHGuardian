@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens
+package com.tron.ehguardian.ui.screens.homeScreens
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
