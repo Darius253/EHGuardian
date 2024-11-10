@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.settings
+package com.tron.ehguardian.ui.screens.homeScreens.settings
 
 import android.Manifest
 import android.app.Activity
@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trontech.ehguardian.ui.AppViewModelProvider
-import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.PostNotificationPopUp
+import com.tron.ehguardian.ui.AppViewModelProvider
+import com.tron.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
+import com.tron.ehguardian.ui.screens.homeScreens.settings.postNotifications.PostNotificationPopUp
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
