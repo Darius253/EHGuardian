@@ -1,11 +1,11 @@
-package com.trontech.ehguardian.ui.theme
+package com.tron.ehguardian.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
 
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.googlefonts.Font
-import com.trontech.ehguardian.R
+import com.tron.ehguardian.R
 
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
