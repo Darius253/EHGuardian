@@ -1,4 +1,4 @@
-package com.trontech.ehguardian
+package com.tron.ehguardian
 
 import org.junit.Test
 
