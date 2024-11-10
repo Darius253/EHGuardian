@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui
+package com.tron.ehguardian.ui
 
 
 
@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.trontech.ehguardian.ui.screens.authenticationScreens.AuthenticationScreen
-import com.trontech.ehguardian.ui.screens.authenticationScreens.ForgotPasswordScreen
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeScreen
+import com.tron.ehguardian.ui.screens.authenticationScreens.AuthenticationScreen
+import com.tron.ehguardian.ui.screens.authenticationScreens.ForgotPasswordScreen
+import com.tron.ehguardian.ui.screens.homeScreens.HomeScreen
 
 // Enum class to define the different navigation destinations
 enum class NavigationClass(val route: String) {
