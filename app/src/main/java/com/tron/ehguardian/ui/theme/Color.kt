@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.theme
+package com.tron.ehguardian.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF475D92)
