@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.profile
+package com.tron.ehguardian.ui.screens.homeScreens.profile
 
 
 
@@ -56,7 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.trontech.ehguardian.R
+import com.tron.ehguardian.R
 
 
 @Composable
