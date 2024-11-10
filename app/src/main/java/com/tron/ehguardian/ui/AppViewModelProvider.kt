@@ -1,14 +1,14 @@
-package com.trontech.ehguardian.ui
+package com.tron.ehguardian.ui
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.trontech.ehguardian.EhGuardianApplication
-import com.trontech.ehguardian.ui.screens.authenticationScreens.login.LoginViewModel
-import com.trontech.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
-import com.trontech.ehguardian.ui.screens.homeScreens.HomeViewModel
-import com.trontech.ehguardian.ui.screens.homeScreens.measureScreen.BluetoothViewModel
+import com.tron.ehguardian.EhGuardianApplication
+import com.tron.ehguardian.ui.screens.authenticationScreens.login.LoginViewModel
+import com.tron.ehguardian.ui.screens.authenticationScreens.signUp.SignUpViewModel
+import com.tron.ehguardian.ui.screens.homeScreens.HomeViewModel
+import com.tron.ehguardian.ui.screens.homeScreens.measureScreen.BluetoothViewModel
 
 object AppViewModelProvider {
     val Factory: ViewModelProvider.Factory = viewModelFactory {
