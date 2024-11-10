@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.settings
+package com.tron.ehguardian.ui.screens.homeScreens.settings
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
