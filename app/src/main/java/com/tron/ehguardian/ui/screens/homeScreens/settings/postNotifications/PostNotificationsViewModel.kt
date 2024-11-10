@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications
+package com.tron.ehguardian.ui.screens.homeScreens.settings.postNotifications
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -9,8 +9,8 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.trontech.ehguardian.MainActivity
-import com.trontech.ehguardian.R
+import com.tron.ehguardian.MainActivity
+import com.tron.ehguardian.R
 
 class Notifications(
     private val context: Context
