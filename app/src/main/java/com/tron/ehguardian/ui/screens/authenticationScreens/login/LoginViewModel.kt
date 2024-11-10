@@ -1,14 +1,13 @@
-package com.trontech.ehguardian.ui.screens.authenticationScreens.login
+package com.tron.ehguardian.ui.screens.authenticationScreens.login
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trontech.ehguardian.data.repositories.UserRepository
+import com.tron.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
