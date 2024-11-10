@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens
+package com.tron.ehguardian.ui.screens.homeScreens
 
 
 
@@ -8,11 +8,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trontech.ehguardian.data.models.HospitalItem
-import com.trontech.ehguardian.data.models.MeasurementData
-import com.trontech.ehguardian.data.models.NewsItem
-import com.trontech.ehguardian.data.models.UserModel
-import com.trontech.ehguardian.data.repositories.UserRepository
+import com.tron.ehguardian.data.models.HospitalItem
+import com.tron.ehguardian.data.models.MeasurementData
+import com.tron.ehguardian.data.models.NewsItem
+import com.tron.ehguardian.data.models.UserModel
+import com.tron.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
