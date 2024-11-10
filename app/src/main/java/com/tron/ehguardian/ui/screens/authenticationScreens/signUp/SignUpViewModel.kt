@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.authenticationScreens.signUp
+package com.tron.ehguardian.ui.screens.authenticationScreens.signUp
 
 import android.content.Context
 import android.widget.Toast
@@ -6,8 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trontech.ehguardian.data.models.UserModel
-import com.trontech.ehguardian.data.repositories.UserRepository
+import com.tron.ehguardian.data.models.UserModel
+import com.tron.ehguardian.data.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
