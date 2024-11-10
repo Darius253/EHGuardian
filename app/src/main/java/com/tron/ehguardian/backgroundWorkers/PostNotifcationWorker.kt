@@ -1,9 +1,9 @@
-package com.trontech.ehguardian.backgroundWorkers
+package com.tron.ehguardian.backgroundWorkers
 
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
+import com.tron.ehguardian.ui.screens.homeScreens.settings.postNotifications.Notifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
