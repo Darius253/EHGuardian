@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.trontech.ehguardian.ui.screens.homeScreens.settings.postNotifications
+package com.tron.ehguardian.ui.screens.homeScreens.settings.postNotifications
 
 import android.Manifest
 import android.content.Intent
@@ -23,8 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.work.WorkManager
-import com.trontech.ehguardian.data.repositories.workManagers.PostNotificationRepository
-import com.trontech.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
+import com.tron.ehguardian.data.repositories.workManagers.PostNotificationRepository
+import com.tron.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
