@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.ui.screens.homeScreens.measureScreen
+package com.tron.ehguardian.ui.screens.homeScreens.measureScreen
 
 
 import androidx.compose.foundation.Image
@@ -37,8 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.compose.LottieAnimation
-import com.trontech.ehguardian.R
-import com.trontech.ehguardian.ui.screens.homeScreens.profile.InputField
+import com.tron.ehguardian.R
+import com.tron.ehguardian.ui.screens.homeScreens.profile.InputField
 
 
 @Composable
