@@ -1,4 +1,4 @@
-package com.trontech.ehguardian.data.models
+package com.tron.ehguardian.data.models
 import java.io.Serializable
 
 
