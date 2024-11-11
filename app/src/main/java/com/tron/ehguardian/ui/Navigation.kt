@@ -11,9 +11,11 @@ import androidx.navigation.compose.composable
 import com.tron.ehguardian.ui.screens.authenticationScreens.AuthenticationScreen
 import com.tron.ehguardian.ui.screens.authenticationScreens.ForgotPasswordScreen
 import com.tron.ehguardian.ui.screens.homeScreens.HomeScreen
+import com.tron.ehguardian.ui.screens.onBoardingScreen.OnBoardingScreen
 
 // Enum class to define the different navigation destinations
 enum class NavigationClass(val route: String) {
+    OnboardingDestination (route = "onboarding"),
     AuthenticationDestination(route = "authentication"),
     HomeDestination(route = "home"),
     ForgotPasswordDestination(route = "forgotPassword")
@@ -28,9 +30,22 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = NavigationClass.AuthenticationDestination.route,
+        startDestination = NavigationClass.OnboardingDestination.route,
         modifier = modifier
     ) {
+        composable(route = NavigationClass.OnboardingDestination.route) {
+            OnBoardingScreen(
+                modifier = modifier,
+                onFinalScreenClick = {
+                    navController.navigate(NavigationClass.AuthenticationDestination.route) {
+                        popUpTo(NavigationClass.OnboardingDestination.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop =true
+                    }
+                }
+            )
+        }
         composable(route = NavigationClass.AuthenticationDestination.route) {
             AuthenticationScreen(
                 modifier = modifier,
