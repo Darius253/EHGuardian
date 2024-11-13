@@ -413,6 +413,10 @@ class User(private val auth: FirebaseAuth, private val firestore: FirebaseFirest
         }
     }
 
+   suspend fun fetchAndStoreNews() {
+
+    }
+
 
 }
 
