@@ -26,9 +26,11 @@ import com.tron.ehguardian.R
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewPage() {
+fun WebViewPage(
+    url:String? = "https://myheartcheck.org.nz"
+) {
     val context = LocalContext.current
-    var loadUrl by remember { mutableStateOf("https://myheartcheck.org.nz") }  // Default URL
+    var loadUrl by remember { mutableStateOf(url) }  // Default URL
     var loading by remember { mutableStateOf(false) }
     var isOffline by remember { mutableStateOf(false) }
 
@@ -120,7 +122,7 @@ fun WebViewPage() {
             }
         },
         update = { webView ->
-            webView.loadUrl(loadUrl)  // Load the new URL when it changes
+            loadUrl?.let { webView.loadUrl(it) }  // Load the new URL when it changes
         }
     )
 
