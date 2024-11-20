@@ -47,7 +47,7 @@ fun OnBoardingScreen(
             )
         }
         item {
-            Spacer(modifier = Modifier.padding(80.dp))
+            Spacer(modifier = Modifier.padding(60.dp))
             NavigationButtons(
                 currentItem = currentItem,
                 onNextClick = { if (currentItem < 3) currentItem += 1 },
@@ -121,7 +121,7 @@ fun OnBoardingItem(
     description: String
 ) {
     Column(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp).height(500.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
