@@ -1,6 +1,8 @@
 package com.tron.ehguardian.ui.screens.authenticationScreens.signUp
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -12,16 +14,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tron.ehguardian.data.models.UserModel
 import com.tron.ehguardian.ui.AppViewModelProvider
 import com.tron.ehguardian.ui.screens.authenticationScreens.login.EmailTextField
 import com.tron.ehguardian.ui.screens.authenticationScreens.login.PasswordTextField
+import com.tron.ehguardian.ui.screens.homeScreens.healthDataScreen.WebViewPage
 import com.tron.ehguardian.ui.screens.homeScreens.profile.DateOfBirthInputField
 import com.tron.ehguardian.ui.screens.homeScreens.profile.DatePickerModal
+import com.tron.ehguardian.ui.screens.homeScreens.settings.ModalBottomHeader
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -48,6 +57,8 @@ fun SignUpScreen(
     val isLoading by signUpViewModel.isLoading.observeAsState(false)
     var showCalendar by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+    val sheetState = rememberModalBottomSheetState()
+
 
     val createdDate = LocalDateTime.now()
 
@@ -56,11 +67,13 @@ fun SignUpScreen(
 
 // Format the createdDate to the required format
     val formattedDate = createdDate.format(formatter)
+    val coroutineScope = rememberCoroutineScope()
 
 
 
 
     val context = LocalContext.current
+
 
     Column(
         modifier = modifier
@@ -68,6 +81,30 @@ fun SignUpScreen(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (sheetState.isVisible) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxHeight(0.9f),
+                containerColor = MaterialTheme.colorScheme.background,
+                onDismissRequest ={
+                    coroutineScope.launch {
+                        sheetState.hide()}},
+                shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                sheetState = sheetState,
+                dragHandle = {
+                    ModalBottomHeader(
+                        headerText = "Privacy Policy",
+                        onDismiss = {
+                            coroutineScope.launch {
+                                sheetState.hide()}}
+                    )
+                }
+            ) {
+                LazyColumn{
+                item{
+                        WebViewPage(url = "https://www.termsfeed.com/live/f0ceea68-5d15-43d8-aa10-af02b4718de3")
+                    }                }
+                }
+        }
         // Welcome Text
         Text(
             text = "Join Us!",
@@ -242,6 +279,30 @@ fun SignUpScreen(
                 datePickerState = datePickerState,
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = buildAnnotatedString {
+                    append("By creating an account, you agree to our ")
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
+                        append("Terms of Service and Privacy Policy ")
+                    }
+                },
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        coroutineScope.launch {
+                            sheetState.show()
+                        }
+
+                    }
+
+            )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
